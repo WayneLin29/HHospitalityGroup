@@ -1,0 +1,39 @@
+﻿<Sql TableName="LUMCloudBedReservations" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMCloudBedReservations">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="PropertyID" type="NVarChar(50)" />
+  <col name="ReservationID" type="NVarChar(100)" />
+  <col name="DateCreated" type="DateTime" nullable="true" />
+  <col name="DateModified" type="DateTime" nullable="true" />
+  <col name="Source" type="NVarChar(256)" nullable="true" />
+  <col name="ThirdPartyIdentifier" type="NVarChar(256)" nullable="true" />
+  <col name="Status" type="NVarChar(50)" nullable="true" />
+  <col name="StartDate" type="DateTime" nullable="true" />
+  <col name="EndDate" type="DateTime" nullable="true" />
+  <col name="Total" type="Decimal(18,6)" nullable="true" />
+  <col name="Balance" type="Decimal(18,6)" nullable="true" />
+  <col name="SuggestedDeposit" type="Decimal(18,6)" nullable="true" />
+  <col name="SubTotal" type="Decimal(18,6)" nullable="true" />
+  <col name="AdditioonalItems" type="Decimal(18,6)" nullable="true" />
+  <col name="TaxesFees" type="Decimal(18,6)" nullable="true" />
+  <col name="GrandTotal" type="Decimal(18,6)" nullable="true" />
+  <col name="Paid" type="Decimal(18,6)" nullable="true" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="LUMCloudBedReservations_NoteID" unique="true">
+    <col name="NoteID" />
+    <col name="CompanyID" />
+  </index>
+  <index name="PK_LUMCloudBedReservations" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="PropertyID" />
+    <col name="ReservationID" />
+  </index>
+</table>]]></CDATA>
+</Sql>

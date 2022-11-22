@@ -1,0 +1,13 @@
+﻿<Webhook>
+    <data-set>
+        <relations format-version="3" relations-version="20160101" main-table="WebHook" />
+        <layout>
+            <table name="WebHook" />
+        </layout>
+        <data>
+            <WebHook>
+                <row WebHookID="6d1d86e9-40ff-433a-a6ec-50899b76a09e" Name="CloudBedWebhooks" Handler="HH_APICustomization.WebHook.CloudBedWebHook" IsActive="1" IsSystem="0" RequestLogLevel="2" RequestRetainCount="10" NoteID="ced93d73-8a64-ed11-aaa2-dc1ba1758b80" />
+            </WebHook>
+        </data>
+    </data-set>
+</Webhook>

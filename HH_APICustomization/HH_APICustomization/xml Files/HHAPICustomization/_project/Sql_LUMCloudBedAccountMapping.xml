@@ -1,0 +1,31 @@
+﻿<Sql TableName="LUMCloudBedAccountMapping" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMCloudBedAccountMapping">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="SequenceID" type="Int" identity="true" />
+  <col name="Type" type="NVarChar(50)" nullable="true" />
+  <col name="CloudBedPropertyID" type="NVarChar(50)" nullable="true" />
+  <col name="TransCategory" type="NVarChar(50)" nullable="true" />
+  <col name="HouseAccount" type="NVarChar(50)" nullable="true" />
+  <col name="TransactionCode" type="NVarChar(50)" nullable="true" />
+  <col name="Description" type="NVarChar(256)" nullable="true" />
+  <col name="Source" type="NVarChar(50)" nullable="true" />
+  <col name="AccountID" type="Int" nullable="true" />
+  <col name="SubAccountID" type="Int" nullable="true" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="LUMCloudBedAccountMapping_NoteID" unique="true">
+    <col name="NoteID" />
+    <col name="CompanyID" />
+  </index>
+  <index name="PK_LUMCloudBedAccountMapping" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="SequenceID" />
+  </index>
+</table>]]></CDATA>
+</Sql>
