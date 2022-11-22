@@ -36,7 +36,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region AccessToken
-        [PXDBString(1024,IsUnicode = true)]
+        [PXDBString(1024, IsUnicode = true)]
         [PXUIField(DisplayName = "Access_token")]
         public virtual string AccessToken { get; set; }
         public abstract class accessToken : PX.Data.BQL.BqlString.Field<accessToken> { }
@@ -57,10 +57,17 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region WebHookUrl
-        [PXDBString(1024,IsUnicode = true)]
+        [PXDBString(1024, IsUnicode = true)]
         [PXUIField(DisplayName = "Acumatica WebHook Url")]
-        public virtual string WebHookUrl { get;set;}
+        public virtual string WebHookUrl { get; set; }
         public abstract class webHookUrl : PX.Data.BQL.BqlString.Field<webHookUrl> { }
+        #endregion
+
+        #region AuthResponseMessage
+        [PXDBString(2048, IsUnicode = true)]
+        [PXUIField(DisplayName = "Auth Response Message")]
+        public virtual string AuthResponseMessage { get; set; }
+        public abstract class authResponseMessage : PX.Data.BQL.BqlString.Field<authResponseMessage> { }
         #endregion
 
         #region CreatedByID

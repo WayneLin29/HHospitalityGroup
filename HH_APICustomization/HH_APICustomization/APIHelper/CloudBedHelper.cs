@@ -33,6 +33,7 @@ namespace HH_APICustomization.APIHelper
                         var graph = PXGraph.CreateInstance<LUMCloudBedPreferenceMaint>();
                         graph.APIPreference.Current = graph.APIPreference.Select();
                         graph.APIPreference.Current.OauthCODE = code;
+                        graph.APIPreference.Current.AuthResponseMessage = responseResult.Length > 2048 ? responseResult.Substring(0, 2048) : responseResult;
                         graph.APIPreference.Current.AccessToken = accessEntity.access_token;
                         graph.APIPreference.Current.RefreshToken = accessEntity.refresh_token;
                         graph.APIPreference.Current.RefreshTokenExpiresTime = DateTime.Now.AddMonths(1);
