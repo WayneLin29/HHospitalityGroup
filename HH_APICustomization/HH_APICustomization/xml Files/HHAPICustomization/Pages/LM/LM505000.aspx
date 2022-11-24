@@ -20,6 +20,7 @@
                         <Template>
                             <px:PXDateTimeEdit runat="server" ID="edFromDate" DataField="FromDate" Width="180px"></px:PXDateTimeEdit>
                             <px:PXDateTimeEdit runat="server" ID="edToDate" DataField="ToDate" Width="180px"></px:PXDateTimeEdit>
+                            <px:PXCheckBox runat="server" ID="edFIsImported" DataField="IsImported" CommitChanges="True"></px:PXCheckBox>
                         </Template>
                     </px:PXFormView>
                     <px:PXGrid AllowPaging="True" AdjustPageSize="Auto" SyncPosition="True" ID="TransactionGrid" runat="server" DataSourceID="ds" Width="100%" Height="100%" SkinID="Details" AllowAutoHide="false">

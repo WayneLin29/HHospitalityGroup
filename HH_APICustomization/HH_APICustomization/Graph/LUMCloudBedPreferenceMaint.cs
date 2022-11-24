@@ -20,8 +20,12 @@ namespace HH_APICustomization.Graph
         [PXImport(typeof(LUMCloudBedPreference))]
         public SelectFrom<LUMCloudBedPreference>.View CloudBedSetup;
 
+        public PXFilter<AccountMappingFilter> acctFilter;
+
         [PXImport(typeof(LUMCloudBedAccountMapping))]
         public SelectFrom<LUMCloudBedAccountMapping>
+              .Where<LUMCloudBedAccountMapping.cloudBedPropertyID.IsEqual<AccountMappingFilter.cloudBedPropertyID.AsOptional>
+                                                                 .Or<AccountMappingFilter.cloudBedPropertyID.AsOptional.IsNull>>
               .OrderBy<LUMCloudBedAccountMapping.accountID.Asc,
                        LUMCloudBedAccountMapping.subAccountID.Asc,
                        LUMCloudBedAccountMapping.cloudBedPropertyID.Asc,
@@ -30,6 +34,7 @@ namespace HH_APICustomization.Graph
                        LUMCloudBedAccountMapping.transactionCode.Asc,
                        LUMCloudBedAccountMapping.houseAccount.Asc,
                        LUMCloudBedAccountMapping.description.Asc>.View AccountMapping;
+
 
         #region Action
         public PXAction<LUMCloudBedAPIPreference> signIn;
@@ -40,6 +45,23 @@ namespace HH_APICustomization.Graph
             var url = this.APIPreference.Current?.OauthUrl;
             throw new PXRedirectToUrlException(url, "CloudBed");
         }
+        #endregion
+    }
+
+    [Serializable]
+    public class AccountMappingFilter : IBqlTable
+    {
+        #region CloudBedPropertyID
+        [PXString(50, IsUnicode = true)]
+        [PXUIField(DisplayName = "PropertyID")]
+        [PXSelector(typeof(Search<LUMCloudBedPreference.cloudBedPropertyID, Where<LUMCloudBedPreference.active, Equal<True>>>),
+           typeof(LUMCloudBedPreference.branchID),
+           typeof(LUMCloudBedPreference.debitAcct),
+           typeof(LUMCloudBedPreference.debitSub),
+           typeof(LUMCloudBedPreference.creditAcct),
+           typeof(LUMCloudBedPreference.creditSub))]
+        public virtual string CloudBedPropertyID { get; set; }
+        public abstract class cloudBedPropertyID : PX.Data.BQL.BqlString.Field<cloudBedPropertyID> { } 
         #endregion
     }
 }

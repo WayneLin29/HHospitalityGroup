@@ -61,6 +61,11 @@
             </px:PXTabItem>
             <px:PXTabItem Text="Account Mapping">
                 <Template>
+                     <px:PXFormView ID="AccountMappingForm" runat="server" DataSourceID="ds" DataMember="AcctFilter" Width="100%" Height="80px" AllowAutoHide="false">
+                        <Template>
+                            <px:PXSelector runat="server" ID="edFCloudBedPropertyID" DataField="CloudBedPropertyID" CommitChanges="true" Width="150px"></px:PXSelector>
+                        </Template>
+                    </px:PXFormView>
                     <px:PXGrid ID="gridCloudBedAccountMapping" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 372px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True">
                         <Levels>
                             <px:PXGridLevel DataMember="AccountMapping">

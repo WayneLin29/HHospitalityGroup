@@ -20,7 +20,8 @@ namespace HH_APICustomization.Graph
 
         public PXFilter<TransactionFilter> TransacionFilter;
         public PXFilter<ReservationFilter> ReservationFilter;
-        public PXFilteredProcessing<LUMCloudBedTransactions, TransactionFilter> Transaction;
+        public PXFilteredProcessing<LUMCloudBedTransactions, TransactionFilter,
+                              Where<LUMCloudBedTransactions.isImported, Equal<Current<TransactionFilter.isImported>>>> Transaction;
         public SelectFrom<LUMCloudBedReservations>.View Reservations;
 
         public LUMCloudBedTransactionProcess()
@@ -70,7 +71,6 @@ namespace HH_APICustomization.Graph
         public virtual void CreateJournalTransaction(LUMCloudBedTransactionProcess baseGraph, List<LUMCloudBedTransactions> selectedData)
         {
             var groupData = selectedData.Where(x => !(x.IsImported ?? false)).GroupBy(x => new { x.TransactionDateTime.Value.Date, x.PropertyID, x.Currency });
-            var glGraph = PXGraph.CreateInstance<JournalEntry>();
             var cloudbedProperty = SelectFrom<LUMCloudBedPreference>.View.Select(baseGraph).RowCast<LUMCloudBedPreference>();
             var reservationData = baseGraph.Reservations.Select().RowCast<LUMCloudBedReservations>();
             var AcctMapAData = SelectFrom<LUMCloudBedAccountMapping>.View.Select(baseGraph).RowCast<LUMCloudBedAccountMapping>();
@@ -84,12 +84,14 @@ namespace HH_APICustomization.Graph
                 var lineNbrDic = new Dictionary<string, int?>();        // 每筆資料所對應到的GL Line
                 LUMCloudBedAccountMapping winnerAcctMapInfo = null;     // 對應到的Account Mapping物件
 
-                using (PXTransactionScope sc = new PXTransactionScope())
+                // 整筆資料錯誤Handler
+                try
                 {
                     #region Header
+                    var glGraph = PXGraph.CreateInstance<JournalEntry>();
                     var doc = glGraph.BatchModule.Cache.CreateInstance() as Batch;
                     doc.Module = "GL";
-                    doc = glGraph.BatchModule.Insert(doc);
+                    doc = glGraph.BatchModule.Cache.Insert(doc) as Batch;
                     doc.DateEntered = cloudBedGroupRow.Key.Date;
                     doc.LedgerID = ledgerInfo?.LedgerID;
                     doc.BranchID = mapCloudbedProerty?.BranchID;
@@ -123,7 +125,7 @@ namespace HH_APICustomization.Graph
                                 Source = mapReservation?.Source
                             };  // 比對目標
                             winnerAcctMapInfo = null;// 最高分物件
-                            // Compare Account Mapping
+                                                     // Compare Account Mapping
                             foreach (var acctMapRow in AcctMapAData)
                             {
                                 // 只比對相同PropertyID
@@ -145,7 +147,6 @@ namespace HH_APICustomization.Graph
                             if (sameScoureList.Count > 1)
                                 throw new PXException($" No Account Mapping Found. Please maintain the combination in Preference ID: {string.Join(",", sameScoureList)}.");
                             var line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
-                            line = glGraph.GLTranModuleBatNbr.Insert(line);
                             line.AccountID = winnerAcctMapInfo?.AccountID;
                             line.SubID = winnerAcctMapInfo?.SubAccountID;
                             line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
@@ -157,13 +158,12 @@ namespace HH_APICustomization.Graph
                                 line.TranDesc = line?.TranDesc?.Substring(0, 512);
                             line.CuryDebitAmt = row.TransactionType?.ToUpper() == "CREDIT" ? row.Amount : 0;
                             line.CuryCreditAmt = row.TransactionType?.ToUpper() == "DEBIT" ? row.Amount : 0;
-                            line = glGraph.GLTranModuleBatNbr.Cache.Update(line) as GLTran;
+                            line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
                             lineNbrDic.Add(row.TransactionID, line.LineNbr);
                             #endregion
 
                             #region RuleB
                             line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
-                            line = glGraph.GLTranModuleBatNbr.Insert(line);
                             line.AccountID = mapCloudbedProerty?.ClearingAcct;
                             line.SubID = mapCloudbedProerty?.ClearingSub;
                             line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
@@ -175,7 +175,7 @@ namespace HH_APICustomization.Graph
                                 line.TranDesc = line?.TranDesc?.Substring(0, 512);
                             line.CuryDebitAmt = row.TransactionType?.ToUpper() == "DEBIT" ? row.Amount : 0;
                             line.CuryCreditAmt = row.TransactionType?.ToUpper() == "CREDIT" ? row.Amount : 0;
-                            glGraph.GLTranModuleBatNbr.Cache.Update(line);
+                            glGraph.GLTranModuleBatNbr.Cache.Insert(line);
                             #endregion
                         }
                         catch (PXOuterException ex)
@@ -200,54 +200,52 @@ namespace HH_APICustomization.Graph
                     // Save Data(只要有一筆成功就Save)
                     if (cloudBedGroupRow.Any(x => x.IsImported ?? false))
                     {
-                        // 整筆資料錯誤Handler
-                        try
-                        {
-                            errorMsg = string.Empty;
-                            glGraph.releaseFromHold.Press();
-                            glGraph.Save.Press();
-                            glBatchNbr = doc.BatchNbr;
-                            sc.Complete();
-                        }
-                        catch (PXOuterException ex)
-                        {
-                            errorMsg = $"Error: {ex.InnerMessages[0]}";
-                        }
-                        catch (Exception ex)
-                        {
-                            errorMsg = $"Error: {ex.Message}";
-                        }
-                        finally
-                        {
-                            // 整組資料都失敗
-                            if (!string.IsNullOrEmpty(errorMsg))
-                                cloudBedGroupRow.ToList().ForEach(x =>
-                                {
-                                    PXLongOperation.SetCurrentItem(x);
-                                    PXProcessing.SetError<LUMCloudBedTransactions>(errorMsg);
-                                    x.IsImported = false;
-                                    x.ErrorMessage = errorMsg;
-                                    baseGraph.Transaction.Update(x);
-                                });
-                            // 回寫BatchNbr & LineNbr
-                            else
-                                cloudBedGroupRow.ToList().ForEach(x =>
-                                {
-                                    PXLongOperation.SetCurrentItem(x);
-                                    if (x.IsImported ?? false)
-                                        PXProcessing.SetProcessed<LUMCloudBedTransactions>();
-                                    else
-                                        PXProcessing.SetError<LUMCloudBedTransactions>(x.ErrorMessage);
-                                    x.BatchNbr = (x.IsImported ?? false) ? glBatchNbr : string.Empty;
-                                    x.LineNbr = (x?.IsImported ?? false) ? lineNbrDic[x.TransactionID] : null;
-                                    baseGraph.Transaction.Update(x);
-                                });
-                        }
+
+                        errorMsg = string.Empty;
+                        glGraph.releaseFromHold.Press();
+                        glGraph.Save.Press();
+                        glBatchNbr = doc.BatchNbr;
                     }
                 }
+                catch (PXOuterException ex)
+                {
+                    errorMsg = $"Error: {ex.InnerMessages[0]}";
+                }
+                catch (Exception ex)
+                {
+                    errorMsg = $"Error: {ex.Message}";
+                }
+                finally
+                {
+                    // 整組資料都失敗
+                    if (!string.IsNullOrEmpty(errorMsg))
+                        cloudBedGroupRow.ToList().ForEach(x =>
+                        {
+                            PXLongOperation.SetCurrentItem(x);
+                            PXProcessing.SetError<LUMCloudBedTransactions>(errorMsg);
+                            x.IsImported = false;
+                            x.ErrorMessage = errorMsg;
+                            baseGraph.Transaction.Update(x);
+                        });
+                    // 回寫BatchNbr & LineNbr
+                    else
+                        cloudBedGroupRow.ToList().ForEach(x =>
+                        {
+                            PXLongOperation.SetCurrentItem(x);
+                            if (x.IsImported ?? false)
+                                PXProcessing.SetProcessed<LUMCloudBedTransactions>();
+                            else
+                                PXProcessing.SetError<LUMCloudBedTransactions>(x.ErrorMessage);
+                            x.BatchNbr = (x.IsImported ?? false) ? glBatchNbr : string.Empty;
+                            x.LineNbr = (x?.IsImported ?? false) ? lineNbrDic[x.TransactionID] : null;
+                            baseGraph.Transaction.Update(x);
+                        });
+                }
+
                 // Save Process Result
                 baseGraph.Actions.PressSave();
             }
+
         }
 
         /// <summary> Get Cloud Bed Transaction Data </summary>
@@ -389,6 +387,12 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "Transaction To")]
         public virtual DateTime? ToDate { get; set; }
         public abstract class toDate : PX.Data.BQL.BqlDateTime.Field<toDate> { }
+
+        [PXBool]
+        [PXDefault(false)]
+        [PXUIField(DisplayName = "Display Imported Transaction")]
+        public virtual bool? IsImported { get; set; }
+        public abstract class isImported : PX.Data.BQL.BqlBool.Field<isImported> { }
     }
 
     [Serializable]
