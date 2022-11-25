@@ -22,6 +22,9 @@ namespace HH_APICustomization.Graph
         public PXFilter<ReservationFilter> ReservationFilter;
         public PXFilteredProcessing<LUMCloudBedTransactions, TransactionFilter,
                               Where<LUMCloudBedTransactions.isImported, Equal<Current<TransactionFilter.isImported>>>> Transaction;
+
+        public SelectFrom<LUMCloudBedTransactions>.View CurrentTransaction;
+
         public SelectFrom<LUMCloudBedReservations>.View Reservations;
 
         public LUMCloudBedTransactionProcess()
@@ -251,13 +254,14 @@ namespace HH_APICustomization.Graph
         /// <summary> Get Cloud Bed Transaction Data </summary>
         public static void GetCloudBedTransactionData(LUMCloudBedTransactionProcess baseGraph)
         {
+            baseGraph.Transaction.Cache.Clear();
             var filter = baseGraph.TransacionFilter.Current;
             if (!filter.FromDate.HasValue || !filter.ToDate.HasValue)
                 throw new PXException("Datetime is required!!");
             var transNewData = CloudBedHelper.GetTransactionData(filter.FromDate.Value, filter.ToDate.Value);
             if (transNewData == null)
                 throw new PXException("Get Transaction Failed!!");
-            var transOldData = baseGraph.Transaction.Select().RowCast<LUMCloudBedTransactions>();
+            var transOldData = baseGraph.CurrentTransaction.Select().RowCast<LUMCloudBedTransactions>();
             using (PXTransactionScope sc = new PXTransactionScope())
             {
                 foreach (var row in transNewData)
@@ -267,7 +271,7 @@ namespace HH_APICustomization.Graph
                     // 如果相同TransactionID資料存在且Imported -> Skip
                     if (existsRow != null && (existsRow.IsImported ?? false))
                         continue;
-                    var trans = existsRow ?? baseGraph.Transaction.Cache.CreateInstance() as LUMCloudBedTransactions;
+                    var trans = existsRow ?? baseGraph.CurrentTransaction.Cache.CreateInstance() as LUMCloudBedTransactions;
                     #region Mapping Field
                     trans.IsImported = false;
                     trans.BatchNbr = null;
@@ -312,9 +316,9 @@ namespace HH_APICustomization.Graph
                     trans.IsDeleted = row.isDeleted;
                     #endregion
                     if (existsRow == null)
-                        baseGraph.Transaction.Cache.Insert(trans);
+                        baseGraph.CurrentTransaction.Cache.Insert(trans);
                     else
-                        baseGraph.Transaction.Cache.Update(trans);
+                        baseGraph.CurrentTransaction.Cache.Update(trans);
                 }
                 baseGraph.Save.Press();
                 sc.Complete();
