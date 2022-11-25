@@ -280,7 +280,7 @@ namespace HH_APICustomization.Graph
                     trans.GuestID = row.guestID;
                     trans.PropertyName = row.propertyName;
                     if (DateTime.TryParse(row.transactionDateTime, out newDateTime))
-                        trans.TransactionDateTime = newDateTime;
+                        trans.TransactionDateTime = newDateTime.AddHours(8);
                     if (DateTime.TryParse(row.transactionDateTimeUTC, out newDateTime))
                         trans.TransactionDateTimeUTC = newDateTime;
                     if (DateTime.TryParse(row.transactionModifiedDateTime, out newDateTime))
