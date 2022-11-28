@@ -16,11 +16,12 @@
         <Items>
             <px:PXTabItem Text="Transaction">
                 <Template>
-                    <px:PXFormView ID="transactionForm" runat="server" DataSourceID="ds" DataMember="TransacionFilter" Width="100%" Height="80px" AllowAutoHide="false">
+                    <px:PXFormView ID="transactionForm" runat="server" DataSourceID="ds" DataMember="TransacionFilter" Width="100%" Height="110px" AllowAutoHide="false">
                         <Template>
                             <px:PXDateTimeEdit runat="server" ID="edFromDate" DataField="FromDate" Width="180px"></px:PXDateTimeEdit>
                             <px:PXDateTimeEdit runat="server" ID="edToDate" DataField="ToDate" Width="180px"></px:PXDateTimeEdit>
-                            <px:PXCheckBox runat="server" ID="edFIsImported" DataField="IsImported" CommitChanges="True"></px:PXCheckBox>
+                            <px:PXDropDown runat="server" ID="edProcessType" DataField="ProcessType" Width="200px"></px:PXDropDown>
+                            <px:PXCheckBox runat="server" ID="IsImported" DataField="IsImported" CommitChanges="True"></px:PXCheckBox>
                         </Template>
                     </px:PXFormView>
                     <px:PXGrid AllowPaging="True" AdjustPageSize="Auto" SyncPosition="True" ID="TransactionGrid" runat="server" DataSourceID="ds" Width="100%" Height="100%" SkinID="Details" AllowAutoHide="false">

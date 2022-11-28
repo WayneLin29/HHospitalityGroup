@@ -30,10 +30,10 @@ namespace HH_APICustomization.Graph
         public LUMCloudBedTransactionProcess()
         {
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions.isImported>(Transaction.Cache, null, true);
-
+            var filter = this.TransacionFilter.Current;
             Transaction.SetProcessDelegate(delegate (List<LUMCloudBedTransactions> list)
             {
-                GoProcessing(list);
+                GoProcessing(list, filter);
             });
         }
 
@@ -65,10 +65,21 @@ namespace HH_APICustomization.Graph
 
         #region Method
 
-        public static void GoProcessing(List<LUMCloudBedTransactions> selectedData)
+        public static void GoProcessing(List<LUMCloudBedTransactions> selectedData, TransactionFilter filter)
         {
             var baseGraph = PXGraph.CreateInstance<LUMCloudBedTransactionProcess>();
-            baseGraph.CreateJournalTransaction(baseGraph, selectedData);
+            switch (filter.ProcessType)
+            {
+                case "ImportTransaction":
+                    GetCloudBedTransactionData(baseGraph);
+                    break;
+                case "ImportReservation":
+                    GetCloudBedReservationData(baseGraph);
+                    break;
+                case "CreateJournalTransaction":
+                    baseGraph.CreateJournalTransaction(baseGraph, selectedData);
+                    break;
+            }
         }
 
         public virtual void CreateJournalTransaction(LUMCloudBedTransactionProcess baseGraph, List<LUMCloudBedTransactions> selectedData)
@@ -108,7 +119,7 @@ namespace HH_APICustomization.Graph
                     {
                         errorMsg = string.Empty;
                         // Set CurrentItem
-                        PXLongOperation.SetCurrentItem(row);
+                        PXProcessing.SetCurrentItem(row);
                         try
                         {
                             var mapReservation = reservationData.FirstOrDefault(x => x.PropertyID == row.PropertyID && x.ReservationID == row.ReservationID);
@@ -224,7 +235,7 @@ namespace HH_APICustomization.Graph
                     if (!string.IsNullOrEmpty(errorMsg))
                         cloudBedGroupRow.ToList().ForEach(x =>
                         {
-                            PXLongOperation.SetCurrentItem(x);
+                            PXProcessing.SetCurrentItem(x);
                             PXProcessing.SetError<LUMCloudBedTransactions>(errorMsg);
                             x.IsImported = false;
                             x.ErrorMessage = errorMsg;
@@ -234,7 +245,7 @@ namespace HH_APICustomization.Graph
                     else
                         cloudBedGroupRow.ToList().ForEach(x =>
                         {
-                            PXLongOperation.SetCurrentItem(x);
+                            PXProcessing.SetCurrentItem(x);
                             if (x.IsImported ?? false)
                                 PXProcessing.SetProcessed<LUMCloudBedTransactions>();
                             else
@@ -391,6 +402,13 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "Transaction To")]
         public virtual DateTime? ToDate { get; set; }
         public abstract class toDate : PX.Data.BQL.BqlDateTime.Field<toDate> { }
+
+        [PXString(IsUnicode = true)]
+        [PXDefault("ImportTransaction")]
+        [PXUIField(DisplayName = "Process type")]
+        [PXStringList(new string[] { "ImportTransaction", "ImportReservation", "CreateJournalTransaction" }, new string[] { "Import Transaction", "Import Reservation", "Create Journal Transaction" })]
+        public virtual string ProcessType { get; set; }
+        public abstract class processType : PX.Data.BQL.BqlString.Field<processType> { }
 
         [PXBool]
         [PXDefault(false)]
