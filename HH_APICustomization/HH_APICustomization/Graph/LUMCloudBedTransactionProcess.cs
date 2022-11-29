@@ -31,9 +31,10 @@ namespace HH_APICustomization.Graph
         {
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions.isImported>(Transaction.Cache, null, true);
             var filter = this.TransacionFilter.Current;
+            var reservationFilter = this.ReservationFilter.Current;
             Transaction.SetProcessDelegate(delegate (List<LUMCloudBedTransactions> list)
             {
-                GoProcessing(list, filter);
+                GoProcessing(list, filter, reservationFilter);
             });
         }
 
@@ -65,16 +66,16 @@ namespace HH_APICustomization.Graph
 
         #region Method
 
-        public static void GoProcessing(List<LUMCloudBedTransactions> selectedData, TransactionFilter filter)
+        public static void GoProcessing(List<LUMCloudBedTransactions> selectedData, TransactionFilter transactionFilter, ReservationFilter reservationFilter)
         {
             var baseGraph = PXGraph.CreateInstance<LUMCloudBedTransactionProcess>();
-            switch (filter.ProcessType)
+            switch (transactionFilter.ProcessType)
             {
                 case "ImportTransaction":
-                    GetCloudBedTransactionData(baseGraph);
+                    GetCloudBedTransactionData(baseGraph, transactionFilter);
                     break;
                 case "ImportReservation":
-                    GetCloudBedReservationData(baseGraph);
+                    GetCloudBedReservationData(baseGraph, reservationFilter);
                     break;
                 case "CreateJournalTransaction":
                     baseGraph.CreateJournalTransaction(baseGraph, selectedData);
@@ -263,10 +264,10 @@ namespace HH_APICustomization.Graph
         }
 
         /// <summary> Get Cloud Bed Transaction Data </summary>
-        public static void GetCloudBedTransactionData(LUMCloudBedTransactionProcess baseGraph)
+        public static void GetCloudBedTransactionData(LUMCloudBedTransactionProcess baseGraph, TransactionFilter transactionFilter = null)
         {
             baseGraph.Transaction.Cache.Clear();
-            var filter = baseGraph.TransacionFilter.Current;
+            var filter = transactionFilter == null ? baseGraph.TransacionFilter.Current : transactionFilter;
             if (!filter.FromDate.HasValue || !filter.ToDate.HasValue)
                 throw new PXException("Datetime is required!!");
             var transNewData = CloudBedHelper.GetTransactionData(filter.FromDate.Value, filter.ToDate.Value);
@@ -337,9 +338,9 @@ namespace HH_APICustomization.Graph
         }
 
         /// <summary> Get Cloud Bed Reservation Data </summary>
-        public static void GetCloudBedReservationData(LUMCloudBedTransactionProcess baseGraph)
+        public static void GetCloudBedReservationData(LUMCloudBedTransactionProcess baseGraph, ReservationFilter reservationFilter = null)
         {
-            var filter = baseGraph.ReservationFilter.Current;
+            var filter = reservationFilter == null ? baseGraph.ReservationFilter.Current : reservationFilter;
             if (!filter.ReservationFromDate.HasValue || !filter.ReservationToDate.HasValue)
                 throw new PXException("Datetime is required!!");
             var reservationNewData = CloudBedHelper.GetReservationData(filter.ReservationFromDate.Value, filter.ReservationToDate.Value);
