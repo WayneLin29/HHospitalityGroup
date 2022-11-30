@@ -3,7 +3,7 @@
   <col name="CompanyID" type="Int" default="Zero" />
   <col name="AccountMappingID" type="Int" identity="true" />
   <col name="Type" type="NVarChar(50)" nullable="true" />
-  <col name="RestauarantID" type="Int" nullable="true" />
+  <col name="RestaurantID" type="Int" nullable="true" />
   <col name="SalesCategory" type="NVarChar(50)" nullable="true" />
   <col name="MenuGroup" type="NVarChar(50)" nullable="true" />
   <col name="MenuItem" type="NVarChar(255)" nullable="true" />
@@ -18,6 +18,11 @@
   <col name="LastModifiedByScreenID" type="Char(8)" nullable="true" />
   <col name="LastModifiedDateTime" type="DateTime" nullable="true" />
   <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="LUMTouchBistroAccountMapping_NoteID" unique="true">
+    <col name="NoteID" />
+    <col name="CompanyID" />
+  </index>
   <index name="PK_LUMTouchBistroAccountMapping" clustered="true" primary="true" unique="true">
     <col name="CompanyID" />
     <col name="AccountMappingID" />

@@ -1,0 +1,26 @@
+﻿<Sql TableName="Create_LUMTouchBistroDataReceivedV" SqlScriptPriority="2" CustomScript="#CDATA">
+    <CDATA name="CustomScript"><![CDATA[CREATE OR ALTER VIEW dbo.LUMTouchBistroDataReceivedV AS
+select 
+	a.CompanyID,
+	uf.FileID,
+	(select value from STRING_SPLIT(uf.name,'\') where value like '%.csv') as FileName,
+	a.Subject as EmailSubject,
+	em.MailFrom,
+	em.MailTo,
+	em.CreatedDateTime AS CreatedAt,
+	uf.UsrIsImported AS IsImported
+from CRActivity a
+inner join NoteDoc nd 
+	on a.CompanyID = nd.CompanyID
+	and a.NoteID = nd.NoteID
+inner join UploadFile uf 
+	on a.CompanyID = uf.CompanyID
+	and nd.FileID = uf.FileID 
+inner join SMEmail em
+	on a.CompanyID = em.CompanyID
+	and a.NoteID = em.RefNoteID
+where a.classID =4
+and a.incoming = 1
+and a.Subject like '%@@TouchBistro@@%'
+and Name like '%.csv']]></CDATA>
+</Sql>

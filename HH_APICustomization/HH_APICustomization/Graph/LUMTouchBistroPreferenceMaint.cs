@@ -8,18 +8,19 @@ namespace HH_APICustomization.Graph
     public class LUMTouchBistroPreferenceMaint : PXGraph<LUMTouchBistroPreferenceMaint>
     {
         #region Action
-        public PXSave<LUMTouchBistroPreference> Save;
-        public PXCancel<LUMTouchBistroPreference> Cancel;
+        public PXSave<EmptyFilter> Save;
+        public PXCancel<EmptyFilter> Cancel;
         #endregion
 
         #region View
+        public PXFilter<EmptyFilter> MasterFilter;
         public PXSelect<LUMTouchBistroPreference> Preferences;
 
         public PXFilter<AccountMappingFilter> Filter;
         [PXImport(typeof(LUMTouchBistroAccountMapping))]
         public PXSelect<LUMTouchBistroAccountMapping,
-            Where<LUMTouchBistroAccountMapping.restauarantID, Equal<Current2<AccountMappingFilter.restauarantID>>,
-                Or<Current2<AccountMappingFilter.restauarantID>, IsNull>>> AccountMappings;
+            Where<LUMTouchBistroAccountMapping.restaurantID, Equal<Current2<AccountMappingFilter.restaurantID>>,
+                Or<Current2<AccountMappingFilter.restaurantID>, IsNull>>> AccountMappings;
         #endregion
 
         #region Event
@@ -27,14 +28,13 @@ namespace HH_APICustomization.Graph
         protected virtual void _(Events.RowPersisting<LUMTouchBistroPreference> e)
         {
             if (e.Row == null) return;
-            // Acuminator disable once PX1045 PXGraphCreateInstanceInEventHandlers [Justification]
-            var item = GetByResturantCD(e.Row.ResturantCD, e.Row.ResturantID);
+            var item = GetByResturantCD(e.Row.RestaurantCD, e.Row.RestaurantID);
             if (item != null)
             {
-                GraphUtil.SetError<LUMTouchBistroPreference.resturantCD>(e.Cache, e.Row, e.Row.ResturantCD, "Duplicated Restaurant ID.");
+                GraphUtil.SetError<LUMTouchBistroPreference.restaurantCD>(e.Cache, e.Row, e.Row.RestaurantCD, "Duplicated Restaurant ID.");
             }
-
         }
+
         #endregion
         #region LUMTouchBistroAccountMapping
         #endregion
@@ -44,33 +44,105 @@ namespace HH_APICustomization.Graph
         protected virtual LUMTouchBistroPreference GetByResturantCD(string resturantCD, int? selfID)
         {
             return PXSelect<LUMTouchBistroPreference,
-                    Where<LUMTouchBistroPreference.resturantCD, Equal<Required<LUMTouchBistroPreference.resturantCD>>,
-                    And<LUMTouchBistroPreference.resturantID, NotEqual<Required<LUMTouchBistroPreference.resturantID>>>>>
+                    Where<LUMTouchBistroPreference.restaurantCD, Equal<Required<LUMTouchBistroPreference.restaurantCD>>,
+                    And<LUMTouchBistroPreference.restaurantID, NotEqual<Required<LUMTouchBistroPreference.restaurantID>>>>>
                 .Select(this, resturantCD, selfID);
         }
 
         #endregion
 
+        #region static
+        #region Method
+        public static LUMTouchBistroAccountMapping GetSalesByMenuItemAcct(PXGraph graph,LUMTBTransactionSummary data) {
+            LUMTouchBistroAccountMapping mapping = null;
+            mapping = GetByMenuItem(graph,data.RestaurantID,data.MenuItem);
+            if(mapping == null) GetBySalesCategory(graph, data.RestaurantID, data.SalesCategory);
+            if (mapping == null) GetByMenuGroup(graph, data.RestaurantID, data.MenuGroup);
+            return mapping;
+        }
+
+        public static LUMTouchBistroAccountMapping GetAccountsSummaryAcct(PXGraph graph, LUMTBTransactionSummary data)
+        {
+            LUMTouchBistroAccountMapping mapping = null;
+            mapping = GetByPayAccount(graph, data.RestaurantID, data.AccountName);
+            return mapping;
+        }
+
+        public static LUMTouchBistroAccountMapping GetPayOutsInsAcct(PXGraph graph, LUMTBTransactionSummary data)
+        {
+            LUMTouchBistroAccountMapping mapping = null;
+            mapping = GetByReason(graph, data.RestaurantID, data.Reason);
+            return mapping;
+        }
+        #endregion
+        #region BQL
+        private static LUMTouchBistroAccountMapping GetByMenuItem(PXGraph graph,int? restaurantID, string menuItem) {
+            return PXSelect<LUMTouchBistroAccountMapping,
+                Where<LUMTouchBistroAccountMapping.restaurantID, Equal<Required<LUMTouchBistroAccountMapping.restaurantID>>,
+                And<LUMTouchBistroAccountMapping.menuItem,Equal<Required<LUMTouchBistroAccountMapping.menuItem>>>>>
+                .Select(graph, restaurantID, menuItem);
+        }
+
+        private static LUMTouchBistroAccountMapping GetByMenuGroup(PXGraph graph, int? restaurantID, string menuGroup)
+        {
+            return PXSelect<LUMTouchBistroAccountMapping,
+                Where<LUMTouchBistroAccountMapping.restaurantID, Equal<Required<LUMTouchBistroAccountMapping.restaurantID>>,
+                And<LUMTouchBistroAccountMapping.menuGroup, Equal<Required<LUMTouchBistroAccountMapping.menuGroup>>>>>
+                .Select(graph, restaurantID, menuGroup);
+        }
+
+        private static LUMTouchBistroAccountMapping GetBySalesCategory(PXGraph graph, int? restaurantID, string salesCategory)
+        {
+            return PXSelect<LUMTouchBistroAccountMapping,
+                Where<LUMTouchBistroAccountMapping.restaurantID, Equal<Required<LUMTouchBistroAccountMapping.restaurantID>>,
+                And<LUMTouchBistroAccountMapping.salesCategory, Equal<Required<LUMTouchBistroAccountMapping.salesCategory>>>>>
+                .Select(graph, restaurantID, salesCategory);
+        }
+
+        private static LUMTouchBistroAccountMapping GetByPayAccount(PXGraph graph, int? restaurantID, string accountName)
+        {
+            return PXSelect<LUMTouchBistroAccountMapping,
+                Where<LUMTouchBistroAccountMapping.restaurantID, Equal<Required<LUMTouchBistroAccountMapping.restaurantID>>,
+                And<LUMTouchBistroAccountMapping.payAccount, Equal<Required<LUMTouchBistroAccountMapping.payAccount>>>>>
+                .Select(graph, restaurantID, accountName);
+        }
+
+        private static LUMTouchBistroAccountMapping GetByReason(PXGraph graph, int? restaurantID, string reason)
+        {
+            return PXSelect<LUMTouchBistroAccountMapping,
+                Where<LUMTouchBistroAccountMapping.restaurantID, Equal<Required<LUMTouchBistroAccountMapping.restaurantID>>,
+                And<LUMTouchBistroAccountMapping.reason, Equal<Required<LUMTouchBistroAccountMapping.reason>>>>>
+                .Select(graph, restaurantID, reason);
+        }
+
+        #endregion
+        #endregion
+
         #region Table
+        [Serializable]
+        [PXCacheName("Empty Filter")]
+        public class EmptyFilter : IBqlTable
+        { }
+
         [Serializable]
         [PXCacheName("Account Mapping Filter")]
         public class AccountMappingFilter : IBqlTable
         {
-            #region RestauarantID
+            #region RestaurantID
             [PXInt()]
             [PXUIField(DisplayName = "Restauarant ID")]
             [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
-            [PXSelector(typeof(Search<LUMTouchBistroPreference.resturantID>),
-                    typeof(LUMTouchBistroPreference.resturantCD),
-                    typeof(LUMTouchBistroPreference.branchID),
-                    typeof(LUMTouchBistroPreference.cashAccountID),
-                    typeof(LUMTouchBistroPreference.cashSubAcctID),
+            [PXSelector(typeof(Search<LUMTouchBistroPreference.restaurantID>),
+                    typeof(LUMTouchBistroPreference.restaurantCD),
+                    typeof(LUMTouchBistroPreference.branch),
+                    typeof(LUMTouchBistroPreference.accountID),
+                    typeof(LUMTouchBistroPreference.subAcctID),
                     typeof(LUMTouchBistroPreference.active),
-                    SubstituteKey = typeof(LUMTouchBistroPreference.resturantCD),
-                    DescriptionField = typeof(LUMTouchBistroPreference.branchID)
+                    SubstituteKey = typeof(LUMTouchBistroPreference.restaurantCD),
+                    DescriptionField = typeof(LUMTouchBistroPreference.branch)
                 )]
-            public virtual int? RestauarantID { get; set; }
-            public abstract class restauarantID : PX.Data.BQL.BqlInt.Field<restauarantID> { }
+            public virtual int? RestaurantID { get; set; }
+            public abstract class restaurantID : PX.Data.BQL.BqlInt.Field<restaurantID> { }
             #endregion
         }
         #endregion

@@ -10,62 +10,62 @@ namespace HH_APICustomization.DAC
     public class LUMTouchBistroPreference : IBqlTable
     {
         #region Keys
-        //public class PK : PrimaryKeyOf<LUMTouchBistroPreference>.By<resturantID>
-        //{
-        //    public static LUMTouchBistroPreference Find(PXGraph graph, int? resturantID) => FindBy(graph, resturantID);
-        //}
+        public class PK : PrimaryKeyOf<LUMTouchBistroPreference>.By<restaurantID>
+        {
+            public static LUMTouchBistroPreference Find(PXGraph graph, int? restaurantID) => FindBy(graph, restaurantID);
+        }
 
-        //public class UK : PrimaryKeyOf<LUMTouchBistroPreference>.By<resturantCD>
-        //{
-        //    public static LUMTouchBistroPreference Find(PXGraph graph, string resturantCD) => FindBy(graph, resturantCD);
-        //}
+        public class UK : PrimaryKeyOf<LUMTouchBistroPreference>.By<restaurantCD>
+        {
+            public static LUMTouchBistroPreference Find(PXGraph graph, string restaurantCD) => FindBy(graph, restaurantCD);
+        }
         #endregion
 
-        #region ResturantID
+        #region RestaurantID
         [PXDBIdentity(IsKey = true)]
-        public virtual int? ResturantID { get; set; }
-        public abstract class resturantID : PX.Data.BQL.BqlInt.Field<resturantID> { }
+        public virtual int? RestaurantID { get; set; }
+        public abstract class restaurantID : PX.Data.BQL.BqlInt.Field<restaurantID> { }
         #endregion
 
-        #region ResturantCD
+        #region RestaurantCD
         [PXDBString(25, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Resturant ID", Required = true)]
+        [PXUIField(DisplayName = "Restaurant ID", Required = true)]
         [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
-        public virtual string ResturantCD { get; set; }
-        public abstract class resturantCD : PX.Data.BQL.BqlString.Field<resturantCD> { }
+        public virtual string RestaurantCD { get; set; }
+        public abstract class restaurantCD : PX.Data.BQL.BqlString.Field<restaurantCD> { }
         #endregion
 
-        #region BranchID
+        #region Branch
         [PXDBInt()]
-        [PXUIField(DisplayName = "Branch ID", Required = true)]
+        [PXUIField(DisplayName = "Branch", Required = true)]
         [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Branch.branchID),
             SubstituteKey = typeof(Branch.branchCD),
             DescriptionField = typeof(Branch.acctName))]
-        public virtual int? BranchID { get; set; }
-        public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
+        public virtual int? Branch { get; set; }
+        public abstract class branch : PX.Data.BQL.BqlInt.Field<branch> { }
         #endregion
 
-        #region CashAccountID
+        #region AccountID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Cash Account ID", Required = true)]
+        [PXUIField(DisplayName = "Account ID", Required = true)]
         [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Account.accountID),
             SubstituteKey = typeof(Account.accountCD),
             DescriptionField = typeof(Account.description))]
-        public virtual int? CashAccountID { get; set; }
-        public abstract class cashAccountID : PX.Data.BQL.BqlInt.Field<cashAccountID> { }
+        public virtual int? AccountID { get; set; }
+        public abstract class accountID : PX.Data.BQL.BqlInt.Field<accountID> { }
         #endregion
 
-        #region CashSubAcctID
+        #region SubAcctID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Cash Sub Acct ID", Required = true)]
+        [PXUIField(DisplayName = "Sub Acct ID", Required = true)]
         [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Sub.subID),
             SubstituteKey = typeof(Sub.subCD),
             DescriptionField = typeof(Sub.description))]
-        public virtual int? CashSubAcctID { get; set; }
-        public abstract class cashSubAcctID : PX.Data.BQL.BqlInt.Field<cashSubAcctID> { }
+        public virtual int? SubAcctID { get; set; }
+        public abstract class subAcctID : PX.Data.BQL.BqlInt.Field<subAcctID> { }
         #endregion
 
         #region Active

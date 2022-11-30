@@ -103,7 +103,7 @@ namespace HH_APICustomization.Graph
                     {
                         errorMsg = string.Empty;
                         // Set CurrentItem
-                        PXLongOperation.SetCurrentItem(row);
+                        PXProcessing.SetCurrentItem(row);
                         try
                         {
                             var mapReservation = reservationData.FirstOrDefault(x => x.PropertyID == row.PropertyID && x.ReservationID == row.ReservationID);
@@ -223,7 +223,7 @@ namespace HH_APICustomization.Graph
                             if (!string.IsNullOrEmpty(errorMsg))
                                 cloudBedGroupRow.ToList().ForEach(x =>
                                 {
-                                    PXLongOperation.SetCurrentItem(x);
+                                    PXProcessing.SetCurrentItem(x);
                                     PXProcessing.SetError<LUMCloudBedTransactions>(errorMsg);
                                     x.IsImported = false;
                                     x.ErrorMessage = errorMsg;
@@ -233,7 +233,7 @@ namespace HH_APICustomization.Graph
                             else
                                 cloudBedGroupRow.ToList().ForEach(x =>
                                 {
-                                    PXLongOperation.SetCurrentItem(x);
+                                    PXProcessing.SetCurrentItem(x);
                                     if (x.IsImported ?? false)
                                         PXProcessing.SetProcessed<LUMCloudBedTransactions>();
                                     else

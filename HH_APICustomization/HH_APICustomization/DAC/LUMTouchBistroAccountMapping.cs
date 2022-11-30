@@ -21,21 +21,21 @@ namespace HH_APICustomization.DAC
         public abstract class type : PX.Data.BQL.BqlString.Field<type> { }
         #endregion
 
-        #region RestauarantID
+        #region RestaurantID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Restauarant ID", Required = true)]
+        [PXUIField(DisplayName = "Restaurant ID", Required = true)]
         [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
-        [PXSelector(typeof(Search<LUMTouchBistroPreference.resturantID>),
-                typeof(LUMTouchBistroPreference.resturantCD),
-                typeof(LUMTouchBistroPreference.branchID),
-                typeof(LUMTouchBistroPreference.cashAccountID),
-                typeof(LUMTouchBistroPreference.cashSubAcctID),
+        [PXSelector(typeof(Search<LUMTouchBistroPreference.restaurantID>),
+                typeof(LUMTouchBistroPreference.restaurantCD),
+                typeof(LUMTouchBistroPreference.branch),
+                typeof(LUMTouchBistroPreference.accountID),
+                typeof(LUMTouchBistroPreference.subAcctID),
                 typeof(LUMTouchBistroPreference.active),
-                SubstituteKey = typeof(LUMTouchBistroPreference.resturantCD),
-                DescriptionField = typeof(LUMTouchBistroPreference.branchID)
+                SubstituteKey = typeof(LUMTouchBistroPreference.restaurantCD),
+                DescriptionField = typeof(LUMTouchBistroPreference.branch)
             )]
-        public virtual int? RestauarantID { get; set; }
-        public abstract class restauarantID : PX.Data.BQL.BqlInt.Field<restauarantID> { }
+        public virtual int? RestaurantID { get; set; }
+        public abstract class restaurantID : PX.Data.BQL.BqlInt.Field<restaurantID> { }
         #endregion
 
         #region SalesCategory
@@ -135,6 +135,13 @@ namespace HH_APICustomization.DAC
         [PXNote()]
         public virtual Guid? NoteID { get; set; }
         public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
+        #endregion
+
+        #region Tstamp
+        [PXDBTimestamp()]
+        [PXUIField(DisplayName = "Tstamp")]
+        public virtual byte[] Tstamp { get; set; }
+        public abstract class tstamp : PX.Data.BQL.BqlByteArray.Field<tstamp> { }
         #endregion
     }
 }

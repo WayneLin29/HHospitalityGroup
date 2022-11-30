@@ -1,11 +1,11 @@
 ﻿<Sql TableName="LUMTouchBistroPreference" TableSchemaXml="#CDATA">
     <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMTouchBistroPreference">
   <col name="CompanyID" type="Int" default="Zero" />
-  <col name="ResturantID" type="Int" identity="true" />
-  <col name="ResturantCD" type="NVarChar(25)" />
-  <col name="BranchID" type="Int" nullable="true" />
-  <col name="CashAccountID" type="Int" nullable="true" />
-  <col name="CashSubAcctID" type="Int" nullable="true" />
+  <col name="RestaurantID" type="Int" identity="true" />
+  <col name="RestaurantCD" type="NVarChar(25)" />
+  <col name="Branch" type="Int" nullable="true" />
+  <col name="AccountID" type="Int" nullable="true" />
+  <col name="SubAcctID" type="Int" nullable="true" />
   <col name="Active" type="Bit" nullable="true" />
   <col name="CreatedByID" type="UniqueIdentifier" nullable="true" />
   <col name="CreatedByScreenID" type="Char(8)" nullable="true" />
@@ -15,7 +15,7 @@
   <col name="LastModifiedDateTime" type="DateTime" nullable="true" />
   <index name="PK_LUMTouchBistroPreference" clustered="true" primary="true" unique="true">
     <col name="CompanyID" />
-    <col name="ResturantID" />
+    <col name="RestaurantID" />
   </index>
 </table>]]></CDATA>
 </Sql>

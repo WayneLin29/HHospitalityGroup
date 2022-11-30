@@ -4,7 +4,7 @@
 <asp:Content ID="cont1" ContentPlaceHolderID="phDS" Runat="Server">
 	<px:PXDataSource ID="ds" runat="server" Visible="True" Width="100%"
         TypeName="HH_APICustomization.Graph.LUMTouchBistroPreferenceMaint"
-        PrimaryView="Preferences"
+        PrimaryView="MasterFilter"
         >
 		<CallbackCommands>
 
@@ -12,7 +12,7 @@
 	</px:PXDataSource>
 </asp:Content>
 <asp:Content ID="cont2" ContentPlaceHolderID="phF" Runat="Server">
-	<px:PXTab SyncPosition="True" ID="tab" runat="server" DataSourceID="ds" Style="z-index: 100" 
+	<px:PXTab DataMember="MasterFilter" SyncPosition="" ID="tab" runat="server" DataSourceID="ds" Style="z-index: 100" 
 		Width="100%" Height="100%" AllowAutoHide="false">
 		<Items>
 			<px:PXTabItem Text="Restaurant">
@@ -22,24 +22,26 @@
 						<Levels>
 							<px:PXGridLevel DataMember="Preferences" >
 								<Columns>
-									<px:PXGridColumn DataField="ResturantCD" Width="140" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="BranchID" Width="140" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="CashAccountID" Width="120" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="CashSubAcctID" Width="140" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="RestaurantCD" Width="140" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="Branch" Width="140" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="AccountID" Width="120" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="SubAcctID" Width="140" ></px:PXGridColumn>
 									<px:PXGridColumn Type="CheckBox" DataField="Active" Width="60" ></px:PXGridColumn></Columns></px:PXGridLevel></Levels>
-						<AutoSize Enabled="True" ></AutoSize></px:PXGrid></Template></px:PXTabItem>
+						<AutoSize Enabled="True" ></AutoSize>
+						<Mode AutoInsert="False" ></Mode>
+						<Mode InplaceInsert="False" ></Mode></px:PXGrid></Template></px:PXTabItem>
 			<px:PXTabItem Text="Account Mapping">
 			
 				<Template>
 								<px:PXFormView DataSourceID="ds" runat="server" ID="CstFormView3" DataMember="Filter" >
 									<Template>
-										<px:PXSelector runat="server" ID="CstPXSelector4" DataField="RestauarantID" CommitChanges="True" ></px:PXSelector></Template></px:PXFormView>
+										<px:PXSelector runat="server" ID="CstPXSelector4" DataField="RestaurantID" CommitChanges="True" ></px:PXSelector></Template></px:PXFormView>
 					<px:PXGrid TabIndex="400" SyncPosition="True" DataSourceID="ds" AdjustPageSize="Auto" AllowPaging="" Height="100%" runat="server" ID="CstPXGrid2" SkinID="Details" Width="100%">
 						<Levels>
 							<px:PXGridLevel DataMember="AccountMappings" >
 								<Columns>
 									<px:PXGridColumn DataField="Type" Width="180" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="RestauarantID" Width="140" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="RestaurantID" Width="140" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="SalesCategory" Width="180" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="MenuGroup" Width="180" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="MenuItem" Width="280" ></px:PXGridColumn>
