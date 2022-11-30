@@ -64,6 +64,32 @@ namespace HH_APICustomization.Graph
 
         #endregion
 
+        #region Event
+
+        public virtual void _(Events.FieldDefaulting<TransactionFilter.fromDate> e)
+        {
+            var row = e.Row as TransactionFilter;
+            if (!row.FromDate.HasValue)
+                row.FromDate = DateTime.Now.AddDays(-1);
+        }
+
+        public virtual void _(Events.FieldDefaulting<TransactionFilter.toDate> e)
+        {
+            var row = e.Row as TransactionFilter;
+            if (!row.ToDate.HasValue)
+                row.ToDate = DateTime.Now;
+        }
+
+
+        public virtual void _(Events.FieldDefaulting<ReservationFilter.reservationToDate> e)
+        {
+            var row = e.Row as ReservationFilter;
+            if (!row.ReservationToDate.HasValue)
+                row.ReservationToDate = DateTime.Now;
+        }
+
+        #endregion
+
         #region Method
 
         public static void GoProcessing(List<LUMCloudBedTransactions> selectedData, TransactionFilter transactionFilter, ReservationFilter reservationFilter)
@@ -123,8 +149,9 @@ namespace HH_APICustomization.Graph
                         PXProcessing.SetCurrentItem(row);
                         try
                         {
+                            long validReservation;
                             var mapReservation = reservationData.FirstOrDefault(x => x.PropertyID == row.PropertyID && x.ReservationID == row.ReservationID);
-                            if (mapReservation == null && long.TryParse(row.ReservationID, out _))
+                            if (mapReservation == null && long.TryParse(row.ReservationID, out validReservation))
                                 throw new PXException("Can not Mapping Reservation Data!!");
 
                             #region RuleA
@@ -393,13 +420,13 @@ namespace HH_APICustomization.Graph
     public class TransactionFilter : IBqlTable
     {
         [PXDate]
-        [PXDefault(typeof(AccessInfo.businessDate))]
+        [PXDefault]
         [PXUIField(DisplayName = "Transaction From")]
         public virtual DateTime? FromDate { get; set; }
         public abstract class fromDate : PX.Data.BQL.BqlDateTime.Field<fromDate> { }
 
         [PXDate]
-        [PXDefault(typeof(AccessInfo.businessDate))]
+        [PXDefault]
         [PXUIField(DisplayName = "Transaction To")]
         public virtual DateTime? ToDate { get; set; }
         public abstract class toDate : PX.Data.BQL.BqlDateTime.Field<toDate> { }
@@ -428,7 +455,7 @@ namespace HH_APICustomization.Graph
         public abstract class reservationFromDate : PX.Data.BQL.BqlDateTime.Field<reservationFromDate> { }
 
         [PXDateAndTime(DisplayMask = "g", InputMask = "g")]
-        [PXDefault(typeof(AccessInfo.businessDate))]
+        [PXDefault]
         [PXUIField(DisplayName = "ReservationUpdate To")]
         public virtual DateTime? ReservationToDate { get; set; }
         public abstract class reservationToDate : PX.Data.BQL.BqlDateTime.Field<reservationToDate> { }
