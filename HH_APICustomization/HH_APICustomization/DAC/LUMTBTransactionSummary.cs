@@ -1,5 +1,6 @@
 using System;
 using PX.Data;
+using PX.Objects.GL;
 
 namespace HH_APICustomization.DAC
 {
@@ -7,9 +8,15 @@ namespace HH_APICustomization.DAC
     [PXCacheName("LUMTBTransactionSummary")]
     public class LUMTBTransactionSummary : IBqlTable
     {
+        #region Selected
+        [PXBool]
+        [PXUIField(DisplayName = "Selected")]
+        public virtual bool? Selected { get; set; }
+        public abstract class selected : PX.Data.BQL.BqlBool.Field<selected> { }
+        #endregion
+
         #region TBseqID
         [PXDBIdentity(IsKey = true)]
-        [PXUIField(DisplayName = "TBseqID")]
         public virtual int? TBseqID { get; set; }
         public abstract class tBseqID : PX.Data.BQL.BqlInt.Field<tBseqID> { }
         #endregion
@@ -38,6 +45,15 @@ namespace HH_APICustomization.DAC
         #region RestaurantID
         [PXDBInt()]
         [PXUIField(DisplayName = "Restaurant ID")]
+        [PXSelector(typeof(Search<LUMTouchBistroPreference.restaurantID>),
+                typeof(LUMTouchBistroPreference.restaurantCD),
+                typeof(LUMTouchBistroPreference.branch),
+                typeof(LUMTouchBistroPreference.accountID),
+                typeof(LUMTouchBistroPreference.subAcctID),
+                typeof(LUMTouchBistroPreference.active),
+                SubstituteKey = typeof(LUMTouchBistroPreference.restaurantCD),
+                DescriptionField = typeof(LUMTouchBistroPreference.branch)
+            )]
         public virtual int? RestaurantID { get; set; }
         public abstract class restaurantID : PX.Data.BQL.BqlInt.Field<restaurantID> { }
         #endregion
@@ -59,6 +75,9 @@ namespace HH_APICustomization.DAC
         #region AccountID
         [PXDBInt()]
         [PXUIField(DisplayName = "Account")]
+        [PXSelector(typeof(Account.accountID),
+            SubstituteKey = typeof(Account.accountCD),
+            DescriptionField = typeof(Account.description))]
         public virtual int? AccountID { get; set; }
         public abstract class accountID : PX.Data.BQL.BqlInt.Field<accountID> { }
         #endregion
@@ -66,6 +85,9 @@ namespace HH_APICustomization.DAC
         #region SubID
         [PXDBInt()]
         [PXUIField(DisplayName = "Sub")]
+        [PXSelector(typeof(Sub.subID),
+            SubstituteKey = typeof(Sub.subCD),
+            DescriptionField = typeof(Sub.description))]
         public virtual int? SubID { get; set; }
         public abstract class subID : PX.Data.BQL.BqlInt.Field<subID> { }
         #endregion
@@ -111,6 +133,7 @@ namespace HH_APICustomization.DAC
         public virtual Decimal? MenuItemVoidQty { get; set; }
         public abstract class menuItemVoidQty : PX.Data.BQL.BqlDecimal.Field<menuItemVoidQty> { }
         #endregion
+
         #region Voids
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Voids")]
@@ -216,13 +239,6 @@ namespace HH_APICustomization.DAC
         public abstract class total : PX.Data.BQL.BqlDecimal.Field<total> { }
         #endregion
 
-        #region Direction
-        [PXDBString(2, IsFixed = true, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Direction")]
-        public virtual string Direction { get; set; }
-        public abstract class direction : PX.Data.BQL.BqlString.Field<direction> { }
-        #endregion
-
         #region Server
         [PXDBString(255, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Server")]
@@ -265,6 +281,13 @@ namespace HH_APICustomization.DAC
         public abstract class comment : PX.Data.BQL.BqlString.Field<comment> { }
         #endregion
 
+        #region ErrorMessage
+        [PXDBString(1024, IsUnicode = true)]
+        [PXUIField(DisplayName = "Error Message")]
+        public virtual string ErrorMessage { get; set; }
+        public abstract class errorMessage : PX.Data.BQL.BqlString.Field<errorMessage> { }
+        #endregion
+
         #region CreatedByID
         [PXDBCreatedByID()]
         public virtual Guid? CreatedByID { get; set; }
@@ -305,6 +328,12 @@ namespace HH_APICustomization.DAC
         [PXNote()]
         public virtual Guid? NoteID { get; set; }
         public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
+        #endregion
+
+        #region unbound
+        [PXInt()]
+        public virtual int? ProcessIndex { get; set; }
+        public abstract class processIndex : PX.Data.BQL.BqlInt.Field<processIndex> { }
         #endregion
     }
 }

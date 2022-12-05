@@ -34,7 +34,6 @@ namespace HH_APICustomization.Graph
         {
             //因為Selected 的關係 LUMTouchBistroDataReceivedV 會被判定為異動，存檔會出事
             datas.ForEach(data => self.Caches<LUMTouchBistroDataReceivedV>().SetStatus(data, PXEntryStatus.Notchanged));
-
             for (int i = 0; i < datas.Count; i++)
             {
                 var data = datas[i];
@@ -43,6 +42,8 @@ namespace HH_APICustomization.Graph
                 {
                     using (PXTransactionScope ts = new PXTransactionScope())
                     {
+                        //移除舊資料
+                        if (data.IsImported == true) self.RemoveOldData(data);
                         //分析檔名
                         TouchBistro_DataReceivedEntity entity = self.ParsingFileName(data);
                         //讀取Csv
@@ -143,6 +144,8 @@ namespace HH_APICustomization.Graph
                 item.Tax1 = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.Tax1)));
                 item.Tax2 = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.Tax2)));
                 item.Tax3 = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.Tax3)));
+                //統由DateTimestamp紀錄傳票日期
+                item.DateTimestamp = item.Date;
 
                 //Get Account & Sub
                 var mapping = LUMTouchBistroPreferenceMaint.GetSalesByMenuItemAcct(this, item);
@@ -172,6 +175,8 @@ namespace HH_APICustomization.Graph
                 item.Subtotal = GetDec(reader.GetValue(column.Get(AccountsSummaryColumn.Subtotal)));
                 item.Tips = GetDec(reader.GetValue(column.Get(AccountsSummaryColumn.Tips)));
                 item.Total = GetDec(reader.GetValue(column.Get(AccountsSummaryColumn.Total)));
+                //統由DateTimestamp紀錄傳票日期
+                item.DateTimestamp = item.Date;
 
                 //Get Account & Sub
                 var mapping = LUMTouchBistroPreferenceMaint.GetAccountsSummaryAcct(this, item);
@@ -243,6 +248,38 @@ namespace HH_APICustomization.Graph
             return new CSVReader(file.Data, Encoding.UTF8.CodePage);
         }
 
+        /// <summary>
+        /// 移除舊有資料
+        /// </summary>
+        /// <param name="data"></param>
+        protected virtual void RemoveOldData(LUMTouchBistroDataReceivedV data)
+        {
+            if (data.IsImported != true) return;
+            var isImportData = GetIsImportDataByFileID(data.FileID);
+            if (isImportData != null)
+                throw new PXException($"Transaction Imported. Please remove imported flag on dataset before re-importing the file.");
+            foreach (LUMTBTransactionSummary item in GetByFileID(data.FileID))
+            {
+                this.Imports.Delete(item);
+            }
+
+        }
+        #endregion
+
+        #region BQL
+        protected virtual LUMTBTransactionSummary GetIsImportDataByFileID(Guid? fileID)
+        {
+            return PXSelect<LUMTBTransactionSummary, Where<LUMTBTransactionSummary.isImported, Equal<True>,
+                And<LUMTBTransactionSummary.fileID, Equal<Required<LUMTBTransactionSummary.fileID>>>>>
+                .Select(this, fileID);
+        }
+
+        protected virtual PXResultset<LUMTBTransactionSummary> GetByFileID(Guid? fileID)
+        {
+            return PXSelect<LUMTBTransactionSummary,
+                Where<LUMTBTransactionSummary.fileID, Equal<Required<LUMTBTransactionSummary.fileID>>>>
+                .Select(this, fileID);
+        }
         #endregion
 
         #region Table
@@ -323,7 +360,5 @@ namespace HH_APICustomization.Graph
         }
         #endregion
 
-        #region BQL
-        #endregion
     }
 }

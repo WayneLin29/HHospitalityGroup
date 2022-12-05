@@ -20,7 +20,17 @@ namespace HH_APICustomization.Graph
         [PXImport(typeof(LUMTouchBistroAccountMapping))]
         public PXSelect<LUMTouchBistroAccountMapping,
             Where<LUMTouchBistroAccountMapping.restaurantID, Equal<Current2<AccountMappingFilter.restaurantID>>,
-                Or<Current2<AccountMappingFilter.restaurantID>, IsNull>>> AccountMappings;
+                Or<Current2<AccountMappingFilter.restaurantID>, IsNull>>,
+            OrderBy<
+                Asc<LUMTouchBistroAccountMapping.restaurantID,
+                Asc<LUMTouchBistroAccountMapping.accountID,
+                Asc<LUMTouchBistroAccountMapping.subAcctID,
+                Asc<LUMTouchBistroAccountMapping.salesCategory,
+                Asc<LUMTouchBistroAccountMapping.menuGroup,
+                Asc<LUMTouchBistroAccountMapping.menuItem,
+                Asc<LUMTouchBistroAccountMapping.reason,
+                Asc<LUMTouchBistroAccountMapping.payAccount>>>>>>>>
+                >> AccountMappings;
         #endregion
 
         #region Event
@@ -56,8 +66,8 @@ namespace HH_APICustomization.Graph
         public static LUMTouchBistroAccountMapping GetSalesByMenuItemAcct(PXGraph graph,LUMTBTransactionSummary data) {
             LUMTouchBistroAccountMapping mapping = null;
             mapping = GetByMenuItem(graph,data.RestaurantID,data.MenuItem);
-            if(mapping == null) GetBySalesCategory(graph, data.RestaurantID, data.SalesCategory);
-            if (mapping == null) GetByMenuGroup(graph, data.RestaurantID, data.MenuGroup);
+            if(mapping == null) mapping = GetBySalesCategory(graph, data.RestaurantID, data.SalesCategory);
+            if (mapping == null) mapping = GetByMenuGroup(graph, data.RestaurantID, data.MenuGroup);
             return mapping;
         }
 
