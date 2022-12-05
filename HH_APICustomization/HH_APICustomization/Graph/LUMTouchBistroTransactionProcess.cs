@@ -48,7 +48,6 @@ namespace HH_APICustomization.Grpah
         #region Action
         public PXAction<ProcessFilter> markImported;
         [PXUIField(DisplayName = "Mark Imported", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
-        [PXUIVisible(typeof(ProcessFilter.isImported))]
         [PXProcessButton]
         public virtual IEnumerable MarkImported(PXAdapter adapter)
         {
@@ -74,6 +73,7 @@ namespace HH_APICustomization.Grpah
             if (e.Row == null) return;
             bool isAR = e.Row.DataType == ProcessFilter.AccountRefresh;
             PXUIFieldAttribute.SetEnabled<ProcessFilter.isImported>(e.Cache, e.Row, !isAR);
+            this.markImported.SetVisible(e.Row.IsImported ?? false);
             bool isSalesByMenuItem = e.Row.DataType == TSDataType.SALES_BY_MENUITEM;
             bool isAccountSum = e.Row.DataType == TSDataType.ACCOUNTS_SUMMARY;
             bool isInOut = e.Row.DataType == TSDataType.PAY_INS || e.Row.DataType == TSDataType.PAY_OUTS;
