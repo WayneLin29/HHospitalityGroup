@@ -25,8 +25,19 @@
         </layout>
         <data>
             <SiteMap>
-                <row Position="21518" Title="TouchBistro Transaction Process" Url="~/Pages/LM/LM505002.aspx" ScreenID="LM505002" NodeID="92723c06-706b-431d-bbb6-6ba2c586b225" ParentID="00000000-0000-0000-0000-000000000000" />
+                <row Position="21518" Title="TouchBistro Transaction Process" Url="~/Pages/LM/LM505002.aspx" ScreenID="LM505002" NodeID="92723c06-706b-431d-bbb6-6ba2c586b225" ParentID="00000000-0000-0000-0000-000000000000">
+                    <MUIScreen IsPortal="0" WorkspaceID="b6902036-c01f-44cb-84ff-340da661381b" Order="50" SubcategoryID="32130442-2305-4394-9389-cf915b191d2a" />
+                </row>
             </SiteMap>
+            <MUIWorkspace>
+                <row IsPortal="0" WorkspaceID="b6902036-c01f-44cb-84ff-340da661381b" Order="148.625" Title="Customization" Icon="extension" AreaID="3635ea7d-0975-48ff-b4ac-a870f7e1e8b5" ScreenID="WSCS0000" IsSystem="0" />
+            </MUIWorkspace>
+            <MUISubcategory>
+                <row IsPortal="0" SubcategoryID="32130442-2305-4394-9389-cf915b191d2a" Order="820" Name="Processes" Icon="" IsSystem="0" />
+            </MUISubcategory>
+            <MUIArea>
+                <row IsPortal="0" AreaID="3635ea7d-0975-48ff-b4ac-a870f7e1e8b5" Order="30" Name="Configuration" />
+            </MUIArea>
         </data>
     </data-set>
 </SiteMapNode>
