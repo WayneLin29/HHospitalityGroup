@@ -1,0 +1,57 @@
+﻿<Sql TableName="LUMTBTransactionSummary" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMTBTransactionSummary">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="TBSeqID" type="Int" identity="true" />
+  <col name="DataType" type="NChar(2)" nullable="true" />
+  <col name="FileID" type="UniqueIdentifier" nullable="true" />
+  <col name="FileName" type="NVarChar(255)" nullable="true" />
+  <col name="RestaurantID" type="Int" nullable="true" />
+  <col name="Date" type="DateTime" nullable="true" />
+  <col name="AccountID" type="Int" nullable="true" />
+  <col name="SubID" type="Int" nullable="true" />
+  <col name="IsImported" type="Bit" nullable="true" />
+  <col name="BatchNbr" type="NVarChar(15)" nullable="true" />
+  <col name="LineNbr" type="Int" nullable="true" />
+  <col name="MenuItem" type="NVarChar(255)" nullable="true" />
+  <col name="SalesCategory" type="NVarChar(50)" nullable="true" />
+  <col name="MenuGroup" type="NVarChar(50)" nullable="true" />
+  <col name="MenuItemVoidQty" type="Decimal(19,2)" nullable="true" />
+  <col name="Voids" type="Decimal(19,2)" nullable="true" />
+  <col name="MenuItemQty" type="Decimal(19,2)" nullable="true" />
+  <col name="GrossSales" type="Decimal(19,2)" nullable="true" />
+  <col name="Discounts" type="Decimal(19,2)" nullable="true" />
+  <col name="NetSales" type="Decimal(19,2)" nullable="true" />
+  <col name="Tax1" type="Decimal(19,2)" nullable="true" />
+  <col name="Tax2" type="Decimal(19,2)" nullable="true" />
+  <col name="Tax3" type="Decimal(19,2)" nullable="true" />
+  <col name="AccountName" type="NVarChar(255)" nullable="true" />
+  <col name="Payments" type="Decimal(19,2)" nullable="true" />
+  <col name="Deposits" type="Decimal(19,2)" nullable="true" />
+  <col name="ChargedToAccount" type="Decimal(19,2)" nullable="true" />
+  <col name="Subtotal" type="Decimal(19,2)" nullable="true" />
+  <col name="Tips" type="Decimal(19,2)" nullable="true" />
+  <col name="Total" type="Decimal(19,2)" nullable="true" />
+  <col name="Direction" type="NChar(2)" nullable="true" />
+  <col name="Server" type="NVarChar(255)" nullable="true" />
+  <col name="DateTimestamp" type="DateTime" nullable="true" />
+  <col name="Reason" type="NVarChar(255)" nullable="true" />
+  <col name="Amount" type="Decimal(19,2)" nullable="true" />
+  <col name="Register" type="NVarChar(255)" nullable="true" />
+  <col name="Comment" type="NVarChar(255)" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByScreenID" type="Char(8)" nullable="true" />
+  <col name="CreatedDateTime" type="DateTime" nullable="true" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" nullable="true" />
+  <col name="LastModifiedByScreenID" type="Char(8)" nullable="true" />
+  <col name="LastModifiedDateTime" type="DateTime" nullable="true" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <index name="LUMTBSalesByMenuItem_NoteID" unique="true">
+    <col name="NoteID" />
+    <col name="CompanyID" />
+  </index>
+  <index name="PK_LUMTBSalesByMenuItem" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="TBSeqID" />
+  </index>
+</table>]]></CDATA>
+</Sql>

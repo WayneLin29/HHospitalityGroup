@@ -44,7 +44,8 @@
     <Reference Include="PX.CS.Contracts">
       <HintPath>..\..\..\..\Bin\PX.CS.Contracts.dll</HintPath>
     </Reference>
-    <Reference Include="PX.Data">
+    <Reference Include="PX.Data, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Bin\PX.Data.dll</HintPath>
     </Reference>
     <Reference Include="PX.Data.BQL.Fluent">
@@ -64,19 +65,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="APIHelper\CloudBedHelper.cs" />
+    <Compile Include="DAC_Extension\UploadFileHHExt.cs" />
+    <Compile Include="Descriptor\Type.cs" />
     <Compile Include="Entity\CloudBed_ReservationEntity.cs" />
     <Compile Include="Entity\CloudBed_TokenEntity.cs" />
     <Compile Include="Entity\CloudBed_TransactionEntity.cs" />
+    <Compile Include="Entity\TouchBistro_DataReceivedEntity.cs" />
     <Compile Include="Examples.cs" />
     <Compile Include="DAC\LUMCloudBedAPIPreference.cs" />
     <Compile Include="Graph\LUMCloudBedPreferenceMaint.cs" />
     <Compile Include="Graph\LUMCloudBedTransactionProcess.cs" />
+    <Compile Include="Graph\LUMTouchBistroImportProcess.cs" />
+    <Compile Include="Graph\LUMTouchBistroPreferenceMaint.cs" />
     <Compile Include="Graph\SelectFrom.cs" />
     <Compile Include="DAC\LUMCloudBedPreference.cs" />
     <Compile Include="DAC\LUMCloudBedTransactions.cs" />
     <Compile Include="DAC\LUMCloudBedAccountMapping.cs" />
     <Compile Include="DAC\LUMCloudBedReservations.cs" />
+    <Compile Include="DAC\LUMTouchBistroAccountMapping.cs" />
+    <Compile Include="DAC\LUMTouchBistroPreference.cs" />
+    <Compile Include="DAC\LUMTBTransactionSummary.cs" />
+    <Compile Include="DAC\LUMTouchBistroDataReceivedV.cs" />
+    <Compile Include="Graph\LUMTouchBistroTransactionProcess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\GraphUtil.cs" />
     <Compile Include="WebHook\CloudBedWebHook.cs" />
   </ItemGroup>
   <ItemGroup>
