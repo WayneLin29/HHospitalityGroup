@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="DAC_Extension\INPIClassHHExt.cs" />
     <Compile Include="DAC_Extension\RQRequestLineOwnedHHExt.cs" />
+    <Compile Include="Graph_Extension\INDocumentReleaseHHExt.cs" />
     <Compile Include="Graph_Extension\INIssueEntryHHExt.cs" />
     <Compile Include="Graph_Extension\PIGeneratorHHExt.cs" />
     <Compile Include="Graph_Extension\RQRequestEntryHHExt.cs" />
