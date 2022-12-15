@@ -28,6 +28,9 @@ namespace PX.Objects.IN
         #region Method
         public virtual string CreateBatch(INRegister item)
         {
+            var inTranItems = GetTran(item.RefNbr);
+            if (inTranItems.Count == 0) return null;
+
             JournalEntry entry = PXGraph.CreateInstance<JournalEntry>();
             #region Batch
             Batch batch = (Batch)entry.BatchModule.Cache.CreateInstance();
@@ -43,7 +46,7 @@ namespace PX.Objects.IN
             #endregion
 
             #region GLTran
-            foreach (INTran tran in GetTran(item.RefNbr))
+            foreach (INTran tran in inTranItems)
             {
                 if (ProjectDefaultAttribute.IsNonProject(tran.ProjectID)) continue;
                 #region Tran A
@@ -94,10 +97,12 @@ namespace PX.Objects.IN
         #region BQL
         protected virtual PXResultset<INTran> GetTran(string refNbr)
         {
+            int? nonProjectID = ProjectDefaultAttribute.NonProject();
             return PXSelect<INTran,
                  Where<INTran.docType, Equal<INDocType.issue>,
-                     And<INTran.refNbr, Equal<Required<INTran.refNbr>>>>>
-                     .Select(Base, refNbr);
+                     And<INTran.projectID,NotEqual<Required<INTran.projectID>>,
+                     And<INTran.refNbr, Equal<Required<INTran.refNbr>>>>>>
+                     .Select(Base, nonProjectID,refNbr);
         }
         #endregion
     }
