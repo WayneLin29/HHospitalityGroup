@@ -31,13 +31,13 @@
   <col name="Subtotal" type="Decimal(19,2)" nullable="true" />
   <col name="Tips" type="Decimal(19,2)" nullable="true" />
   <col name="Total" type="Decimal(19,2)" nullable="true" />
-  <col name="Direction" type="NChar(2)" nullable="true" />
   <col name="Server" type="NVarChar(255)" nullable="true" />
   <col name="DateTimestamp" type="DateTime" nullable="true" />
   <col name="Reason" type="NVarChar(255)" nullable="true" />
   <col name="Amount" type="Decimal(19,2)" nullable="true" />
   <col name="Register" type="NVarChar(255)" nullable="true" />
   <col name="Comment" type="NVarChar(255)" nullable="true" />
+  <col name="ErrorMessage" type="NVarChar(1024)" nullable="true" />
   <col name="CreatedByID" type="UniqueIdentifier" nullable="true" />
   <col name="CreatedByScreenID" type="Char(8)" nullable="true" />
   <col name="CreatedDateTime" type="DateTime" nullable="true" />
