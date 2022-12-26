@@ -36,14 +36,14 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region AccessToken
-        [PXDBString(1024, IsUnicode = true)]
+        [PXDBString(4000, IsUnicode = true)]
         [PXUIField(DisplayName = "Access_token")]
         public virtual string AccessToken { get; set; }
         public abstract class accessToken : PX.Data.BQL.BqlString.Field<accessToken> { }
         #endregion
 
         #region RefreshToken
-        [PXDBString(1024, IsUnicode = true)]
+        [PXDBString(4000, IsUnicode = true)]
         [PXUIField(DisplayName = "Refresh_token")]
         public virtual string RefreshToken { get; set; }
         public abstract class refreshToken : PX.Data.BQL.BqlString.Field<refreshToken> { }

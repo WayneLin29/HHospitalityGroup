@@ -5,8 +5,8 @@
   <col name="ClientSecret" type="NVarChar(256)" nullable="true" />
   <col name="OauthUrl" type="NVarChar(1024)" nullable="true" />
   <col name="OauthCODE" type="NVarChar(256)" nullable="true" />
-  <col name="AccessToken" type="NVarChar(1024)" nullable="true" />
-  <col name="RefreshToken" type="NVarChar(1024)" nullable="true" />
+  <col name="AccessToken" type="NVarChar(4000)" nullable="true" />
+  <col name="RefreshToken" type="NVarChar(4000)" nullable="true" />
   <col name="RefreshTokenExpiresTime" type="DateTime" nullable="true" />
   <col name="WebHookUrl" type="NVarChar(1024)" nullable="true" />
   <col name="CreatedByID" type="UniqueIdentifier" />
