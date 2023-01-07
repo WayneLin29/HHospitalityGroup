@@ -184,6 +184,14 @@ namespace HH_APICustomization.Grpah
                     else if (dataType == TSDataType.PAY_INS) batchNbr = CreateBatchByOutsIns(preference, groupList, ledger?.LedgerID, false);
                     else if (dataType == TSDataType.PAY_OUTS) batchNbr = CreateBatchByOutsIns(preference, groupList, ledger?.LedgerID, true);
                 }
+                catch (PXOuterException e)
+                {
+                    for (int j = 0; j < e.InnerFields.Length; j++)
+                    {
+                        errorMsg += $"[{e.InnerFields[j]} - {e.InnerMessages[j]}] \r\n";
+                    }
+                    errorMsg = e.Message;
+                }
                 catch (Exception e)
                 {
                     errorMsg = e.Message;
