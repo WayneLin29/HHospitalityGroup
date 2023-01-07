@@ -194,7 +194,7 @@ namespace HH_APICustomization.Grpah
                 }
                 catch (Exception e)
                 {
-                    errorMsg = e.Message;
+                    errorMsg = $"{e.Message} \r\n {errorMsg}";
                 }
                 finally
                 {
@@ -294,7 +294,6 @@ namespace HH_APICustomization.Grpah
                     tranA = entry.GLTranModuleBatNbr.Insert(tranA);
                     tranA.AccountID = item.AccountID;
                     tranA.SubID = item.SubID;
-                    tranA.Qty = item.MenuItemQty;
                     tranA.TranDesc = String.Format("Account Audit - {0}", item.AccountName);
                     tranA.CuryDebitAmt = item.Total;
                     tranA.CuryCreditAmt = 0m;
@@ -350,7 +349,6 @@ namespace HH_APICustomization.Grpah
                     tranA = entry.GLTranModuleBatNbr.Insert(tranA);
                     tranA.AccountID = item.AccountID;
                     tranA.SubID = item.SubID;
-                    tranA.Qty = item.MenuItemQty;
                     tranA.TranDesc = String.Format("Account Remit - {0}", item.Reason);
                     tranA.CuryDebitAmt = isOut ? 0m : item.Amount;
                     tranA.CuryCreditAmt = isOut ? item.Amount : 0m;
