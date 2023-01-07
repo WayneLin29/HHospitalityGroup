@@ -9,9 +9,17 @@
         <LayoutUnit>Inch</LayoutUnit>
         <MailSettings>
             <ActivitySource>RQRequest.NoteID</ActivitySource>
+            <Bcc>
+            </Bcc>
             <Body>='Dear Customer, This is an automatic email to notify you that you have a new Request available on your account. You will find a copy of Request items #'+[RQRequest.OrderNbr]+' '+'attached to this email.  #010;#010;If you have any questions, please don’t hesitate to contact us at email.  #010;#010;Thank you for choosing'+' '+[CompanyContact.FullName]+'.'</Body>
+            <Cc>
+            </Cc>
+            <Format>
+            </Format>
             <ParentSource>Vendor.NoteID</ParentSource>
             <Subject>=[CompanyContact.FullName]+':'+' '+'Request items #'+[RQRequest.OrderNbr]</Subject>
+            <TemplateID>
+            </TemplateID>
             <To>=[ShippingContact.Email]</To>
         </MailSettings>
         <PageSettings>
@@ -284,7 +292,7 @@
                 <ParentName>RQRequest</ParentName>
             </ReportRelation>
             <ReportRelation>
-                <ChildName>StoragePlaceStatus</ChildName>
+                <ChildName>INSiteStatus</ChildName>
                 <Links>
                     <RelationRow>
                         <ChildField>SiteID</ChildField>
@@ -308,7 +316,7 @@
                 <ParentName>RQRequestLine</ParentName>
             </ReportRelation>
         </Relations>
-        <SchemaUrl>https://www.acumatica.com.tw/Manuf/</SchemaUrl>
+        <SchemaUrl>http://localhost/AcumaticaHH/</SchemaUrl>
         <StylesTemplate>TemplateFormExternal.rpx</StylesTemplate>
         <Tables>
             <ReportTable Name="BAccount">
@@ -2071,80 +2079,6 @@
                 </Fields>
                 <FullName>PX.Objects.GL.Branch</FullName>
             </ReportTable>
-            <ReportTable Name="StoragePlaceStatus">
-                <Fields>
-                    <ReportField Name="Active">
-                        <DataType>Boolean</DataType>
-                    </ReportField>
-                    <ReportField Name="BaseUnit">
-                    </ReportField>
-                    <ReportField Name="CartID">
-                    </ReportField>
-                    <ReportField Name="CartID_description">
-                    </ReportField>
-                    <ReportField Name="CartID_INCart_descr">
-                    </ReportField>
-                    <ReportField Name="Descr">
-                    </ReportField>
-                    <ReportField Name="ExpireDate">
-                        <DataType>DateTime</DataType>
-                    </ReportField>
-                    <ReportField Name="ExpireDate_Day">
-                    </ReportField>
-                    <ReportField Name="ExpireDate_Hour">
-                    </ReportField>
-                    <ReportField Name="ExpireDate_Month">
-                    </ReportField>
-                    <ReportField Name="ExpireDate_Quarter">
-                    </ReportField>
-                    <ReportField Name="InventoryCD">
-                    </ReportField>
-                    <ReportField Name="InventoryDescr">
-                    </ReportField>
-                    <ReportField Name="InventoryID">
-                        <DataType>Int32</DataType>
-                    </ReportField>
-                    <ReportField Name="IsCart">
-                        <DataType>Boolean</DataType>
-                    </ReportField>
-                    <ReportField Name="LocationID">
-                    </ReportField>
-                    <ReportField Name="LocationID_description">
-                    </ReportField>
-                    <ReportField Name="LocationID_INLocation_descr">
-                    </ReportField>
-                    <ReportField Name="LocationID_Segment1">
-                    </ReportField>
-                    <ReportField Name="LotSerialNbr">
-                    </ReportField>
-                    <ReportField Name="NoteActivity">
-                    </ReportField>
-                    <ReportField Name="NoteID">
-                        <DataType>Object</DataType>
-                    </ReportField>
-                    <ReportField Name="NoteImages">
-                    </ReportField>
-                    <ReportField Name="Qty">
-                        <DataType>Decimal</DataType>
-                    </ReportField>
-                    <ReportField Name="SiteCD">
-                    </ReportField>
-                    <ReportField Name="SiteID">
-                        <DataType>Int32</DataType>
-                    </ReportField>
-                    <ReportField Name="SplittedIcon">
-                    </ReportField>
-                    <ReportField Name="StorageCD">
-                    </ReportField>
-                    <ReportField Name="StorageID">
-                        <DataType>Int32</DataType>
-                    </ReportField>
-                    <ReportField Name="SubItemID">
-                        <DataType>Int32</DataType>
-                    </ReportField>
-                </Fields>
-                <FullName>PX.Objects.IN.StoragePlaceStatus</FullName>
-            </ReportTable>
             <ReportTable Name="INSite">
                 <Fields>
                     <ReportField Name="Active">
@@ -3389,6 +3323,200 @@
                 </Fields>
                 <FullName>PX.Objects.IN.InventoryItem</FullName>
             </ReportTable>
+            <ReportTable Name="INSiteStatus">
+                <Fields>
+                    <ReportField Name="Active">
+                        <DataType>Boolean</DataType>
+                    </ReportField>
+                    <ReportField Name="InventoryID">
+                    </ReportField>
+                    <ReportField Name="InventoryID_description">
+                    </ReportField>
+                    <ReportField Name="InventoryID_InventoryItem_descr">
+                    </ReportField>
+                    <ReportField Name="InventoryID_Segment1">
+                    </ReportField>
+                    <ReportField Name="LastModifiedDateTime">
+                        <DataType>DateTime</DataType>
+                    </ReportField>
+                    <ReportField Name="LastModifiedDateTime_Day">
+                    </ReportField>
+                    <ReportField Name="LastModifiedDateTime_Hour">
+                    </ReportField>
+                    <ReportField Name="LastModifiedDateTime_Month">
+                    </ReportField>
+                    <ReportField Name="LastModifiedDateTime_Quarter">
+                    </ReportField>
+                    <ReportField Name="QtyActual">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyAvail">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyExpired">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyFixedFSSrvOrd">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyFSSrvOrdAllocated">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyFSSrvOrdBooked">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyFSSrvOrdPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyHardAvail">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyINAssemblyDemand">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyINAssemblySupply">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyINIssues">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyINReceipts">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyINReplaned">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyInTransit">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyInTransitToProduction">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyInTransitToSO">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyNotAvail">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyOnHand">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPODropShipOrders">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPODropShipPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPODropShipReceipts">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOFixedFSSrvOrd">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOFixedFSSrvOrdPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOFixedFSSrvOrdReceipts">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOFixedOrders">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOFixedPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOFixedProductionOrders">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOFixedProductionPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOFixedReceipts">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOOrders">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyPOReceipts">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProdFixedProdOrders">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProdFixedProdOrdersPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProdFixedProduction">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProdFixedPurchase">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProdFixedSalesOrders">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProdFixedSalesOrdersPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProductionAllocated">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProductionDemand">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProductionDemandPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProductionSupply">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtyProductionSupplyPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtySOBackOrdered">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtySOBooked">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtySODropShip">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtySOFixed">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtySOFixedProduction">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtySOPrepared">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtySOShipped">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="QtySOShipping">
+                        <DataType>Decimal</DataType>
+                    </ReportField>
+                    <ReportField Name="SiteID">
+                    </ReportField>
+                    <ReportField Name="SiteID_description">
+                    </ReportField>
+                    <ReportField Name="SiteID_INSite_descr">
+                    </ReportField>
+                    <ReportField Name="SiteID_Segment1">
+                    </ReportField>
+                    <ReportField Name="SubItemID">
+                    </ReportField>
+                    <ReportField Name="SubItemID_Segment1">
+                    </ReportField>
+                    <ReportField Name="tstamp">
+                    </ReportField>
+                </Fields>
+                <FullName>PX.Objects.IN.INSiteStatus</FullName>
+            </ReportTable>
         </Tables>
         <Version>20211215</Version>
         <ViewerFields>
@@ -3940,10 +4068,10 @@
             <Group Name="SiteID_InventoryID">
                 <Grouping>
                     <GroupExp>
-                        <DataField>=[StoragePlaceStatus.SiteID]</DataField>
+                        <DataField>=[INSiteStatus.SiteID]</DataField>
                     </GroupExp>
                     <GroupExp>
-                        <DataField>=[StoragePlaceStatus.InventoryID]</DataField>
+                        <DataField>=[INSiteStatus.InventoryID]</DataField>
                     </GroupExp>
                 </Grouping>
                 <Headers>
@@ -4022,7 +4150,7 @@
                                     <TextAlign>Right</TextAlign>
                                 </Style>
                                 <StyleName>Normal</StyleName>
-                                <Value>=Sum([StoragePlaceStatus.Qty])</Value>
+                                <Value>=Sum([INSiteStatus.QtyOnHand])#010;</Value>
                             </TextBox>
                         </Items>
                     </Header>
