@@ -322,6 +322,7 @@ namespace HH_APICustomization.Graph
                     trans.HouseAccountName = row.houseAccountName;
                     trans.GuestID = row.guestID;
                     trans.PropertyName = row.propertyName;
+                    trans.IsImported = row.isDeleted;
                     if (DateTime.TryParse(row.transactionDateTime, out newDateTime))
                         trans.TransactionDateTime = newDateTime.AddHours(8);
                     if (DateTime.TryParse(row.transactionDateTimeUTC, out newDateTime))
@@ -388,8 +389,11 @@ namespace HH_APICustomization.Graph
                     reservation.Source = row.sourceName;
                     reservation.ThirdPartyIdentifier = row.thirdPartyIdentifier;
                     reservation.Status = row.status;
-                    reservation.StartDate = DateTime.Parse(row.startDate);
-                    reservation.EndDate = DateTime.Parse(row.endDate);
+                    var tempDate = new DateTime();
+                    if (DateTime.TryParse(row.startDate, out tempDate))
+                        reservation.StartDate = DateTime.Parse(row.startDate);
+                    if (DateTime.TryParse(row.endDate, out tempDate))
+                        reservation.EndDate = DateTime.Parse(row.endDate);
                     reservation.Balance = (decimal?)row.balance;
                     #endregion
                     if (existsRow != null)
