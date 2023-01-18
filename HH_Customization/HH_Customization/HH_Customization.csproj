@@ -56,6 +56,9 @@
   <ItemGroup>
     <Compile Include="DAC_Extension\INPIClassHHExt.cs" />
     <Compile Include="DAC_Extension\RQRequestLineOwnedHHExt.cs" />
+    <Compile Include="Graph_Extension\APPaymentEntryHHExt.cs" />
+    <Compile Include="Graph_Extension\APInvoiceEntryHHExt.cs" />
+    <Compile Include="Graph_Extension\POReceiptEntryHHExt.cs" />
     <Compile Include="Graph_Release\INDocumentReleaseHHExt.cs" />
     <Compile Include="Graph_Extension\INIssueEntryHHExt.cs" />
     <Compile Include="Graph_Extension\PIGeneratorHHExt.cs" />
@@ -72,6 +75,7 @@
       <Version>5.0.0</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

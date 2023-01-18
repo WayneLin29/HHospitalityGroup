@@ -184,9 +184,17 @@ namespace HH_APICustomization.Grpah
                     else if (dataType == TSDataType.PAY_INS) batchNbr = CreateBatchByOutsIns(preference, groupList, ledger?.LedgerID, false);
                     else if (dataType == TSDataType.PAY_OUTS) batchNbr = CreateBatchByOutsIns(preference, groupList, ledger?.LedgerID, true);
                 }
+                catch (PXOuterException e)
+                {
+                    for (int j = 0; j < e.InnerFields.Length; j++)
+                    {
+                        errorMsg += $"[{e.InnerFields[j]} - {e.InnerMessages[j]}] \r\n";
+                    }
+                    errorMsg = e.Message;
+                }
                 catch (Exception e)
                 {
-                    errorMsg = e.Message;
+                    errorMsg = $"{e.Message} \r\n {errorMsg}";
                 }
                 finally
                 {
@@ -286,7 +294,6 @@ namespace HH_APICustomization.Grpah
                     tranA = entry.GLTranModuleBatNbr.Insert(tranA);
                     tranA.AccountID = item.AccountID;
                     tranA.SubID = item.SubID;
-                    tranA.Qty = item.MenuItemQty;
                     tranA.TranDesc = String.Format("Account Audit - {0}", item.AccountName);
                     tranA.CuryDebitAmt = item.Total;
                     tranA.CuryCreditAmt = 0m;
@@ -342,7 +349,6 @@ namespace HH_APICustomization.Grpah
                     tranA = entry.GLTranModuleBatNbr.Insert(tranA);
                     tranA.AccountID = item.AccountID;
                     tranA.SubID = item.SubID;
-                    tranA.Qty = item.MenuItemQty;
                     tranA.TranDesc = String.Format("Account Remit - {0}", item.Reason);
                     tranA.CuryDebitAmt = isOut ? 0m : item.Amount;
                     tranA.CuryCreditAmt = isOut ? item.Amount : 0m;
