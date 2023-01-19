@@ -58,6 +58,7 @@
     <Compile Include="DAC_Extension\RQRequestLineOwnedHHExt.cs" />
     <Compile Include="Graph_Extension\APPaymentEntryHHExt.cs" />
     <Compile Include="Graph_Extension\APInvoiceEntryHHExt.cs" />
+    <Compile Include="Graph_Extension\EPApprovalProcessHHExt.cs" />
     <Compile Include="Graph_Extension\POReceiptEntryHHExt.cs" />
     <Compile Include="Graph_Release\INDocumentReleaseHHExt.cs" />
     <Compile Include="Graph_Extension\INIssueEntryHHExt.cs" />
