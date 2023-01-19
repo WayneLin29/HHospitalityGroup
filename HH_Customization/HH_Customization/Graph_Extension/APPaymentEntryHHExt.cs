@@ -56,8 +56,10 @@ namespace PX.Objects.AP
             if (Base.Document.Cache.GetStatus(invoice) == PXEntryStatus.Inserted)
             {
                 CashAccount ca = CashAccount.PK.Find(Base, invoice.CashAccountID);
-                if (ca?.BranchID != null)
-                    Base.Document.Cache.SetValue<APInvoice.branchID>(invoice, ca.BranchID);
+                if (ca?.BranchID != null) { 
+                    Base.Document.Cache.SetValueExt<APPayment.branchID>(invoice, ca.BranchID);
+                    Base.Document.UpdateCurrent();
+                }
             }
         }
 

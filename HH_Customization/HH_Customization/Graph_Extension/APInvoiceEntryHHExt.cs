@@ -22,7 +22,6 @@ namespace PX.Objects.AP
         {
             using (PXTransactionScope ts = new PXTransactionScope())
             {
-                LinkBranch();
                 LinkFileByPO();
                 baseMethod();
                 ts.Complete();
@@ -43,6 +42,12 @@ namespace PX.Objects.AP
         #endregion
         #endregion
 
+        #region Event
+        protected virtual void _(Events.RowPersisting<APInvoice> e) {
+            LinkBranch();
+        }
+        #endregion
+
         #region Method
         /// <summary>
         /// APInvoice新增時自動綁定明細第一筆BranchID
@@ -54,8 +59,10 @@ namespace PX.Objects.AP
             if (Base.Document.Cache.GetStatus(invoice) == PXEntryStatus.Inserted)
             {
                 APTran tran = Base.Transactions.Select();
-                if (tran?.BranchID != null)
-                    Base.Document.Cache.SetValue<APInvoice.branchID>(invoice, tran.BranchID);
+                if (tran?.BranchID != null) { 
+                    Base.Document.Cache.SetValueExt<APInvoice.branchID>(invoice, tran.BranchID);
+                    Base.Document.UpdateCurrent();
+                }
             }
         }
 
