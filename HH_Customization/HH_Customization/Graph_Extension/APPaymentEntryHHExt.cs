@@ -69,11 +69,12 @@ namespace PX.Objects.AP
         /// <returns></returns>
         protected virtual WebDialogResult ValidateBranch()
         {
-            APPayment invoice = Base.Document.Current;
-            CashAccount ca = CashAccount.PK.Find(Base, invoice.CashAccountID);
-            if (invoice.BranchID != ca.BranchID)
+            APPayment payment = Base.Document.Current;
+            if (payment.CashAccountID == null) return WebDialogResult.OK;
+            CashAccount ca = CashAccount.PK.Find(Base, payment.CashAccountID);
+            if (payment.BranchID != ca.BranchID)
             {
-                Branch hb = Branch.PK.Find(Base, invoice.BranchID);
+                Branch hb = Branch.PK.Find(Base, payment.BranchID);
                 Branch db = Branch.PK.Find(Base, ca.BranchID);
                 return Base.Document.Ask(
                     $"Document Branch - [{hb?.BranchCD?.Trim()}] differs from bank account branch [{db?.BranchCD?.Trim()}]. This will result in inter-company posting. Are you sure you want to proceed?"

@@ -16,8 +16,7 @@ namespace PX.Objects.EP
             //取得對應的簽核資料
             var refRow = helper.GetEntityRow(e.Row.RefNoteID);
             //取得對應資料之Cache
-            var type = Base.Caches.Keys.ToList().Find(x => x.FullName == e.Row.EntityType);
-            PXCache cache = Base.Caches[type];
+            PXCache cache = Base.Caches[refRow.GetType()];
             //取得BranchID
             e.NewValue = cache.GetValue(refRow, "BranchID");
         }
