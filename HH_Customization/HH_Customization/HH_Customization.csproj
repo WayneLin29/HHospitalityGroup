@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="DAC_Extension\INPIClassHHExt.cs" />
     <Compile Include="DAC_Extension\RQRequestLineOwnedHHExt.cs" />
+    <Compile Include="Descriptor\LUMStringList.cs" />
     <Compile Include="Graph_Extension\APPaymentEntryHHExt.cs" />
     <Compile Include="Graph_Extension\APInvoiceEntryHHExt.cs" />
     <Compile Include="Graph_Extension\EPApprovalProcessHHExt.cs" />
@@ -67,6 +68,13 @@
     <Compile Include="Graph_Extension\RQRequestEntryHHExt.cs" />
     <Compile Include="Graph_Extension\RQRequisitionEntryHHExt.cs" />
     <Compile Include="DAC_Extension\INRegisterHHExt.cs" />
+    <Compile Include="Graph\LUMTourTypeClassMaint.cs" />
+    <Compile Include="DAC\LUMTourCostStructure.cs" />
+    <Compile Include="DAC\LUMTourTypeClass.cs" />
+    <Compile Include="DAC\LUMTourGuset.cs" />
+    <Compile Include="DAC\LUMTourGroup.cs" />
+    <Compile Include="DAC\LUMTourGroupItem.cs" />
+    <Compile Include="Graph\LUMTourGroupEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
