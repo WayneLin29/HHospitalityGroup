@@ -350,8 +350,8 @@ namespace HH_APICustomization.Grpah
                     tranA.AccountID = item.AccountID;
                     tranA.SubID = item.SubID;
                     tranA.TranDesc = String.Format("Account Remit - {0}", item.Reason);
-                    tranA.CuryDebitAmt = isOut ? 0m : item.Amount;
-                    tranA.CuryCreditAmt = isOut ? item.Amount : 0m;
+                    tranA.CuryDebitAmt = isOut ? item.Amount : 0m;
+                    tranA.CuryCreditAmt = isOut ? 0m : item.Amount;
                     tranA = entry.GLTranModuleBatNbr.Update(tranA);
                     #endregion
 
