@@ -3,6 +3,7 @@
   <col name="CompanyID" type="Int" default="Zero" />
   <col name="ReservationID" type="NVarChar(50)" />
   <col name="RoomID" type="NVarChar(20)" />
+  <col name="RoomName" type="NVarChar(200)" nullable="true" />
   <col name="RoomType" type="NVarChar(20)" />
   <col name="RoomTypeName" type="NVarChar(200)" nullable="true" />
   <col name="Checkin" type="DateTime" nullable="true" />

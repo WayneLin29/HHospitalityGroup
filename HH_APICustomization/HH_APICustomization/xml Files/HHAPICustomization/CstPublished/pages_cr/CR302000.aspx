@@ -147,11 +147,12 @@
                         <Template>
                             <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
                             <px:PXDateTimeEdit runat="server" ID="edReviewDate" DataField="ReviewDate"></px:PXDateTimeEdit>
-                            <px:PXSelector runat="server" ID="edReservationID" DataField="ReservationID" FilterByAllFields="true" Width="100px" CommitChanges="True"></px:PXSelector>
-                            <px:PXSelector runat="server" ID="edRoomID" DataField="RoomID" Width="100px" CommitChanges="true"></px:PXSelector>
+                            <px:PXSelector runat="server" ID="edReservationID" DataField="ReservationID" FilterByAllFields="true" Width="180px" CommitChanges="True"></px:PXSelector>
+                            <px:PXSelector runat="server" ID="edRoomID" DataField="RoomID" Width="180px" CommitChanges="true"></px:PXSelector>
                             <px:PXNumberEdit runat="server" ID="edScore" DataField="Score" Width="80px"></px:PXNumberEdit>
                             <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
                             <px:PXTextEdit runat="server" ID="edPropertyID" DataField="LUMCloudBedReservations__PropertyID" Width="100px"></px:PXTextEdit>
+                            <px:PXTextEdit runat="server" ID="edCloudBedBranch" DataField="LUMCloudBedPreference__BranchID" Width="120px"></px:PXTextEdit>
                             <px:PXTextEdit runat="server" ID="edSource" DataField="LUMCloudBedReservations__Source" Width="100px"></px:PXTextEdit>
                             <px:PXDateTimeEdit runat="server" ID="edCheckin" DataField="LUMCloudBedRoomAssignment__Checkin"></px:PXDateTimeEdit>
                             <px:PXDateTimeEdit runat="server" ID="edCheckout" DataField="LUMCloudBedRoomAssignment__Checkout"></px:PXDateTimeEdit>
@@ -159,7 +160,7 @@
                             <px:PXRichTextEdit ID="edReviewText" runat="server" DataField="ReviewText"
                                 Style="width: 100%;height: 120px" AllowAttached="true" AllowSearch="true"
                                 AllowMacros="true" AllowLoadTemplate="false" AllowSourceMode="true">
-                                <AutoSize Enabled="True" MinHeight="216" />
+                                <AutoSize Enabled="True" MinHeight="500" />
                             </px:PXRichTextEdit>
                         </Template>
                     </px:PXFormView>

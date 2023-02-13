@@ -16,6 +16,7 @@ namespace PX.Objects.CR
     {
         public SelectFrom<LUMContactReview>
                .LeftJoin<LUMCloudBedReservations>.On<LUMContactReview.reservationID.IsEqual<LUMCloudBedReservations.reservationID>>
+               .LeftJoin<LUMCloudBedPreference>.On<LUMCloudBedReservations.propertyID.IsEqual<LUMCloudBedPreference.cloudBedPropertyID>>
                .LeftJoin<LUMCloudBedRoomAssignment>.On<LUMCloudBedRoomAssignment.reservationID.IsEqual<LUMContactReview.reservationID>
                     .And<LUMCloudBedRoomAssignment.roomid.IsEqual<LUMContactReview.roomID>>>
                .Where<LUMContactReview.contactID.IsEqual<Contact.contactID.FromCurrent>>

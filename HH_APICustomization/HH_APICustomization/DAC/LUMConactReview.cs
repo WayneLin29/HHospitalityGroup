@@ -38,12 +38,14 @@ namespace HHAPICustomization.DAC
         #endregion
 
         #region RoomID
-        [PXDBString(20, IsUnicode = true,InputMask = "")]
+        [PXDBString(20, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "RoomID")]
         [PXSelector(typeof(Search<LUMCloudBedRoomAssignment.roomid,
                             Where<LUMCloudBedRoomAssignment.reservationID, Equal<Current<LUMContactReview.reservationID>>>>),
+                    typeof(LUMCloudBedRoomAssignment.roomName),
                     typeof(LUMCloudBedRoomAssignment.checkin),
-                    typeof(LUMCloudBedRoomAssignment.checkout))]
+                    typeof(LUMCloudBedRoomAssignment.checkout),
+                    DescriptionField = typeof(LUMCloudBedRoomAssignment.roomName))]
         public virtual string RoomID { get; set; }
         public abstract class roomID : PX.Data.BQL.BqlString.Field<roomID> { }
         #endregion

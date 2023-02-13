@@ -434,6 +434,7 @@ namespace HH_APICustomization.Graph
                             #region Mapping Assignment Field
                             RoomAssignment.ReservationID = currentReservationID;
                             RoomAssignment.Roomid = room?.roomID;
+                            RoomAssignment.RoomName = room?.roomName;
                             RoomAssignment.RoomType = room?.roomTypeID;
                             RoomAssignment.RoomTypeName = room?.roomTypeName;
                             var tempDate = new DateTime();

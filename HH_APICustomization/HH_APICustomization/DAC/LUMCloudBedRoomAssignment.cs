@@ -21,12 +21,20 @@ namespace HH_APICustomization.DAC
         public abstract class roomid : PX.Data.BQL.BqlString.Field<roomid> { }
         #endregion
 
+        #region RoomName
+        [PXDBString(200)]
+        [PXUIField(DisplayName = "Room Name")]
+        public virtual string RoomName { get; set; }
+        public abstract class roomName : PX.Data.BQL.BqlString.Field<roomName> { }
+        #endregion
+
         #region RoomType
         [PXDBString(20,IsKey = true)]
         [PXUIField(DisplayName = "Room Type")]
         public virtual string RoomType { get; set; }
         public abstract class roomType : PX.Data.BQL.BqlString.Field<roomType> { }
         #endregion
+
 
         #region RoomTypeName
         [PXDBString(200, IsUnicode = true, InputMask = "")]
