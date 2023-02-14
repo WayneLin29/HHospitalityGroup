@@ -148,7 +148,7 @@
                             <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
                             <px:PXDateTimeEdit runat="server" ID="edReviewDate" DataField="ReviewDate"></px:PXDateTimeEdit>
                             <px:PXSelector runat="server" ID="edReservationID" DataField="ReservationID" FilterByAllFields="true" Width="180px" CommitChanges="True"></px:PXSelector>
-                            <px:PXSelector runat="server" ID="edRoomID" DataField="RoomID" Width="180px" CommitChanges="true"></px:PXSelector>
+                            <px:PXSelector runat="server" ID="edRoomID" DataField="RoomID" Width="300px" CommitChanges="true"></px:PXSelector>
                             <px:PXNumberEdit runat="server" ID="edScore" DataField="Score" Width="80px"></px:PXNumberEdit>
                             <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
                             <px:PXTextEdit runat="server" ID="edPropertyID" DataField="LUMCloudBedReservations__PropertyID" Width="100px"></px:PXTextEdit>

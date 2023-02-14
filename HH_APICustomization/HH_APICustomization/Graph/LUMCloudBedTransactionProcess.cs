@@ -89,7 +89,7 @@ namespace HH_APICustomization.Graph
         {
             var row = e.Row as ReservationFilter;
             if (!row.ReservationToDate.HasValue)
-                row.ReservationToDate = DateTime.Now;
+                row.ReservationToDate = PX.Common.PXTimeZoneInfo.Now;
         }
 
         #endregion
