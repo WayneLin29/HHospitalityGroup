@@ -1,0 +1,26 @@
+﻿<Sql TableName="LUMCloudBedRoomAssignment" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMCloudBedRoomAssignment">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="ReservationID" type="NVarChar(50)" />
+  <col name="RoomID" type="NVarChar(20)" />
+  <col name="RoomName" type="NVarChar(200)" nullable="true" />
+  <col name="RoomType" type="NVarChar(20)" />
+  <col name="RoomTypeName" type="NVarChar(200)" nullable="true" />
+  <col name="Checkin" type="DateTime" nullable="true" />
+  <col name="Checkout" type="DateTime" nullable="true" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="PK_LUMCloudBedRoomAssignment" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="ReservationID" />
+    <col name="RoomID" />
+    <col name="RoomType" />
+  </index>
+</table>]]></CDATA>
+</Sql>

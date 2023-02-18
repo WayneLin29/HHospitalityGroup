@@ -27,6 +27,10 @@ namespace HH_APICustomization.Graph
 
         public SelectFrom<LUMCloudBedReservations>.View Reservations;
 
+        public SelectFrom<LUMCloudBedRoomAssignment>.View RoomAssignment;
+
+        public SelectFrom<LUMCloudBedRoomRateDetails>.View RoomRateDetails;
+
         public LUMCloudBedTransactionProcess()
         {
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions.isImported>(Transaction.Cache, null, true);
@@ -85,7 +89,7 @@ namespace HH_APICustomization.Graph
         {
             var row = e.Row as ReservationFilter;
             if (!row.ReservationToDate.HasValue)
-                row.ReservationToDate = DateTime.Now;
+                row.ReservationToDate = PX.Common.PXTimeZoneInfo.Now;
         }
 
         #endregion
@@ -377,32 +381,101 @@ namespace HH_APICustomization.Graph
             var reservationOldData = baseGraph.Reservations.Select().RowCast<LUMCloudBedReservations>();
             using (PXTransactionScope sc = new PXTransactionScope())
             {
-                foreach (var row in reservationNewData)
+                try
                 {
-                    var existsRow = reservationOldData.FirstOrDefault(x => x.PropertyID == row.propertyID && x.ReservationID == row.reservationID);
-                    var reservation = existsRow ?? baseGraph.Reservations.Cache.CreateInstance() as LUMCloudBedReservations;
-                    #region Mapping Field
-                    reservation.PropertyID = row.propertyID;
-                    reservation.ReservationID = row.reservationID;
-                    reservation.DateCreated = DateTime.Parse(row.dateCreated);
-                    reservation.DateModified = DateTime.Parse(row.dateModified);
-                    reservation.Source = row.sourceName;
-                    reservation.ThirdPartyIdentifier = row.thirdPartyIdentifier;
-                    reservation.Status = row.status;
-                    var tempDate = new DateTime();
-                    if (DateTime.TryParse(row.startDate, out tempDate))
-                        reservation.StartDate = DateTime.Parse(row.startDate);
-                    if (DateTime.TryParse(row.endDate, out tempDate))
-                        reservation.EndDate = DateTime.Parse(row.endDate);
-                    reservation.Balance = (decimal?)row.balance;
+                    #region Reservation
+                    foreach (var row in reservationNewData)
+                    {
+                        var existsRow = reservationOldData.FirstOrDefault(x => x.PropertyID == row.propertyID && x.ReservationID == row.reservationID);
+                        var reservation = existsRow ?? baseGraph.Reservations.Cache.CreateInstance() as LUMCloudBedReservations;
+                        #region Mapping Field
+                        reservation.PropertyID = row.propertyID;
+                        reservation.ReservationID = row.reservationID;
+                        reservation.DateCreated = DateTime.Parse(row.dateCreated);
+                        reservation.DateModified = DateTime.Parse(row.dateModified);
+                        reservation.Source = row.sourceName;
+                        reservation.ThirdPartyIdentifier = row.thirdPartyIdentifier;
+                        reservation.Status = row.status;
+                        var tempDate = new DateTime();
+                        if (DateTime.TryParse(row.startDate, out tempDate))
+                            reservation.StartDate = DateTime.Parse(row.startDate);
+                        if (DateTime.TryParse(row.endDate, out tempDate))
+                            reservation.EndDate = DateTime.Parse(row.endDate);
+                        reservation.Balance = (decimal?)row.balance;
+                        #endregion
+                        if (existsRow != null)
+                            baseGraph.Reservations.Cache.Update(reservation);
+                        else
+                            baseGraph.Reservations.Cache.Insert(reservation);
+                    }
                     #endregion
-                    if (existsRow != null)
-                        baseGraph.Reservations.Cache.Update(reservation);
-                    else
-                        baseGraph.Reservations.Cache.Insert(reservation);
+
+                    #region Reservation Rate
+                    var rateDetails = CloudBedHelper.GetReservationWithRate(reservationNewData.Select(x => x.propertyID).Distinct().ToList(), filter.ReservationFromDate.Value, filter.ReservationToDate.Value);
+                    if (rateDetails == null)
+                    {
+                        sc.Dispose();
+                        throw new PXException("Get Reservation Rate Detail failed!!");
+                    }
+                    baseGraph.RoomAssignment.Cache.Delete(baseGraph.RoomAssignment.Select().RowCast<LUMCloudBedRoomAssignment>());
+                    var oldRoomAssignment = baseGraph.RoomAssignment.Select().RowCast<LUMCloudBedRoomAssignment>();
+                    var oldRoomRate = baseGraph.RoomRateDetails.Select().RowCast<LUMCloudBedRoomRateDetails>();
+                    foreach (var row in rateDetails)
+                    {
+                        var currentReservationID = row?.reservationID;
+                        foreach (var room in row.rooms)
+                        {
+                            if (string.IsNullOrEmpty(room?.roomID))
+                                continue;
+                            #region Room Assignment
+                            var existsRoomAssignment = oldRoomAssignment.FirstOrDefault(x => x.ReservationID == currentReservationID && x.Roomid == room?.roomID && x.RoomType == room?.roomTypeID);
+                            baseGraph.RoomAssignment.Cache.Delete(existsRoomAssignment);
+                            var RoomAssignment = baseGraph.RoomAssignment.Cache.CreateInstance() as LUMCloudBedRoomAssignment;
+                            #region Mapping Assignment Field
+                            RoomAssignment.ReservationID = currentReservationID;
+                            RoomAssignment.Roomid = room?.roomID;
+                            RoomAssignment.RoomName = room?.roomName;
+                            RoomAssignment.RoomType = room?.roomTypeID;
+                            RoomAssignment.RoomTypeName = room?.roomTypeName;
+                            var tempDate = new DateTime();
+                            if (DateTime.TryParse(room?.roomCheckIn, out tempDate))
+                                RoomAssignment.Checkin = DateTime.Parse(room.roomCheckIn);
+                            if (DateTime.TryParse(room?.roomCheckOut, out tempDate))
+                                RoomAssignment.Checkout = DateTime.Parse(room.roomCheckOut);
+                            #endregion
+                            baseGraph.RoomAssignment.Cache.Insert(RoomAssignment);
+                            #endregion
+
+                            #region Room Rate
+                            foreach (var rateRow in room.detailedRoomRates)
+                            {
+                                var existsRoomRate = oldRoomRate.FirstOrDefault(x => x.ReservationID == currentReservationID && x.Roomid == room?.roomID && x.RateDate.Value.Date == DateTime.Parse(rateRow.Key).Date);
+                                baseGraph.RoomRateDetails.Cache.Delete(existsRoomRate);
+                                var roomRate = baseGraph.RoomRateDetails.Cache.CreateInstance() as LUMCloudBedRoomRateDetails;
+                                #region Mapping Rate Field
+                                roomRate.ReservationID = currentReservationID;
+                                roomRate.Roomid = room.roomID;
+                                roomRate.RateDate = DateTime.Parse(rateRow.Key);
+                                roomRate.Rate = Decimal.Parse(rateRow.Value.ToString());
+                                #endregion
+                                baseGraph.RoomRateDetails.Cache.Insert(roomRate);
+                            }
+                            #endregion
+                        }
+                    }
+                    #endregion
+
+                    baseGraph.Save.Press();
+                    sc.Complete();
                 }
-                baseGraph.Save.Press();
-                sc.Complete();
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    sc.Dispose();
+                }
             }
         }
 

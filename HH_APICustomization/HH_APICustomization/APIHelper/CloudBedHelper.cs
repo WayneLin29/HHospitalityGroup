@@ -148,6 +148,45 @@ namespace HH_APICustomization.APIHelper
             }
         }
 
+        /// <summary> Get Reservation With Rate Details </summary>
+        public static List<ReservationRateDetail> GetReservationWithRate(List<string> propertyidList, DateTime fromDate, DateTime toDate)
+        {
+            var accessToken = UpdateAccessToken();
+            try
+            {
+                List<ReservationRateDetail> result = new List<ReservationRateDetail>();
+                foreach (var propertyID in propertyidList)
+                {
+                    int pageNumber = 1;
+                    var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservationsWithRateDetails?propertyID={propertyID}&modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                    HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
+                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                        throw new PXException(response.Content.ReadAsStringAsync().Result);
+                    var reservationEntity = JsonConvert.DeserializeObject<CloudBed_ReservationWithRateDetailEntity>(response.Content.ReadAsStringAsync().Result);
+                    result.AddRange(reservationEntity.data);
+                    int total = reservationEntity.total;
+                    // 重複抓取資料直到全抓
+                    if (reservationEntity.success && reservationEntity.count != total)
+                    {
+                        int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
+                        for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
+                        {
+                            url = $"https://hotels.cloudbeds.com/api/v1.1/getReservationsWithRateDetails?propertyID={propertyID}&modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                            response = SendAPIRequest(url, accessToken, HttpMethod.Get);
+                            reservationEntity = JsonConvert.DeserializeObject<CloudBed_ReservationWithRateDetailEntity>(response.Content.ReadAsStringAsync().Result);
+                            result.AddRange(reservationEntity.data);
+                        }
+                    }
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                PXTrace.WriteError(ex.Message);
+                return null;
+            }
+        }
+
         public static HttpResponseMessage SendAPIRequest(string url, string accessToken, HttpMethod httpMethod)
         {
             using (HttpClient client = new HttpClient())
