@@ -1,5 +1,8 @@
 using System;
 using PX.Data;
+using PX.Data.ReferentialIntegrity.Attributes;
+using PX.Objects.CS;
+using PX.Objects.GL;
 
 namespace HH_Customization.DAC
 {
@@ -7,30 +10,63 @@ namespace HH_Customization.DAC
     [PXCacheName("LUMTourGroup")]
     public class LUMTourGroup : IBqlTable
     {
+        #region AutoNumber
+        public const string NUMBERING_ID = "TOURGROUP";
+        public class numberingID : PX.Data.BQL.BqlString.Constant<numberingID> { public numberingID() : base(NUMBERING_ID) { } }
+        #endregion
+
+        #region Key
+        public class PK : PrimaryKeyOf<LUMTourGroup>.By<tourGroupNbr>
+        {
+            public static LUMTourGroup Find(PXGraph graph, string tourGroupNbr) => FindBy(graph, tourGroupNbr);
+        }
+        #endregion
+
         #region TourGroupNbr
         [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Tour Group Nbr")]
+        [AutoNumber(typeof(Search<Numbering.numberingID,
+            Where<Numbering.numberingID, Equal<numberingID>>>), typeof(AccessInfo.businessDate))]
+        [PXSelector(typeof(Search<tourGroupNbr>),
+                typeof(tourGroupNbr),
+                typeof(description),
+                typeof(branchID),
+                typeof(tourTypeClassID),
+                typeof(dateFrom),
+                typeof(dateTo)
+            )]
         public virtual string TourGroupNbr { get; set; }
         public abstract class tourGroupNbr : PX.Data.BQL.BqlString.Field<tourGroupNbr> { }
         #endregion
 
         #region TourTypeClassID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Tour Type Class ID")]
+        [PXUIField(DisplayName = "Tour Type Class ID",Required = true)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXSelector(typeof(Search<LUMTourTypeClass.typeClassID,
+            Where<LUMTourTypeClass.branchID, Equal<Current<branchID>>>>),
+            typeof(LUMTourTypeClass.typeClassCD),
+            typeof(LUMTourTypeClass.description),
+            typeof(LUMTourTypeClass.branchID),
+            typeof(LUMTourTypeClass.curyID),
+            SubstituteKey = typeof(LUMTourTypeClass.typeClassCD),
+            DescriptionField = typeof(LUMTourTypeClass.description)
+            )]
         public virtual int? TourTypeClassID { get; set; }
         public abstract class tourTypeClassID : PX.Data.BQL.BqlInt.Field<tourTypeClassID> { }
         #endregion
 
         #region BranchID
-        [PXDBInt()]
-        [PXUIField(DisplayName = "Branch ID")]
+        [Branch()]
+        [PXDefault(typeof(Current<AccessInfo.branchID>), PersistingCheck = PXPersistingCheck.NullOrBlank)]
         public virtual int? BranchID { get; set; }
         public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
         #endregion
 
         #region DateFrom
         [PXDBDate()]
-        [PXUIField(DisplayName = "Date From")]
+        [PXUIField(DisplayName = "Date From", Required = true)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         public virtual DateTime? DateFrom { get; set; }
         public abstract class dateFrom : PX.Data.BQL.BqlDateTime.Field<dateFrom> { }
         #endregion
@@ -104,6 +140,52 @@ namespace HH_Customization.DAC
         [PXDBLastModifiedDateTime()]
         public virtual DateTime? LastModifiedDateTime { get; set; }
         public abstract class lastModifiedDateTime : PX.Data.BQL.BqlDateTime.Field<lastModifiedDateTime> { }
+        #endregion
+
+        #region Unbound
+
+        #region RevenueTWD
+        [PXDecimal]
+        [PXUIField(DisplayName = "Revenue (TWD)",IsReadOnly = true)]
+        public virtual decimal? RevenueTWD { get; set; }
+        public abstract class revenueTWD : PX.Data.BQL.BqlDecimal.Field<revenueTWD> { }
+        #endregion
+
+        #region RevenuePHP
+        [PXDecimal]
+        [PXUIField(DisplayName = "Revenue (PHP)", IsReadOnly = true)]
+        public virtual decimal? RevenuePHP { get; set; }
+        public abstract class revenuePHP : PX.Data.BQL.BqlDecimal.Field<revenuePHP> { }
+        #endregion
+
+        #region GrossProfitTWD
+        [PXDecimal]
+        [PXUIField(DisplayName = "Gross Profit (TWD)", IsReadOnly = true)]
+        public virtual decimal? GrossProfitTWD { get; set; }
+        public abstract class grossProfitTWD : PX.Data.BQL.BqlDecimal.Field<grossProfitTWD> { }
+        #endregion
+
+        #region GrossProfitPHP
+        [PXDecimal]
+        [PXUIField(DisplayName = "Gross Profit (PHP)", IsReadOnly = true)]
+        public virtual decimal? GrossProfitPHP { get; set; }
+        public abstract class grossProfitPHP : PX.Data.BQL.BqlDecimal.Field<grossProfitPHP> { }
+        #endregion
+
+        #region CostPHP
+        [PXDecimal]
+        [PXUIField(DisplayName = "Cost (PHP)", IsReadOnly = true)]
+        public virtual decimal? CostPHP { get; set; }
+        public abstract class costPHP : PX.Data.BQL.BqlDecimal.Field<costPHP> { }
+        #endregion
+
+        #region GrossProfitPer
+        [PXDecimal]
+        [PXUIField(DisplayName = "Gross Profit %", IsReadOnly = true)]
+        public virtual decimal? GrossProfitPer { get; set; }
+        public abstract class grossProfitPer : PX.Data.BQL.BqlDecimal.Field<grossProfitPer> { }
+        #endregion
+
         #endregion
     }
 }

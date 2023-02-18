@@ -1,5 +1,9 @@
 using System;
 using PX.Data;
+using PX.Data.ReferentialIntegrity.Attributes;
+using PX.Objects.IN;
+using PX.Objects.GL;
+using PX.Objects.CM.Extensions;
 
 namespace HH_Customization.DAC
 {
@@ -7,9 +11,18 @@ namespace HH_Customization.DAC
     [PXCacheName("LUMTourGroupItem")]
     public class LUMTourGroupItem : IBqlTable
     {
+        #region Key
+        public class PK : PrimaryKeyOf<LUMTourGroupItem>.By<tourGroupNbr, tourGroupItemID>
+        {
+            public static LUMTourGroupItem Find(PXGraph graph, string tourGroupNbr, int? tourGroupItemID) => FindBy(graph, tourGroupNbr, tourGroupItemID);
+        }
+        #endregion
+
         #region TourGroupNbr
         [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Tour Group Nbr")]
+        [PXDBDefault(typeof(LUMTourGroup.tourGroupNbr))]
+        [PXParent(typeof(Select<LUMTourGroup, Where<LUMTourGroup.tourGroupNbr, Equal<Current<tourGroupNbr>>>>))]
         public virtual string TourGroupNbr { get; set; }
         public abstract class tourGroupNbr : PX.Data.BQL.BqlString.Field<tourGroupNbr> { }
         #endregion
@@ -22,7 +35,14 @@ namespace HH_Customization.DAC
 
         #region InventoryID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Inventory ID")]
+        [PXUIField(DisplayName = "Inventory ID", Required = true)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXSelector(typeof(Search<InventoryItem.inventoryID>),
+                typeof(InventoryItem.inventoryCD),
+                typeof(InventoryItem.descr),
+                SubstituteKey = typeof(InventoryItem.inventoryCD),
+                DescriptionField = typeof(InventoryItem.descr)
+            )]
         public virtual int? InventoryID { get; set; }
         public abstract class inventoryID : PX.Data.BQL.BqlInt.Field<inventoryID> { }
         #endregion
@@ -37,6 +57,10 @@ namespace HH_Customization.DAC
         #region Description
         [PXDBString(255, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Description")]
+        [PXDefault(typeof(
+            Search<InventoryItem.descr,
+                Where<InventoryItem.inventoryID,Equal<Current<inventoryID>>>>)
+            ,PersistingCheck = PXPersistingCheck.Nothing)]
         public virtual string Description { get; set; }
         public abstract class description : PX.Data.BQL.BqlString.Field<description> { }
         #endregion
@@ -49,36 +73,68 @@ namespace HH_Customization.DAC
         #endregion
 
         #region CuryID
-        [PXDBString(5, IsFixed = true, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "CuryID")]
+        [PXDBString(5, IsUnicode = true, InputMask = ">LLLLL")]
+        [PXUIField(DisplayName = "Currency", Required = true)]
+        [PXDefault(typeof(Search<LUMTourTypeClass.curyID,
+            Where<LUMTourTypeClass.typeClassID, Equal<Current<LUMTourGroup.tourTypeClassID>>>>),
+            PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXSelector(typeof(Currency.curyID))]
         public virtual string CuryID { get; set; }
         public abstract class curyID : PX.Data.BQL.BqlString.Field<curyID> { }
         #endregion
 
         #region AccountID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Account ID")]
+        [PXUIField(DisplayName = "Account", Required = true)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXSelector(typeof(Search<Account.accountID, Where<Account.active, Equal<True>>>),
+                typeof(Account.accountCD),
+                typeof(Account.description),
+                SubstituteKey = typeof(Account.accountCD),
+                DescriptionField = typeof(Account.description)
+            )]
         public virtual int? AccountID { get; set; }
         public abstract class accountID : PX.Data.BQL.BqlInt.Field<accountID> { }
         #endregion
 
         #region SubID
         [PXDBInt()]
-        [PXUIField(DisplayName = "SubID")]
+        [PXUIField(DisplayName = "Sub Account", Required = true)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXSelector(typeof(Search<Sub.subID, Where<Sub.active, Equal<True>>>),
+                typeof(Sub.subCD),
+                typeof(Sub.description),
+                SubstituteKey = typeof(Sub.subCD),
+                DescriptionField = typeof(Sub.description)
+            )]
         public virtual int? SubID { get; set; }
         public abstract class subID : PX.Data.BQL.BqlInt.Field<subID> { }
         #endregion
 
         #region PayAccountID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Pay Account ID")]
+        [PXUIField(DisplayName = "Pay Account", Required = true)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXSelector(typeof(Search<Account.accountID, Where<Account.active, Equal<True>>>),
+                typeof(Account.accountCD),
+                typeof(Account.description),
+                SubstituteKey = typeof(Account.accountCD),
+                DescriptionField = typeof(Account.description)
+            )]
         public virtual int? PayAccountID { get; set; }
         public abstract class payAccountID : PX.Data.BQL.BqlInt.Field<payAccountID> { }
         #endregion
 
         #region PaySubID
         [PXDBInt()]
-        [PXUIField(DisplayName = "PaySubID")]
+        [PXUIField(DisplayName = "Pay Sub Account", Required = true)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXSelector(typeof(Search<Sub.subID, Where<Sub.active, Equal<True>>>),
+                typeof(Sub.subCD),
+                typeof(Sub.description),
+                SubstituteKey = typeof(Sub.subCD),
+                DescriptionField = typeof(Sub.description)
+            )]
         public virtual int? PaySubID { get; set; }
         public abstract class paySubID : PX.Data.BQL.BqlInt.Field<paySubID> { }
         #endregion

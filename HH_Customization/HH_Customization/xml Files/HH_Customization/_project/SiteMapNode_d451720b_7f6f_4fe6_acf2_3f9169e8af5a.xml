@@ -25,8 +25,21 @@
         </layout>
         <data>
             <SiteMap>
-                <row Position="21520" Title="LM Tour Group Entry" Url="~/Pages/LM/LM301000.aspx" ScreenID="LM301000" NodeID="d451720b-7f6f-4fe6-acf2-3f9169e8af5a" ParentID="00000000-0000-0000-0000-000000000000" />
+                <row Position="21520" Title="LM Tour Group Entry" Url="~/Pages/LM/LM301000.aspx" ScreenID="LM301000" NodeID="d451720b-7f6f-4fe6-acf2-3f9169e8af5a" ParentID="00000000-0000-0000-0000-000000000000">
+                    <MUIScreen IsPortal="0" WorkspaceID="e2c3849a-6280-41df-81f3-552b91adfae5" Order="55" SubcategoryID="38d13a6e-3076-42fb-9fce-62fa33897da6" />
+                </row>
             </SiteMap>
+            <MUIWorkspace>
+                <row IsPortal="0" WorkspaceID="e2c3849a-6280-41df-81f3-552b91adfae5" Order="216" Title="Sales Orders" Icon="pen_frame" AreaID="62cfd5dc-8eb9-4e92-bbcd-e0a99eb5e5df" ScreenID="WSOM0000" IsSystem="0">
+                    <MUIFavoriteWorkspace IsPortal="0" Username="" IsFavorite="1" />
+                </row>
+            </MUIWorkspace>
+            <MUISubcategory>
+                <row IsPortal="0" SubcategoryID="38d13a6e-3076-42fb-9fce-62fa33897da6" Order="64" Name="Transactions" Icon="" IsSystem="0" />
+            </MUISubcategory>
+            <MUIArea>
+                <row IsPortal="0" AreaID="62cfd5dc-8eb9-4e92-bbcd-e0a99eb5e5df" Order="20" Name="Operations" />
+            </MUIArea>
         </data>
     </data-set>
 </SiteMapNode>

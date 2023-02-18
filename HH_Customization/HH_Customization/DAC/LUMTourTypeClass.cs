@@ -1,4 +1,5 @@
 using System;
+using HH_Customization.Graph;
 using PX.Data;
 using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.CM.Extensions;
@@ -8,6 +9,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourTypeClass")]
+    [PXPrimaryGraph(typeof(LUMTourTypeClassMaint))]
     public class LUMTourTypeClass : IBqlTable
     {
         #region Key

@@ -22,7 +22,7 @@ namespace HH_Customization.DAC
         [PXDBInt()]
         [PXUIField(DisplayName = "Type Class ID")]
         [PXDBDefault(typeof(LUMTourTypeClass.typeClassID))]
-        [PXParent(typeof(Select<LUMTourTypeClass, Where<LUMTourTypeClass.typeClassID, Equal<Current<LUMTourTypeClass.typeClassID>>>>))]
+        [PXParent(typeof(Select<LUMTourTypeClass, Where<LUMTourTypeClass.typeClassID, Equal<Current<typeClassID>>>>))]
         public virtual int? TypeClassID { get; set; }
         public abstract class typeClassID : PX.Data.BQL.BqlInt.Field<typeClassID> { }
         #endregion
