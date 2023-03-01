@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PX.Objects.GL;
 
 namespace HH_APICustomization.Graph
 {
@@ -34,10 +35,13 @@ namespace HH_APICustomization.Graph
     [Serializable]
     public class PayrollFilter : IBqlTable
     {
-        [PXString]
+        [PXInt]
         [PXUIField(DisplayName = "Branch")]
-        public virtual string Branch { get; set; }
-        public abstract class branch : PX.Data.BQL.BqlString.Field<branch> { }
+        [PXSelector(typeof(Search<Branch.branchID, Where<Branch.active.IsEqual<True>>>),
+                    typeof(Branch.branchCD),
+                    SubstituteKey = typeof(Branch.branchCD))]
+        public virtual int? Branch { get; set; }
+        public abstract class branch : PX.Data.BQL.BqlInt.Field<branch> { }
 
         [PXDate]
         [PXUIField(DisplayName = "DateFrom")]

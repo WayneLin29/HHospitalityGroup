@@ -1,7 +1,7 @@
 ﻿<Sql TableName="LUMPayrollHour" TableSchemaXml="#CDATA">
     <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMPayrollHour">
   <col name="CompanyID" type="Int" default="Zero" />
-  <col name="Branch" type="NVarChar(50)" />
+  <col name="Branch" type="Int" />
   <col name="WorkingDate" type="DateTime" />
   <col name="EmployeeID" type="Int" />
   <col name="EarningType" type="NVarChar(15)" />

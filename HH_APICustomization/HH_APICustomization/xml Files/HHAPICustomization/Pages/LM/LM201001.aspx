@@ -11,7 +11,7 @@
     </px:PXDataSource>
     <px:PXFormView ID="form" runat="server" DataSourceID="ds" DataMember="Filter" Width="100%" Height="100px" AllowAutoHide="false">
         <Template>
-            <px:PXTextEdit runat="server" ID="edBranchFilter" DataField="Branch" Width="180" CommitChanges="true"></px:PXTextEdit>
+            <px:PXSelector runat="server" ID="edBranchFilter" DataField="Branch" Width="180" CommitChanges="true"></px:PXSelector>
             <px:PXDateTimeEdit runat="server" ID="edDateFrom" DataField="DateFrom" Width="180px" CommitChanges="true"></px:PXDateTimeEdit>
             <px:PXDateTimeEdit runat="server" ID="edDateTo" DataField="DateTo" Width="180px" CommitChanges="true"></px:PXDateTimeEdit>
         </Template>
@@ -28,7 +28,7 @@
                                 <Columns>
                                     <px:PXGridColumn DataField="Branch" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="WorkingDate" Width="120"></px:PXGridColumn>
-                                    <px:PXGridColumn DataField="EmployeeID" Width="150"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="EmployeeID" Width="150" DisplayMode="Hint"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="EarningType" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Hour" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Remark" Width="300"></px:PXGridColumn>
@@ -59,7 +59,7 @@
                                 <Columns>
                                     <px:PXGridColumn DataField="Branch" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="AdjustmentDate" Width="120"></px:PXGridColumn>
-                                    <px:PXGridColumn DataField="EmployeeID" Width="150"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="EmployeeID" Width="150" DisplayMode="Hint"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="AdjustmentType" Width="150"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Amount" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Remark" Width="180"></px:PXGridColumn>

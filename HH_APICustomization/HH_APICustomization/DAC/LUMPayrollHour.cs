@@ -3,6 +3,7 @@ using PX.Data;
 using PX.Data.BQL.Fluent;
 using PX.Objects.CR;
 using PX.Objects.EP;
+using PX.Objects.GL;
 
 namespace HHAPICustomization.DAC
 {
@@ -11,10 +12,13 @@ namespace HHAPICustomization.DAC
     public class LUMPayrollHour : IBqlTable
     {
         #region Branch
-        [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]
+        [PXDBInt(IsKey = true)]
         [PXUIField(DisplayName = "Branch")]
-        public virtual string Branch { get; set; }
-        public abstract class branch : PX.Data.BQL.BqlString.Field<branch> { }
+        [PXSelector(typeof(Search<Branch.branchID, Where<Branch.active.IsEqual<True>>>),
+                    typeof(Branch.branchCD),
+                    SubstituteKey = typeof(Branch.branchCD))]
+        public virtual int? Branch { get; set; }
+        public abstract class branch : PX.Data.BQL.BqlInt.Field<branch> { }
         #endregion
 
         #region WorkingDate
