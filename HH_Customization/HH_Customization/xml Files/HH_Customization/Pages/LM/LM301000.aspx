@@ -59,11 +59,13 @@
 									<px:PXGridColumn CommitChanges="True" DataField="BaseRate" Width="100" ></px:PXGridColumn>
 									<px:PXGridColumn CommitChanges="True" DataField="AdjAmt" Width="100" ></px:PXGridColumn>
 									<px:PXGridColumn CommitChanges="True" DataField="Total" Width="100" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="NoteText" Width="280" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="Remark" Width="280" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="CuryID" Width="70" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="SOOrderNbr" Width="140" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="SOOrderType" Width="70" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="SOLineNbr" Width="70" ></px:PXGridColumn></Columns></px:PXGridLevel></Levels>
+									<px:PXGridColumn DataField="SOLineNbr" Width="70" ></px:PXGridColumn></Columns>
+								<RowTemplate>
+									<px:PXSelector runat="server" ID="CstPXSelector31" DataField="SOOrderNbr" AllowEdit="True" /></RowTemplate></px:PXGridLevel></Levels>
 						<AutoSize MinHeight="100" Enabled="True" Container="Window" ></AutoSize>
 						<Mode InitNewRow="True" InplaceInsert="True" ></Mode>
 						

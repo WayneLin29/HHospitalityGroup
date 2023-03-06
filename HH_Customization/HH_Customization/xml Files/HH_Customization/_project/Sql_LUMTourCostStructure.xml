@@ -3,7 +3,7 @@
   <col name="CompanyID" type="Int" default="Zero" />
   <col name="TypeClassID" type="Int" />
   <col name="CostStructureID" type="Int" identity="true" />
-  <col name="Level" type="NChar(3)" nullable="true" />
+  <col name="Level" type="NVarChar(3)" nullable="true" />
   <col name="InventoryID" type="Int" nullable="true" />
   <col name="ExtCost" type="Decimal(16,4)" nullable="true" />
   <col name="AccountID" type="Int" nullable="true" />

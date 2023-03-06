@@ -57,6 +57,7 @@ namespace HH_Customization.DAC
         #region Pax
         [PXDBInt()]
         [PXUIField(DisplayName = "Pax", IsReadOnly = true)]
+        [PXDefault(0)]
         public virtual int? Pax { get; set; }
         public abstract class pax : PX.Data.BQL.BqlInt.Field<pax> { }
         #endregion
@@ -64,6 +65,11 @@ namespace HH_Customization.DAC
         #region UnitPrice
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Unit Price")]
+        [PXDefault(
+            typeof(Search<InventoryItemCurySettings.basePrice,
+                Where<InventoryItemCurySettings.inventoryID, Equal<Current<inventoryID>>,
+                    And<InventoryItemCurySettings.curyID, Equal<Current<AccessInfo.baseCuryID>>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         public virtual Decimal? UnitPrice { get; set; }
         public abstract class unitPrice : PX.Data.BQL.BqlDecimal.Field<unitPrice> { }
         #endregion
@@ -71,19 +77,21 @@ namespace HH_Customization.DAC
         #region ExtCost
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Ext Cost")]
+        [PXDefault(TypeCode.Decimal, "0.0")]
         public virtual Decimal? ExtCost { get; set; }
         public abstract class extCost : PX.Data.BQL.BqlDecimal.Field<extCost> { }
         #endregion
 
         #region InventoryID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Inventory ID")]
+        [PXUIField(DisplayName = "Inventory ID", Required = true)]
         [PXSelector(typeof(Search<InventoryItem.inventoryID>),
             typeof(InventoryItem.inventoryCD),
             typeof(InventoryItem.descr),
             SubstituteKey = typeof(InventoryItem.inventoryCD),
             DescriptionField = typeof(InventoryItem.descr)
             )]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         public virtual int? InventoryID { get; set; }
         public abstract class inventoryID : PX.Data.BQL.BqlInt.Field<inventoryID> { }
         #endregion
@@ -91,7 +99,10 @@ namespace HH_Customization.DAC
         #region AccountID
         [PXDBInt()]
         [PXUIField(DisplayName = "Account", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(
+            typeof(Search<InventoryItem.cOGSAcctID,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Account.accountID, Where<Account.active, Equal<True>>>),
                 typeof(Account.accountCD),
                 typeof(Account.description),
@@ -105,7 +116,10 @@ namespace HH_Customization.DAC
         #region SubID
         [PXDBInt()]
         [PXUIField(DisplayName = "Sub Account", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(
+            typeof(Search<InventoryItem.cOGSSubID,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Sub.subID, Where<Sub.active, Equal<True>>>),
                 typeof(Sub.subCD),
                 typeof(Sub.description),

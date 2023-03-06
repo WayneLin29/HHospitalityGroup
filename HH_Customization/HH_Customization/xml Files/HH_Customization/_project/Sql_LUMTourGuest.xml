@@ -10,7 +10,7 @@
   <col name="BaseRate" type="Decimal(16,4)" nullable="true" />
   <col name="AdjAmt" type="Decimal(16,4)" nullable="true" />
   <col name="Total" type="Decimal(16,4)" nullable="true" />
-  <col name="NoteText" type="NVarChar(255)" nullable="true" />
+  <col name="Remark" type="NVarChar(255)" nullable="true" />
   <col name="CuryID" type="NChar(5)" nullable="true" />
   <col name="SOOrderNbr" type="NVarChar(15)" nullable="true" />
   <col name="SOOrderType" type="Char(2)" nullable="true" />

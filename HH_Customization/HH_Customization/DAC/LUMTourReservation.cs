@@ -50,14 +50,16 @@ namespace HH_Customization.DAC
 
         #region ReservationID
         [PXDBString(50, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Reservation ID")]
+        [PXUIField(DisplayName = "Reservation ID",Required = true)]
+        [PXDefault(PersistingCheck =PXPersistingCheck.NullOrBlank)]
         public virtual string ReservationID { get; set; }
         public abstract class reservationID : PX.Data.BQL.BqlString.Field<reservationID> { }
         #endregion
 
         #region InventoryID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Inventory ID")]
+        [PXUIField(DisplayName = "Inventory ID",Required = true)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<InventoryItem.inventoryID>),
             typeof(InventoryItem.inventoryCD),
             typeof(InventoryItem.descr),
@@ -71,7 +73,10 @@ namespace HH_Customization.DAC
         #region AccountID
         [PXDBInt()]
         [PXUIField(DisplayName = "Account", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(
+            typeof(Search<InventoryItem.cOGSAcctID,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Account.accountID, Where<Account.active, Equal<True>>>),
                 typeof(Account.accountCD),
                 typeof(Account.description),
@@ -85,7 +90,10 @@ namespace HH_Customization.DAC
         #region SubID
         [PXDBInt()]
         [PXUIField(DisplayName = "Sub Account", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(
+            typeof(Search<InventoryItem.cOGSSubID,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Sub.subID, Where<Sub.active, Equal<True>>>),
                 typeof(Sub.subCD),
                 typeof(Sub.description),
@@ -120,6 +128,7 @@ namespace HH_Customization.DAC
         #region ExtCost
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Ext Cost")]
+        [PXDefault(TypeCode.Decimal, "0.0")]
         public virtual Decimal? ExtCost { get; set; }
         public abstract class extCost : PX.Data.BQL.BqlDecimal.Field<extCost> { }
         #endregion
@@ -197,10 +206,9 @@ namespace HH_Customization.DAC
         #region unbound
         #region ExtCost(CB)
         [PXDecimal()]
-        [PXUIField(DisplayName = "Ext Cost(CB)")]
-        [PXUnboundDefault(0)]
-        [PXDBScalar(typeof(Search4<LUMTourRoomReservations.extCost
-            , Where<LUMTourRoomReservations.reservationID, Equal<reservationID>>
+        [PXUIField(DisplayName = "Ext Cost(CB)",IsReadOnly = true)]
+        [PXUnboundDefault(typeof(Search4<LUMTourRoomReservations.extCost
+            , Where<LUMTourRoomReservations.reservationID, Equal<Current<reservationID>>>
             , Aggregate<Sum<LUMTourRoomReservations.extCost>>>))]
         public virtual Decimal? ExtCostCB { get; set; }
         public abstract class extCostCB : PX.Data.BQL.BqlDecimal.Field<extCostCB> { }

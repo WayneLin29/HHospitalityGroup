@@ -21,10 +21,6 @@ namespace PX.Objects.SO
         }
         #endregion
 
-        #region Var
-        protected bool isFlight = false;
-        #endregion
-
         #region View
         public PXSelect<LUMTourFlight,
             Where<LUMTourFlight.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
@@ -42,31 +38,11 @@ namespace PX.Objects.SO
             And<LUMTourItem.sOOrderType, Equal<Current<SOOrder.orderType>>>>> Items;
 
         #region Dialog
+        public PXFilter<DailogControl> DialogCtrl;
+
         public PXSelect<LUMTourGuestLinkDetail,
             Where<LUMTourGuestLinkDetail.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
                 And<LUMTourGuestLinkDetail.sOOrderType, Equal<Current<SOOrder.orderType>>>>> GuestLinks;
-        public IEnumerable guestLinks()
-        {
-            var current = Base.Document.Current;
-            var datas = PXSelect<LUMTourGuestLinkDetail,
-            Where<LUMTourGuestLinkDetail.sOOrderNbr, Equal<Required<SOOrder.orderNbr>>,
-                And<LUMTourGuestLinkDetail.sOOrderType, Equal<Required<SOOrder.orderType>>>>>
-                .Select(Base, current.OrderNbr, current.OrderType);
-
-            int? linkID = isFlight ? Flights.Current.FligthID : Items.Current.ItemID;
-            string linkType = isFlight ? LUMTourLinkType.FLIGHT : LUMTourLinkType.ITEM;
-
-
-            foreach (LUMTourGuestLinkDetail data in datas)
-            {
-                var link = Links.Select().RowCast<LUMTourGuestLink>()
-                    .ToList()
-                    .Find(d => d.GuestID == data.TourGuestID && d.LinkID == linkID && d.LinkType == linkType);
-                data.Selected = link != null;
-                yield return data;
-            }
-        }
-
 
         public PXSelect<LUMTourGuestLinkItem,
             Where<LUMTourGuestLinkItem.linkType, Equal<LUMTourLinkType.item>,
@@ -102,15 +78,38 @@ namespace PX.Objects.SO
 
         #endregion
 
+        #region Event
+        protected void _(Events.RowDeleting<SOLine> e)
+        {
+            if (e.Row == null) return;
+            //find Guest
+            LUMTourGuest guest = GetGuestBySO(e.Row.OrderNbr, e.Row.OrderType, e.Row.LineNbr);
+            if (guest != null)
+                throw new PXSetPropertyException($"Please check Tour Group(LM201000):{guest.TourGroupNbr}", PXErrorLevel.RowError);
+        }
+
+        protected void _(Events.FieldUpdated<LUMTourReservation, LUMTourReservation.reservationID> e)
+        {
+            if (e.Row == null) return;
+            e.Cache.SetDefaultExt<LUMTourReservation.extCostCB>(e.Row);
+        }
+
+        #endregion
+
         #region Method
         public virtual void ShowLinkEdit(bool isFlight, int? linkID)
         {
-            this.isFlight = isFlight;
+            if (DialogCtrl.Current.IsShow != true)
+            {
+                SetGuestLinksSelect(isFlight, linkID);
+                DialogCtrl.Current.IsShow = true;
+            }
             if (GuestLinks.AskExt() == WebDialogResult.OK)
             {
                 EditLink(isFlight, linkID);
             }
             GuestLinks.Cache.Clear();
+            DialogCtrl.Current.IsShow = false;
         }
 
         public virtual void EditLink(bool isFlight, int? linkID)
@@ -128,7 +127,8 @@ namespace PX.Objects.SO
                 Flights.Current.Pax = selected.Count;
                 Flights.UpdateCurrent();
             }
-            else {
+            else
+            {
                 Items.Current.Pax = selected.Count;
                 Items.UpdateCurrent();
             }
@@ -158,10 +158,10 @@ namespace PX.Objects.SO
             var linkType = isFlight ? LUMTourLinkType.FLIGHT : LUMTourLinkType.ITEM;
             foreach (LUMTourGuestLinkDetail detail in GuestLinks.Select())
             {
-                GuestLinks.Cache.SetDefaultExt<LUMTourGuestLinkDetail.selected>(detail);
-                //var link = Links.Select().RowCast<LUMTourGuestLink>().ToList().Find(d => d.LinkID == linkID && d.LinkType == linkType);
-                //detail.Selected = link != null;
-                //GuestLinks.Update(detail);
+                var link = Links.Select().RowCast<LUMTourGuestLink>().ToList()
+                    .Find(d => d.GuestID == detail.TourGuestID && d.LinkID == linkID && d.LinkType == linkType);
+                detail.Selected = link != null;
+                GuestLinks.Update(detail);
             }
         }
 
@@ -175,9 +175,28 @@ namespace PX.Objects.SO
                 And<LUMTourGuestLink.linkID, Equal<Required<LUMTourGuestLink.linkID>>>>>
                 .Select(Base, linkType, linkID);
         }
+
+        public PXResultset<LUMTourGuest> GetGuestBySO(string orderNbr, string orderType, int? lineNbr)
+        {
+            return PXSelect<LUMTourGuest,
+                Where<LUMTourGuest.sOOrderNbr, Equal<Required<LUMTourGuest.sOOrderNbr>>,
+                And<LUMTourGuest.sOOrderType, Equal<Required<LUMTourGuest.sOOrderType>>,
+                And<LUMTourGuest.sOLineNbr, Equal<Required<LUMTourGuest.sOLineNbr>>>>>>
+                .Select(Base, orderNbr, orderType, lineNbr);
+        }
         #endregion
 
         #region Table
+        [PXHidden]
+        public class DailogControl : IBqlTable
+        {
+            #region IsShow
+            [PXBool()]
+            [PXUnboundDefault(false)]
+            public virtual bool? IsShow { get; set; }
+            public abstract class isShow : PX.Data.BQL.BqlBool.Field<isShow> { }
+            #endregion
+        }
 
         #region LUMTourGuestLinkDetail
         [PXCacheName("Tour Guest Link Detail")]
@@ -192,6 +211,7 @@ namespace PX.Objects.SO
             #region Selected
             [PXBool()]
             [PXUIField(DisplayName = "Selected")]
+            [PXUnboundDefault]
             public virtual bool? Selected { get; set; }
             public abstract class selected : PX.Data.BQL.BqlBool.Field<selected> { }
             #endregion
@@ -221,26 +241,6 @@ namespace PX.Objects.SO
             public abstract class tourGuestID : PX.Data.BQL.BqlInt.Field<tourGuestID> { }
             #endregion
 
-            //#region GuestID
-            //[PXDBInt(BqlField = typeof(LUMTourGuestLink.guestID))]
-            //public virtual int? GuestID { get; set; }
-            //public abstract class guestID : PX.Data.BQL.BqlInt.Field<guestID> { }
-            //#endregion
-
-            //#region LinkID
-            //[PXDBInt(BqlField = typeof(LUMTourGuestLink.linkID))]
-            //public virtual int? LinkID { get; set; }
-            //public abstract class linkID : PX.Data.BQL.BqlInt.Field<linkID> { }
-            //#endregion
-
-            //#region LinkType
-            //[PXDBString(BqlField = typeof(LUMTourGuestLink.linkType), IsKey = true, IsUnicode = true, InputMask = "")]
-            //[PXUIField(DisplayName = "Link Type")]
-            //[LUMTourLinkType]
-            //public virtual string LinkType { get; set; }
-            //public abstract class linkType : PX.Data.BQL.BqlString.Field<linkType> { }
-            //#endregion
-
             #region NameCH
             [PXDBString(BqlField = typeof(LUMTourGuest.nameCH), IsUnicode = true)]
             [PXUIField(DisplayName = "Chinese Name", IsReadOnly = true)]
@@ -265,12 +265,10 @@ namespace PX.Objects.SO
         Select2<LUMCloudBedReservations,
             InnerJoin<LUMCloudBedRoomRateDetails,
                 On<LUMCloudBedReservations.reservationID, Equal<LUMCloudBedRoomRateDetails.reservationID>>,
-            InnerJoin<LUMCloudBedPreference,
-                On<LUMCloudBedReservations.propertyID, Equal<LUMCloudBedPreference.cloudBedPropertyID>>,
             LeftJoin<LUMCloudBedRoomAssignment,
                 On<LUMCloudBedRoomRateDetails.reservationID, Equal<LUMCloudBedRoomAssignment.reservationID>,
-                And<LUMCloudBedRoomRateDetails.roomid, Equal<LUMCloudBedRoomAssignment.roomid>>>>>>
-        >), Persistent = false)]
+                And<LUMCloudBedRoomRateDetails.roomid, Equal<LUMCloudBedRoomAssignment.roomid>>>>>
+        >))]
         public class LUMTourRoomReservations : IBqlTable
         {
             #region Key
