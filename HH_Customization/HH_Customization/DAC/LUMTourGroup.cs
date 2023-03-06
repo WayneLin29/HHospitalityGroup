@@ -147,6 +147,7 @@ namespace HH_Customization.DAC
         #region RevenueTWD
         [PXDecimal]
         [PXUIField(DisplayName = "Revenue (TWD)",IsReadOnly = true)]
+        [PXUnboundDefault()]
         public virtual decimal? RevenueTWD { get; set; }
         public abstract class revenueTWD : PX.Data.BQL.BqlDecimal.Field<revenueTWD> { }
         #endregion
@@ -154,6 +155,7 @@ namespace HH_Customization.DAC
         #region RevenuePHP
         [PXDecimal]
         [PXUIField(DisplayName = "Revenue (PHP)", IsReadOnly = true)]
+        [PXUnboundDefault()]
         public virtual decimal? RevenuePHP { get; set; }
         public abstract class revenuePHP : PX.Data.BQL.BqlDecimal.Field<revenuePHP> { }
         #endregion
@@ -161,6 +163,7 @@ namespace HH_Customization.DAC
         #region GrossProfitTWD
         [PXDecimal]
         [PXUIField(DisplayName = "Gross Profit (TWD)", IsReadOnly = true)]
+        [PXUnboundDefault()]
         public virtual decimal? GrossProfitTWD { get; set; }
         public abstract class grossProfitTWD : PX.Data.BQL.BqlDecimal.Field<grossProfitTWD> { }
         #endregion
@@ -168,6 +171,7 @@ namespace HH_Customization.DAC
         #region GrossProfitPHP
         [PXDecimal]
         [PXUIField(DisplayName = "Gross Profit (PHP)", IsReadOnly = true)]
+        [PXUnboundDefault()]
         public virtual decimal? GrossProfitPHP { get; set; }
         public abstract class grossProfitPHP : PX.Data.BQL.BqlDecimal.Field<grossProfitPHP> { }
         #endregion
@@ -175,6 +179,7 @@ namespace HH_Customization.DAC
         #region CostPHP
         [PXDecimal]
         [PXUIField(DisplayName = "Cost (PHP)", IsReadOnly = true)]
+        [PXUnboundDefault()]
         public virtual decimal? CostPHP { get; set; }
         public abstract class costPHP : PX.Data.BQL.BqlDecimal.Field<costPHP> { }
         #endregion
@@ -182,6 +187,7 @@ namespace HH_Customization.DAC
         #region GrossProfitPer
         [PXDecimal]
         [PXUIField(DisplayName = "Gross Profit %", IsReadOnly = true)]
+        [PXUnboundDefault()]
         public virtual decimal? GrossProfitPer { get; set; }
         public abstract class grossProfitPer : PX.Data.BQL.BqlDecimal.Field<grossProfitPer> { }
         #endregion

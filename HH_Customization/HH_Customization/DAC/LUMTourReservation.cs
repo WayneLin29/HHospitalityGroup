@@ -1,87 +1,71 @@
 using System;
 using PX.Data;
 using PX.Data.ReferentialIntegrity.Attributes;
+using PX.Objects.SO;
 using PX.Objects.IN;
 using PX.Objects.GL;
-using PX.Objects.CM.Extensions;
+using static PX.Objects.SO.SOOrderEntryHHExt;
 using PX.Objects.AP;
 
 namespace HH_Customization.DAC
 {
     [Serializable]
-    [PXCacheName("LUMTourGroupItem")]
-    public class LUMTourGroupItem : IBqlTable
+    [PXCacheName("LUMTourReservation")]
+    public class LUMTourReservation : IBqlTable
     {
         #region Key
-        public class PK : PrimaryKeyOf<LUMTourGroupItem>.By<tourGroupNbr, tourGroupItemID>
+        public class PK : PrimaryKeyOf<LUMTourReservation>.By<tourReservationID, sOOrderNbr, sOOrderType>
         {
-            public static LUMTourGroupItem Find(PXGraph graph, string tourGroupNbr, int? tourGroupItemID) => FindBy(graph, tourGroupNbr, tourGroupItemID);
+            public static LUMTourReservation Find(PXGraph graph, int? tourReservationID, string sOOrderNbr, string sOOrderType) => FindBy(graph, tourReservationID, sOOrderNbr, sOOrderType);
+        }
+        public static class FK
+        {
+            public class Order : SOOrder.PK.ForeignKeyOf<SOLine>.By<sOOrderType, sOOrderNbr> { }
         }
         #endregion
 
-        #region TourGroupNbr
-        [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Tour Group Nbr")]
-        [PXDBDefault(typeof(LUMTourGroup.tourGroupNbr))]
-        [PXParent(typeof(Select<LUMTourGroup, Where<LUMTourGroup.tourGroupNbr, Equal<Current<tourGroupNbr>>>>))]
-        public virtual string TourGroupNbr { get; set; }
-        public abstract class tourGroupNbr : PX.Data.BQL.BqlString.Field<tourGroupNbr> { }
+        #region TourReservationID
+        [PXDBIdentity(IsKey = true)]
+        public virtual int? TourReservationID { get; set; }
+        public abstract class tourReservationID : PX.Data.BQL.BqlInt.Field<tourReservationID> { }
         #endregion
 
-        #region TourGroupItemID
-        [PXDBIdentity(IsKey = true)]
-        public virtual int? TourGroupItemID { get; set; }
-        public abstract class tourGroupItemID : PX.Data.BQL.BqlInt.Field<tourGroupItemID> { }
+        #region SOOrderNbr
+        [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "SOOrder Nbr")]
+        [PXDBDefault(typeof(SOOrder.orderNbr), DefaultForUpdate = false)]
+        [PXParent(typeof(FK.Order))]
+        public virtual string SOOrderNbr { get; set; }
+        public abstract class sOOrderNbr : PX.Data.BQL.BqlString.Field<sOOrderNbr> { }
+        #endregion
+
+        #region SOOrderType
+        [PXDBString(5, IsKey = true, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "SOOrder Type")]
+        [PXDefault(typeof(SOOrder.orderType))]
+
+        public virtual string SOOrderType { get; set; }
+        public abstract class sOOrderType : PX.Data.BQL.BqlString.Field<sOOrderType> { }
+        #endregion
+
+        #region ReservationID
+        [PXDBString(50, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "Reservation ID")]
+        public virtual string ReservationID { get; set; }
+        public abstract class reservationID : PX.Data.BQL.BqlString.Field<reservationID> { }
         #endregion
 
         #region InventoryID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Inventory ID", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXUIField(DisplayName = "Inventory ID")]
         [PXSelector(typeof(Search<InventoryItem.inventoryID>),
-                typeof(InventoryItem.inventoryCD),
-                typeof(InventoryItem.descr),
-                SubstituteKey = typeof(InventoryItem.inventoryCD),
-                DescriptionField = typeof(InventoryItem.descr)
+            typeof(InventoryItem.inventoryCD),
+            typeof(InventoryItem.descr),
+            SubstituteKey = typeof(InventoryItem.inventoryCD),
+            DescriptionField = typeof(InventoryItem.descr)
             )]
         public virtual int? InventoryID { get; set; }
         public abstract class inventoryID : PX.Data.BQL.BqlInt.Field<inventoryID> { }
-        #endregion
-
-        #region Date
-        [PXDBDate()]
-        [PXUIField(DisplayName = "Date")]
-        public virtual DateTime? Date { get; set; }
-        public abstract class date : PX.Data.BQL.BqlDateTime.Field<date> { }
-        #endregion
-
-        #region Description
-        [PXDBString(255, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Description")]
-        [PXDefault(typeof(
-            Search<InventoryItem.descr,
-                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
-            , PersistingCheck = PXPersistingCheck.Nothing)]
-        public virtual string Description { get; set; }
-        public abstract class description : PX.Data.BQL.BqlString.Field<description> { }
-        #endregion
-
-        #region ExtCost
-        [PXDBDecimal()]
-        [PXUIField(DisplayName = "Ext Cost")]
-        public virtual Decimal? ExtCost { get; set; }
-        public abstract class extCost : PX.Data.BQL.BqlDecimal.Field<extCost> { }
-        #endregion
-
-        #region CuryID
-        [PXDBString(5, IsUnicode = true, InputMask = ">LLLLL")]
-        [PXUIField(DisplayName = "Currency", Required = true)]
-        //[PXDefault(typeof(Search<LUMTourTypeClass.curyID,
-        //    Where<LUMTourTypeClass.typeClassID, Equal<Current<LUMTourGroup.tourTypeClassID>>>>),
-        //    PersistingCheck = PXPersistingCheck.NullOrBlank)]
-        [PXSelector(typeof(Currency.curyID))]
-        public virtual string CuryID { get; set; }
-        public abstract class curyID : PX.Data.BQL.BqlString.Field<curyID> { }
         #endregion
 
         #region AccountID
@@ -124,6 +108,20 @@ namespace HH_Customization.DAC
             )]
         public virtual int? VendorID { get; set; }
         public abstract class vendorID : PX.Data.BQL.BqlInt.Field<vendorID> { }
+        #endregion
+
+        #region Remark
+        [PXDBString(255, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "Remark")]
+        public virtual string Remark { get; set; }
+        public abstract class remark : PX.Data.BQL.BqlString.Field<remark> { }
+        #endregion
+
+        #region ExtCost
+        [PXDBDecimal()]
+        [PXUIField(DisplayName = "Ext Cost")]
+        public virtual Decimal? ExtCost { get; set; }
+        public abstract class extCost : PX.Data.BQL.BqlDecimal.Field<extCost> { }
         #endregion
 
         #region APRefNbr
@@ -194,6 +192,19 @@ namespace HH_Customization.DAC
         [PXNote()]
         public virtual Guid? NoteID { get; set; }
         public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
+        #endregion
+
+        #region unbound
+        #region ExtCost(CB)
+        [PXDecimal()]
+        [PXUIField(DisplayName = "Ext Cost(CB)")]
+        [PXUnboundDefault(0)]
+        [PXDBScalar(typeof(Search4<LUMTourRoomReservations.extCost
+            , Where<LUMTourRoomReservations.reservationID, Equal<reservationID>>
+            , Aggregate<Sum<LUMTourRoomReservations.extCost>>>))]
+        public virtual Decimal? ExtCostCB { get; set; }
+        public abstract class extCostCB : PX.Data.BQL.BqlDecimal.Field<extCostCB> { }
+        #endregion
         #endregion
     }
 }

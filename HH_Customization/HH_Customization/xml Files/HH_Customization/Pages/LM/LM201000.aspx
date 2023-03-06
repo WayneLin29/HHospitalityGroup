@@ -32,13 +32,12 @@
 		<Levels>
 			<px:PXGridLevel DataMember="CostStructures">
 			    <Columns>
-				<px:PXGridColumn DataField="Level" Width="70" />
-				<px:PXGridColumn DataField="InventoryID" Width="70" />
-				<px:PXGridColumn DataField="ExtCost" Width="100" />
-				<px:PXGridColumn DataField="AccountID" Width="120" />
-				<px:PXGridColumn DataField="SubID" Width="140" />
-				<px:PXGridColumn DataField="PayAccountID" Width="120" />
-				<px:PXGridColumn DataField="PaySubID" Width="140" ></px:PXGridColumn></Columns>
+				<px:PXGridColumn DataField="Level" Width="70" ></px:PXGridColumn>
+				<px:PXGridColumn DataField="InventoryID" Width="70" ></px:PXGridColumn>
+				<px:PXGridColumn DataField="ExtCost" Width="100" ></px:PXGridColumn>
+				<px:PXGridColumn DataField="AccountID" Width="120" ></px:PXGridColumn>
+				<px:PXGridColumn DataField="SubID" Width="140" ></px:PXGridColumn>
+				<px:PXGridColumn DataField="VendorID" Width="140" /></Columns>
 			</px:PXGridLevel>
 		</Levels>
 		<AutoSize Container="Window" Enabled="True" MinHeight="150" />

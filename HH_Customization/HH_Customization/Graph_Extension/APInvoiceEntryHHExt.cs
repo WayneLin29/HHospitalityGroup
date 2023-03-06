@@ -46,6 +46,7 @@ namespace PX.Objects.AP
         protected virtual void _(Events.RowPersisting<APInvoice> e) {
             LinkBranch();
         }
+
         #endregion
 
         #region Method

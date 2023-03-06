@@ -49,7 +49,7 @@
 				<Template>
 					<px:PXGrid Width="100%" SkinID="Details" AllowPaging="True" DataSourceID="ds" SyncPosition="True" runat="server" ID="CstPXGrid25">
 						<Levels>
-							<px:PXGridLevel DataMember="Gusets" >
+							<px:PXGridLevel DataMember="Guests" >
 								<Columns>
 									<px:PXGridColumn DataField="SubGroupID" Width="140" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="NameCH" Width="140" ></px:PXGridColumn>
@@ -85,8 +85,9 @@
 									<px:PXGridColumn DataField="CuryID" Width="70" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="AccountID" Width="120" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="SubID" Width="140" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="PayAccountID_description" Width="220" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="PaySubID" Width="140" ></px:PXGridColumn></Columns></px:PXGridLevel></Levels>
+									<px:PXGridColumn DataField="VendorID" Width="140" />
+									<px:PXGridColumn DataField="APRefNbr" Width="140" />
+									<px:PXGridColumn DataField="APLineNbr" Width="70" /></Columns></px:PXGridLevel></Levels>
 						<AutoSize MinHeight="100" Container="Parent" Enabled="True" ></AutoSize>
 						<AutoSize Container="Parent" ></AutoSize>
 						<Mode InitNewRow="True" ></Mode></px:PXGrid></Template>

@@ -30,8 +30,8 @@ namespace HH_Customization.DAC
         #endregion
 
         #region TypeClassCD
-        [PXDBString(25, IsUnicode = true, InputMask = "",IsKey = true)]
-        [PXUIField(DisplayName = "Type CD",Required = true)]
+        [PXDBString(25, IsUnicode = true, InputMask = "", IsKey = true)]
+        [PXUIField(DisplayName = "Type CD", Required = true)]
         [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<LUMTourTypeClass.typeClassCD>),
             typeof(LUMTourTypeClass.typeClassCD),
@@ -62,7 +62,7 @@ namespace HH_Customization.DAC
         #region CuryID
         [PXDBString(5, IsUnicode = true, InputMask = ">LLLLL")]
         [PXUIField(DisplayName = "Currency", Required = true)]
-        [PXDefault(typeof(Current<AccessInfo.baseCuryID>),PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(typeof(Current<AccessInfo.baseCuryID>), PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Currency.curyID))]
 
         public virtual string CuryID { get; set; }

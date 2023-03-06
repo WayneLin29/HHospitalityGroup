@@ -7,16 +7,15 @@ using PX.Objects.SO;
 namespace HH_Customization.DAC
 {
     [Serializable]
-    [PXCacheName("LUMTourGuset")]
-    public class LUMTourGuset : IBqlTable
+    [PXCacheName("LUMTourGuest")]
+    public class LUMTourGuest : IBqlTable
     {
         #region Key
-        public class PK : PrimaryKeyOf<LUMTourGuset>.By<tourGroupNbr, tourGusetID>
+        public class PK : PrimaryKeyOf<LUMTourGuest>.By<tourGroupNbr, tourGuestID>
         {
-            public static LUMTourGuset Find(PXGraph graph, string tourGroupNbr, int? tourGusetID) => FindBy(graph, tourGroupNbr, tourGusetID);
+            public static LUMTourGuest Find(PXGraph graph, string tourGroupNbr, int? tourGuestID) => FindBy(graph, tourGroupNbr, tourGuestID);
         }
         #endregion
-
 
         #region TourGroupNbr
         [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
@@ -27,10 +26,10 @@ namespace HH_Customization.DAC
         public abstract class tourGroupNbr : PX.Data.BQL.BqlString.Field<tourGroupNbr> { }
         #endregion
 
-        #region TourGusetID
+        #region TourGuestID
         [PXDBIdentity(IsKey = true)]
-        public virtual int? TourGusetID { get; set; }
-        public abstract class tourGusetID : PX.Data.BQL.BqlInt.Field<tourGusetID> { }
+        public virtual int? TourGuestID { get; set; }
+        public abstract class tourGuestID : PX.Data.BQL.BqlInt.Field<tourGuestID> { }
         #endregion
 
         #region SubGroupID
@@ -81,25 +80,25 @@ namespace HH_Customization.DAC
 
         #region Total
         [PXDBDecimal()]
-        [PXUIField(DisplayName = "Total",IsReadOnly = true)]
+        [PXUIField(DisplayName = "Total", IsReadOnly = true)]
         [PXFormula(typeof(Sub<baseRate, adjAmt>))]
         public virtual Decimal? Total { get; set; }
         public abstract class total : PX.Data.BQL.BqlDecimal.Field<total> { }
         #endregion
 
-        #region NoteText
+        #region Remark
         [PXDBString(255, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Notes")]
-        public virtual string NoteText { get; set; }
-        public abstract class noteText : PX.Data.BQL.BqlString.Field<noteText> { }
+        [PXUIField(DisplayName = "Remark")]
+        public virtual string Remark { get; set; }
+        public abstract class remark : PX.Data.BQL.BqlString.Field<remark> { }
         #endregion
 
         #region CuryID
         [PXDBString(5, IsUnicode = true, InputMask = ">LLLLL")]
         [PXUIField(DisplayName = "Currency", Required = true)]
-        [PXDefault(typeof(Search<LUMTourTypeClass.curyID,
-            Where<LUMTourTypeClass.typeClassID, Equal<Current<LUMTourGroup.tourTypeClassID>>>>),
-            PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        //[PXDefault(typeof(Search<LUMTourTypeClass.curyID,
+        //    Where<LUMTourTypeClass.typeClassID, Equal<Current<LUMTourGroup.tourTypeClassID>>>>),
+        //    PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Currency.curyID))]
         public virtual string CuryID { get; set; }
         public abstract class curyID : PX.Data.BQL.BqlString.Field<curyID> { }
@@ -108,18 +107,17 @@ namespace HH_Customization.DAC
         #region SOOrderNbr
         [PXDBString(15, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "SOOrder Nbr", IsReadOnly = true)]
-        [PXSelector(typeof(SOOrder.orderType))]
+        [PXSelector(typeof(SOOrder.orderNbr))]
         public virtual string SOOrderNbr { get; set; }
         public abstract class sOOrderNbr : PX.Data.BQL.BqlString.Field<sOOrderNbr> { }
         #endregion
 
         #region SOOrderType
-        [PXDBString(2, IsFixed = true, InputMask = "")]
+        [PXDBString(2, IsFixed = true, InputMask = ">LL")]
         [PXUIField(DisplayName = "SOOrder Type", IsReadOnly = true)]
         [PXSelector(typeof(Search<SOOrderType.orderType>),
             SubstituteKey = typeof(SOOrderType.descr)
             )]
-
         public virtual string SOOrderType { get; set; }
         public abstract class sOOrderType : PX.Data.BQL.BqlString.Field<sOOrderType> { }
         #endregion
@@ -192,6 +190,7 @@ namespace HH_Customization.DAC
         #region Deposit
         [PXDecimal()]
         [PXUIField(DisplayName = "Deposit", IsReadOnly = true)]
+        [PXUnboundDefault()]
         public virtual Decimal? Deposit { get; set; }
         public abstract class deposit : PX.Data.BQL.BqlDecimal.Field<deposit> { }
         #endregion
@@ -199,6 +198,7 @@ namespace HH_Customization.DAC
         #region FinalPayAmount
         [PXDecimal()]
         [PXUIField(DisplayName = "FinalPayAmount", IsReadOnly = true)]
+        [PXUnboundDefault()]
         public virtual Decimal? FinalPayAmount { get; set; }
         public abstract class finalPayAmount : PX.Data.BQL.BqlDecimal.Field<finalPayAmount> { }
         #endregion

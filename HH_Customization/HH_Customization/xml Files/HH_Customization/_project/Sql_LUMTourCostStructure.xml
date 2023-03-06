@@ -8,8 +8,7 @@
   <col name="ExtCost" type="Decimal(16,4)" nullable="true" />
   <col name="AccountID" type="Int" nullable="true" />
   <col name="SubID" type="Int" nullable="true" />
-  <col name="PayAccountID" type="Int" nullable="true" />
-  <col name="PaySubID" type="Int" nullable="true" />
+  <col name="VendorID" type="Int" nullable="true" />
   <col name="tstamp" type="Timestamp" />
   <col name="CreatedByID" type="UniqueIdentifier" />
   <col name="CreatedByScreenID" type="Char(8)" />

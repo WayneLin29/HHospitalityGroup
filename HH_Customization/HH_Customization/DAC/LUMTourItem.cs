@@ -1,68 +1,91 @@
 using System;
 using PX.Data;
-using PX.Objects.IN;
-using PX.Objects.GL;
-using static HH_Customization.Descriptor.LUMStringList;
 using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.AP;
+using PX.Objects.GL;
+using PX.Objects.IN;
+using PX.Objects.SO;
 
 namespace HH_Customization.DAC
 {
     [Serializable]
-    [PXCacheName("LUMTourCostStructure")]
-    public class LUMTourCostStructure : IBqlTable
+    [PXCacheName("LUMTourItem")]
+    public class LUMTourItem : IBqlTable
     {
         #region Key
-        public class PK : PrimaryKeyOf<LUMTourCostStructure>.By<costStructureID>
+        public class PK : PrimaryKeyOf<LUMTourItem>.By<itemID, sOOrderNbr, sOOrderType>
         {
-            public static LUMTourCostStructure Find(PXGraph graph, int? costStructureID) => FindBy(graph, costStructureID);
+            public static LUMTourItem Find(PXGraph graph, int? itemID, string sOOrderNbr, string sOOrderType) => FindBy(graph, itemID, sOOrderNbr, sOOrderType);
+        }
+        public static class FK
+        {
+            public class Order : SOOrder.PK.ForeignKeyOf<SOLine>.By<sOOrderType, sOOrderNbr> { }
         }
         #endregion
 
-        #region TypeClassID
-        [PXDBInt()]
-        [PXUIField(DisplayName = "Type Class ID")]
-        [PXDBDefault(typeof(LUMTourTypeClass.typeClassID))]
-        [PXParent(typeof(Select<LUMTourTypeClass, Where<LUMTourTypeClass.typeClassID, Equal<Current<typeClassID>>>>))]
-        public virtual int? TypeClassID { get; set; }
-        public abstract class typeClassID : PX.Data.BQL.BqlInt.Field<typeClassID> { }
+        #region SOOrderNbr
+        [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "SOOrder Nbr")]
+        [PXDBDefault(typeof(SOOrder.orderNbr), DefaultForUpdate = false)]
+        [PXParent(typeof(FK.Order))]
+        public virtual string SOOrderNbr { get; set; }
+        public abstract class sOOrderNbr : PX.Data.BQL.BqlString.Field<sOOrderNbr> { }
         #endregion
 
-        #region CostStructureID
+        #region SOOrderType
+        [PXDBString(5, IsKey = true, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "SOOrder Type")]
+        [PXDefault(typeof(SOOrder.orderType))]
+
+        public virtual string SOOrderType { get; set; }
+        public abstract class sOOrderType : PX.Data.BQL.BqlString.Field<sOOrderType> { }
+        #endregion
+
+        #region ItemID
         [PXDBIdentity(IsKey = true)]
-        public virtual int? CostStructureID { get; set; }
-        public abstract class costStructureID : PX.Data.BQL.BqlInt.Field<costStructureID> { }
+        public virtual int? ItemID { get; set; }
+        public abstract class itemID : PX.Data.BQL.BqlInt.Field<itemID> { }
         #endregion
 
-        #region Level
-        [PXDBString(3, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Level")]
-        [LUMTourLevel]
-        [PXDefault(LUMTourLevel.GROUP)]
-        public virtual string Level { get; set; }
-        public abstract class level : PX.Data.BQL.BqlString.Field<level> { }
+        #region Date
+        [PXDBDate()]
+        [PXUIField(DisplayName = "Date")]
+        public virtual DateTime? Date { get; set; }
+        public abstract class date : PX.Data.BQL.BqlDateTime.Field<date> { }
         #endregion
 
-        #region InventoryID
+        #region Pax
         [PXDBInt()]
-        [PXUIField(DisplayName = "Inventory ID",Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
-        [PXSelector(typeof(Search<InventoryItem.inventoryID>),
-                typeof(InventoryItem.inventoryCD),
-                typeof(InventoryItem.descr),
-                SubstituteKey = typeof(InventoryItem.inventoryCD),
-                DescriptionField = typeof(InventoryItem.descr)
-            )]
-        public virtual int? InventoryID { get; set; }
-        public abstract class inventoryID : PX.Data.BQL.BqlInt.Field<inventoryID> { }
+        [PXUIField(DisplayName = "Pax", IsReadOnly = true)]
+        public virtual int? Pax { get; set; }
+        public abstract class pax : PX.Data.BQL.BqlInt.Field<pax> { }
+        #endregion
+
+        #region UnitPrice
+        [PXDBDecimal()]
+        [PXUIField(DisplayName = "Unit Price")]
+        public virtual Decimal? UnitPrice { get; set; }
+        public abstract class unitPrice : PX.Data.BQL.BqlDecimal.Field<unitPrice> { }
         #endregion
 
         #region ExtCost
         [PXDBDecimal()]
-        [PXUIField(DisplayName = "Ext Cost", Required = true)]
-        [PXDefault(0,PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXUIField(DisplayName = "Ext Cost")]
         public virtual Decimal? ExtCost { get; set; }
         public abstract class extCost : PX.Data.BQL.BqlDecimal.Field<extCost> { }
+        #endregion
+
+        #region InventoryID
+        [PXDBInt()]
+        [PXUIField(DisplayName = "Inventory ID")]
+        [PXSelector(typeof(Search<InventoryItem.inventoryID>),
+            typeof(InventoryItem.inventoryCD),
+            typeof(InventoryItem.descr),
+            SubstituteKey = typeof(InventoryItem.inventoryCD),
+            DescriptionField = typeof(InventoryItem.descr)
+            )]
+        public virtual int? InventoryID { get; set; }
+        public abstract class inventoryID : PX.Data.BQL.BqlInt.Field<inventoryID> { }
         #endregion
 
         #region AccountID
@@ -107,6 +130,27 @@ namespace HH_Customization.DAC
         public abstract class vendorID : PX.Data.BQL.BqlInt.Field<vendorID> { }
         #endregion
 
+        #region APRefNbr
+        [PXDBString(15)]
+        [PXUIField(DisplayName = "AP Bill", IsReadOnly = true)]
+        public virtual string APRefNbr { get; set; }
+        public abstract class aPRefNbr : PX.Data.BQL.BqlString.Field<aPRefNbr> { }
+        #endregion
+
+        #region APDocType
+        [PXDBString(5)]
+        [PXUIField(DisplayName = "AP Doc Type", IsReadOnly = true)]
+        public virtual string APDocType { get; set; }
+        public abstract class aPDocType : PX.Data.BQL.BqlString.Field<aPDocType> { }
+        #endregion
+
+        #region APLineNbr
+        [PXDBInt()]
+        [PXUIField(DisplayName = "Line Nbr", IsReadOnly = true)]
+        public virtual int? APLineNbr { get; set; }
+        public abstract class aPLineNbr : PX.Data.BQL.BqlInt.Field<aPLineNbr> { }
+        #endregion
+
         #region Tstamp
         [PXDBTimestamp()]
         [PXUIField(DisplayName = "Tstamp")]
@@ -148,6 +192,12 @@ namespace HH_Customization.DAC
         [PXDBLastModifiedDateTime()]
         public virtual DateTime? LastModifiedDateTime { get; set; }
         public abstract class lastModifiedDateTime : PX.Data.BQL.BqlDateTime.Field<lastModifiedDateTime> { }
+        #endregion
+
+        #region NoteID
+        [PXNote()]
+        public virtual Guid? NoteID { get; set; }
+        public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
         #endregion
     }
 }
