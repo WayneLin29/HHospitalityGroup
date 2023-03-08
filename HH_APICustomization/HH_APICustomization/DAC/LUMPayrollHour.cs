@@ -12,11 +12,8 @@ namespace HHAPICustomization.DAC
     public class LUMPayrollHour : IBqlTable
     {
         #region Branch
-        [PXDBInt(IsKey = true)]
         [PXUIField(DisplayName = "Branch")]
-        [PXSelector(typeof(Search<Branch.branchID, Where<Branch.active.IsEqual<True>>>),
-                    typeof(Branch.branchCD),
-                    SubstituteKey = typeof(Branch.branchCD))]
+        [Branch(typeof(AccessInfo.branchID), IsDetail = false, TabOrder = 0, IsKey = true)]
         public virtual int? Branch { get; set; }
         public abstract class branch : PX.Data.BQL.BqlInt.Field<branch> { }
         #endregion

@@ -37,9 +37,7 @@ namespace HH_APICustomization.Graph
     {
         [PXInt]
         [PXUIField(DisplayName = "Branch")]
-        [PXSelector(typeof(Search<Branch.branchID, Where<Branch.active.IsEqual<True>>>),
-                    typeof(Branch.branchCD),
-                    SubstituteKey = typeof(Branch.branchCD))]
+        [Branch(useDefaulting: false)]
         public virtual int? Branch { get; set; }
         public abstract class branch : PX.Data.BQL.BqlInt.Field<branch> { }
 
