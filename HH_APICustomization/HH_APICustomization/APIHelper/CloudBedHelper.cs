@@ -2,6 +2,7 @@
 using HH_APICustomization.Entity;
 using HH_APICustomization.Graph;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PX.Data;
 using PX.Data.BQL.Fluent;
 using System;
@@ -154,6 +155,7 @@ namespace HH_APICustomization.APIHelper
             var accessToken = UpdateAccessToken();
             try
             {
+                var tempJbList = new List<JObject>();
                 List<ReservationRateDetail> result = new List<ReservationRateDetail>();
                 foreach (var propertyID in propertyidList)
                 {
@@ -162,21 +164,27 @@ namespace HH_APICustomization.APIHelper
                     HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                         throw new PXException(response.Content.ReadAsStringAsync().Result);
-                    var reservationEntity = JsonConvert.DeserializeObject<CloudBed_ReservationWithRateDetailEntity>(response.Content.ReadAsStringAsync().Result);
-                    result.AddRange(reservationEntity.data);
-                    int total = reservationEntity.total;
+                    var reservationJObject = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
+                    AddJobjectManualy("data", reservationJObject, tempJbList);
+                    int total = int.Parse(reservationJObject["total"].ToString());
                     // 重複抓取資料直到全抓
-                    if (reservationEntity.success && reservationEntity.count != total)
+                    if (bool.Parse(reservationJObject["success"].ToString()) && int.Parse(reservationJObject["count"].ToString()) != total)
                     {
                         int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                         for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                         {
                             url = $"https://hotels.cloudbeds.com/api/v1.1/getReservationsWithRateDetails?propertyID={propertyID}&modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
                             response = SendAPIRequest(url, accessToken, HttpMethod.Get);
-                            reservationEntity = JsonConvert.DeserializeObject<CloudBed_ReservationWithRateDetailEntity>(response.Content.ReadAsStringAsync().Result);
-                            result.AddRange(reservationEntity.data);
+                            reservationJObject = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
+                            AddJobjectManualy("data", reservationJObject, tempJbList);
                         }
                     }
+                }
+                // 排除 RoomRate = null 的資料
+                foreach (var element in tempJbList.ToList())
+                {
+                    if (element["detailedRates"].Count() != 0)
+                        result.Add(element.ToObject<ReservationRateDetail>());
                 }
                 return result;
             }
@@ -227,5 +235,12 @@ namespace HH_APICustomization.APIHelper
 
         private static LUMCloudBedAPIPreference GetCloudBedAPIPreference()
             => SelectFrom<LUMCloudBedAPIPreference>.View.Select(new PX.Data.PXGraph()).TopFirst;
+
+        private static List<JObject> AddJobjectManualy(string keyName, JObject sourceObject, List<JObject> destinationObject)
+        {
+            foreach (JObject item in sourceObject[keyName])
+                destinationObject.Add(item);
+            return destinationObject;
+        }
     }
 }
