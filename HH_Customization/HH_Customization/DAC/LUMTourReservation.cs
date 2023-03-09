@@ -6,12 +6,13 @@ using PX.Objects.IN;
 using PX.Objects.GL;
 using static PX.Objects.SO.SOOrderEntryHHExt;
 using PX.Objects.AP;
+using HH_Customization.Interface;
 
 namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourReservation")]
-    public class LUMTourReservation : IBqlTable
+    public class LUMTourReservation : IBqlTable, IAPLink, ICreateAPData
     {
         #region Key
         public class PK : PrimaryKeyOf<LUMTourReservation>.By<tourReservationID, sOOrderNbr, sOOrderType>
@@ -28,6 +29,13 @@ namespace HH_Customization.DAC
         [PXDBIdentity(IsKey = true)]
         public virtual int? TourReservationID { get; set; }
         public abstract class tourReservationID : PX.Data.BQL.BqlInt.Field<tourReservationID> { }
+        #endregion
+
+        #region Selected
+        [PXBool()]
+        [PXUIField(DisplayName = "Selected")]
+        public virtual bool? Selected { get; set; }
+        public abstract class selected : PX.Data.BQL.BqlBool.Field<selected> { }
         #endregion
 
         #region SOOrderNbr
@@ -135,21 +143,22 @@ namespace HH_Customization.DAC
 
         #region APRefNbr
         [PXDBString(15)]
-        [PXUIField(DisplayName = "AP Bill")]
+        [PXUIField(DisplayName = "AP Bill" ,IsReadOnly = true)]
+        [PXSelector(typeof(Search<APInvoice.refNbr, Where<APInvoice.docType, Equal<APDocType.invoice>>>))]
         public virtual string APRefNbr { get; set; }
         public abstract class aPRefNbr : PX.Data.BQL.BqlString.Field<aPRefNbr> { }
         #endregion
 
         #region APDocType
         [PXDBString(5)]
-        [PXUIField(DisplayName = "AP Doc Type")]
+        [PXUIField(DisplayName = "AP Doc Type", IsReadOnly = true)]
         public virtual string APDocType { get; set; }
         public abstract class aPDocType : PX.Data.BQL.BqlString.Field<aPDocType> { }
         #endregion
 
         #region APLineNbr
         [PXDBInt()]
-        [PXUIField(DisplayName = "Line Nbr")]
+        [PXUIField(DisplayName = "Line Nbr", IsReadOnly = true)]
         public virtual int? APLineNbr { get; set; }
         public abstract class aPLineNbr : PX.Data.BQL.BqlInt.Field<aPLineNbr> { }
         #endregion

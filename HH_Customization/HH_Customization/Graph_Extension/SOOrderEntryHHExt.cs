@@ -9,6 +9,8 @@ using PX.Objects.GL;
 using HH_Customization.DAC;
 using HH_APICustomization.DAC;
 using static HH_Customization.Descriptor.LUMStringList;
+using HH_Customization.Interface;
+using PX.Objects.AP;
 
 namespace PX.Objects.SO
 {
@@ -56,6 +58,7 @@ namespace PX.Objects.SO
         #endregion
 
         #region Actions
+        #region EditLinkByFlight
         public PXAction<LUMTourFlight> editLinkByFlight;
         [PXButton(CommitChanges = true)]
         [PXUIField(DisplayName = "EditLink By Flight")]
@@ -65,7 +68,9 @@ namespace PX.Objects.SO
             ShowLinkEdit(true, current.FligthID);
             return adapter.Get();
         }
+        #endregion
 
+        #region EditLinkByItem
         public PXAction<LUMTourItem> editLinkByItem;
         [PXButton(CommitChanges = true)]
         [PXUIField(DisplayName = "EditLink By Item")]
@@ -75,17 +80,115 @@ namespace PX.Objects.SO
             ShowLinkEdit(false, current.ItemID);
             return adapter.Get();
         }
+        #endregion
 
+        #region Check AP Link
+        public PXAction<SOOrder> checkAPLinkByItem;
+        public PXAction<SOOrder> checkAPLinkByFlight;
+        public PXAction<SOOrder> checkAPLinkByReservation;
+
+        [PXButton(CommitChanges = true), PXUIField(DisplayName = "Check AP Bill Link", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
+        public IEnumerable CheckAPLinkByItem(PXAdapter adapter)
+        {
+            PXCache cache = Items.Cache;
+            List<LUMTourItem> list = Items.Select().RowCast<LUMTourItem>().ToList();
+            DoCheckAPLink<LUMTourItem>(cache, list);
+            return adapter.Get();
+        }
+
+        [PXButton(CommitChanges = true), PXUIField(DisplayName = "Check AP Bill Link", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
+        public IEnumerable CheckAPLinkByFlight(PXAdapter adapter)
+        {
+            PXCache cache = Flights.Cache;
+            List<LUMTourFlight> list = Flights.Select().RowCast<LUMTourFlight>().ToList();
+            DoCheckAPLink<LUMTourFlight>(cache, list);
+            return adapter.Get();
+        }
+
+        [PXButton(CommitChanges = true), PXUIField(DisplayName = "Check AP Bill Link", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
+        public IEnumerable CheckAPLinkByReservation(PXAdapter adapter)
+        {
+            PXCache cache = Flights.Cache;
+            List<LUMTourReservation> list = Reservations.Select().RowCast<LUMTourReservation>().ToList();
+            DoCheckAPLink<LUMTourReservation>(cache, list);
+            return adapter.Get();
+        }
+        #endregion
+
+        #region Create AP
+        public PXAction<SOOrder> createAPByItem;
+        public PXAction<SOOrder> createAPByFlight;
+        public PXAction<SOOrder> createAPByReservation;
+
+        [PXButton(CommitChanges = true), PXUIField(DisplayName = "Create AP Bill", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
+        public IEnumerable CreateAPByItem(PXAdapter adapter)
+        {
+            PXCache cache = Items.Cache;
+            List<LUMTourItem> list = Items.Select().RowCast<LUMTourItem>().ToList();
+            DoCreateAP<LUMTourItem>(cache, list);
+            return adapter.Get();
+        }
+
+        [PXButton(CommitChanges = true), PXUIField(DisplayName = "Create AP Bill", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
+        public IEnumerable CreateAPByFlight(PXAdapter adapter)
+        {
+            PXCache cache = Flights.Cache;
+            List<LUMTourFlight> list = Flights.Select().RowCast<LUMTourFlight>().ToList();
+            DoCreateAP<LUMTourFlight>(cache, list);
+            return adapter.Get();
+        }
+
+        [PXButton(CommitChanges = true), PXUIField(DisplayName = "Create AP Bill", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
+        public IEnumerable CreateAPByReservation(PXAdapter adapter)
+        {
+            PXCache cache = Reservations.Cache;
+            List<LUMTourReservation> list = Reservations.Select().RowCast<LUMTourReservation>().ToList();
+            DoCreateAP<LUMTourReservation>(cache, list);
+            return adapter.Get();
+        }
+        #endregion
         #endregion
 
         #region Event
-        protected void _(Events.RowDeleting<SOLine> e)
+        protected void _(Events.RowSelected<SOOrder> e, PXRowSelected baseMethod)
         {
             if (e.Row == null) return;
+            baseMethod?.Invoke(e.Cache, e.Args);
+            bool isInsert = e.Cache.GetStatus(e.Row) == PXEntryStatus.Inserted;
+            checkAPLinkByItem.SetEnabled(!isInsert);
+            checkAPLinkByFlight.SetEnabled(!isInsert);
+            checkAPLinkByReservation.SetEnabled(!isInsert);
+            createAPByItem.SetEnabled(!isInsert);
+            createAPByFlight.SetEnabled(!isInsert);
+            createAPByReservation.SetEnabled(!isInsert);
+        }
+
+        protected void _(Events.RowDeleting<SOLine> e, PXRowDeleting baseMethod)
+        {
+            if (e.Row == null) return;
+            baseMethod?.Invoke(e.Cache, e.Args);
             //find Guest
             LUMTourGuest guest = GetGuestBySO(e.Row.OrderNbr, e.Row.OrderType, e.Row.LineNbr);
             if (guest != null)
-                throw new PXSetPropertyException($"Please check Tour Group(LM201000):{guest.TourGroupNbr}", PXErrorLevel.RowError);
+                throw new PXException($"Please check Tour Group(LM301000):{guest.TourGroupNbr}", PXErrorLevel.RowError);
+        }
+
+        protected void _(Events.RowSelected<LUMTourItem> e)
+        {
+            if (e.Row == null) return;
+            SetAPlinkSelectedEnabled<LUMTourItem>(e.Cache, e.Row);
+        }
+
+        protected void _(Events.RowSelected<LUMTourFlight> e)
+        {
+            if (e.Row == null) return;
+            SetAPlinkSelectedEnabled<LUMTourFlight>(e.Cache, e.Row);
+        }
+
+        protected void _(Events.RowSelected<LUMTourReservation> e)
+        {
+            if (e.Row == null) return;
+            SetAPlinkSelectedEnabled<LUMTourReservation>(e.Cache, e.Row);
         }
 
         protected void _(Events.FieldUpdated<LUMTourReservation, LUMTourReservation.reservationID> e)
@@ -97,6 +200,88 @@ namespace PX.Objects.SO
         #endregion
 
         #region Method
+        public void SetAPlinkSelectedEnabled<T>(PXCache cache, T data) where T : ICreateAPData, IAPLink
+        {
+            PXUIFieldAttribute.SetEnabled(cache, data, "Selected", !HasAPLink<T>(data));
+        }
+
+        public bool HasAPLink<T>(T data) where T : IAPLink
+        {
+            return data.APRefNbr != null && data.APDocType != null && data.APLineNbr != null;
+        }
+
+        public virtual void DoCheckAPLink<T>(PXCache cache, List<T> list) where T : IAPLink
+        {
+            Base.Persist();
+            using (PXTransactionScope ts = new PXTransactionScope())
+            {
+                var apList = list.FindAll(d => d.APRefNbr != null && d.APDocType != null && d.APLineNbr != null);
+                foreach (var item in apList)
+                {
+                    APTran tran = APTran.PK.Find(Base, item.APDocType, item.APRefNbr, item.APLineNbr);
+                    if (tran == null)
+                    {
+                        item.APDocType = null;
+                        item.APRefNbr = null;
+                        item.APLineNbr = null;
+                        cache.Update(item);
+                    }
+                }
+                Base.Persist();
+                ts.Complete();
+            }
+        }
+
+        public virtual void DoCreateAP<T>(PXCache cache, List<T> list) where T : IBqlTable, ICreateAPData, IAPLink
+        {
+            Base.Persist();
+            SOOrder header = Base.Document.Current;
+            using (PXTransactionScope ts = new PXTransactionScope())
+            {
+                var groupby = list.FindAll(d => d.Selected ?? false)
+                                  .GroupBy(d => new { d.VendorID });
+                foreach (var group in groupby)
+                {
+                    List<T> groupList = group.ToList();
+                    APInvoiceEntry entry = PXGraph.CreateInstance<APInvoiceEntry>();
+                    APInvoice doc = new APInvoice()
+                    {
+                        DocType = APDocType.Invoice,
+                        BranchID = header.BranchID,
+                        VendorID = group.Key.VendorID,
+                        InvoiceNbr = header.OrderNbr,
+                        DocDesc = header.DocDesc
+                    };
+                    doc = entry.Document.Current = entry.Document.Insert(doc);
+
+                    #region 更新幣別
+                    CM.Extensions.CurrencyInfo curyInfo = entry.currencyinfo.Current;
+                    entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, header.CuryID);
+                    entry.currencyinfo.Update(curyInfo);
+                    #endregion
+                    entry.Save.Press();
+                    foreach (T data in groupList)
+                    {
+                        APTran tran = entry.Transactions.Insert(new APTran());
+                        tran.InventoryID = data.InventoryID;
+                        tran.AccountID = data.AccountID;
+                        tran.SubID = data.SubID;
+                        tran.CuryLineAmt = data.ExtCost;
+                        entry.Transactions.Update(tran);
+
+                        data.APRefNbr = doc.RefNbr;
+                        data.APDocType = doc.DocType;
+                        data.APLineNbr = tran.LineNbr;
+                        cache.Update(data);
+                    }
+                    entry.Save.Press();
+                }
+                Base.Persist();
+                ts.Complete();
+            }
+            cache.Clear();
+        }
+
         public virtual void ShowLinkEdit(bool isFlight, int? linkID)
         {
             if (DialogCtrl.Current.IsShow != true)

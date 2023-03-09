@@ -15,7 +15,7 @@
 		<Template>
 			<px:PXLayoutRule ID="PXLayoutRule1" runat="server" StartRow="True"></px:PXLayoutRule>
 			<px:PXLayoutRule ControlSize="S" runat="server" ID="CstPXLayoutRule1" StartColumn="True" ></px:PXLayoutRule>
-			<px:PXSelector runat="server" ID="CstPXSelector30" DataField="TourGroupNbr" />
+			<px:PXSelector runat="server" ID="CstPXSelector30" DataField="TourGroupNbr" ></px:PXSelector>
 			<px:PXDateTimeEdit runat="server" ID="CstPXDateTimeEdit7" DataField="DateFrom" ></px:PXDateTimeEdit>
 			<px:PXLayoutRule runat="server" ID="CstLayoutRule14" ColumnSpan="4" ></px:PXLayoutRule>
 			<px:PXTextEdit runat="server" ID="CstPXTextEdit28" DataField="Description" ></px:PXTextEdit>
@@ -29,12 +29,10 @@
 			<px:PXTextEdit runat="server" ID="CstPXTextEdit12" DataField="Helper" ></px:PXTextEdit>
 			<px:PXLayoutRule runat="server" ID="CstPXLayoutRule5" StartRow="True" ></px:PXLayoutRule>
 			<px:PXLayoutRule runat="server" ID="CstPXLayoutRule15" StartColumn="True" ></px:PXLayoutRule>
-			<px:PXNumberEdit runat="server" ID="CstPXNumberEdit20" DataField="RevenueTWD" ></px:PXNumberEdit>
 			<px:PXNumberEdit runat="server" ID="CstPXNumberEdit19" DataField="RevenuePHP" ></px:PXNumberEdit>
 			<px:PXLayoutRule runat="server" ID="CstPXLayoutRule16" StartColumn="True" ></px:PXLayoutRule>
 			<px:PXNumberEdit runat="server" ID="CstPXNumberEdit21" DataField="CostPHP" ></px:PXNumberEdit>
 			<px:PXLayoutRule runat="server" ID="CstPXLayoutRule17" StartColumn="True" ></px:PXLayoutRule>
-			<px:PXNumberEdit runat="server" ID="CstPXNumberEdit23" DataField="GrossProfitTWD" ></px:PXNumberEdit>
 			<px:PXNumberEdit runat="server" ID="CstPXNumberEdit22" DataField="GrossProfitPHP" ></px:PXNumberEdit>
 			<px:PXLayoutRule runat="server" ID="CstPXLayoutRule18" StartColumn="True" ></px:PXLayoutRule>
 			<px:PXNumberEdit runat="server" ID="CstPXNumberEdit24" DataField="GrossProfitPer" ></px:PXNumberEdit></Template>
@@ -76,23 +74,33 @@
 			</px:PXTabItem>
 			<px:PXTabItem BindingContext="form" Text="Items">
 				<Template>
-					<px:PXGrid SyncPosition="True" Width="100%" SkinID="Details" AllowPaging="True" runat="server" ID="CstPXGrid26" DataSourceID="ds">
+					<px:PXGrid SyncPosition="True" Width="100%" SkinID="Details" AllowPaging="True" runat="server" ID="gridItems" DataSourceID="ds">
 						<Levels>
 							<px:PXGridLevel DataMember="Items" >
 								<Columns>
-									<px:PXGridColumn DataField="InventoryID" Width="70" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="Selected" Width="60" Type="CheckBox" AllowCheckAll="True" TextAlign="Center" ></px:PXGridColumn>
+									<px:PXGridColumn CommitChanges="True" DataField="InventoryID" Width="70" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="Date" Width="90" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="Description" Width="280" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="ExtCost" Width="100" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="CuryID" Width="70" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="AccountID" Width="120" ></px:PXGridColumn>
 									<px:PXGridColumn DataField="SubID" Width="140" ></px:PXGridColumn>
-									<px:PXGridColumn DataField="VendorID" Width="140" />
-									<px:PXGridColumn DataField="APRefNbr" Width="140" />
-									<px:PXGridColumn DataField="APLineNbr" Width="70" /></Columns></px:PXGridLevel></Levels>
+									<px:PXGridColumn DataField="VendorID" Width="140" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="APRefNbr" Width="140" ></px:PXGridColumn>
+									<px:PXGridColumn DataField="APLineNbr" Width="70" ></px:PXGridColumn></Columns>
+								<RowTemplate>
+									<px:PXSelector runat="server" ID="CstPXSelector33" DataField="InventoryID" AllowEdit="True" ></px:PXSelector>
+									<px:PXSelector runat="server" ID="CstPXSelector35" DataField="APRefNbr" AllowEdit="True" /></RowTemplate></px:PXGridLevel></Levels>
 						<AutoSize MinHeight="100" Container="Parent" Enabled="True" ></AutoSize>
 						<AutoSize Container="Parent" ></AutoSize>
-						<Mode InitNewRow="True" ></Mode></px:PXGrid></Template>
+						<Mode InitNewRow="True" ></Mode>
+						<ActionBar>
+							<CustomItems>
+								<px:PXToolBarButton>
+									<AutoCallBack Command="CreateAP" Target="ds" /></px:PXToolBarButton>
+								<px:PXToolBarButton>
+									<AutoCallBack Command="CheckAPLink" Target="ds" ></AutoCallBack></px:PXToolBarButton></CustomItems></ActionBar></px:PXGrid></Template>
 			</px:PXTabItem>
 		</Items>
 		<AutoSize Container="Window" Enabled="True" MinHeight="100" ></AutoSize>

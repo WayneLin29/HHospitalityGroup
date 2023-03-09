@@ -1,4 +1,5 @@
 using System;
+using HH_Customization.Interface;
 using PX.Data;
 using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.AP;
@@ -10,7 +11,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourFlight")]
-    public class LUMTourFlight : IBqlTable
+    public class LUMTourFlight : IBqlTable, IAPLink, ICreateAPData
     {
         #region Const
         public const string FLIGHT = "FLIGHT";
@@ -26,6 +27,13 @@ namespace HH_Customization.DAC
         {
             public class Order : SOOrder.PK.ForeignKeyOf<SOLine>.By<sOOrderType, sOOrderNbr> { }
         }
+        #endregion
+
+        #region Selected
+        [PXBool()]
+        [PXUIField(DisplayName = "Selected")]
+        public virtual bool? Selected { get; set; }
+        public abstract class selected : PX.Data.BQL.BqlBool.Field<selected> { }
         #endregion
 
         #region SOOrderNbr
@@ -197,6 +205,7 @@ namespace HH_Customization.DAC
         #region APRefNbr
         [PXDBString(15)]
         [PXUIField(DisplayName = "AP Bill", IsReadOnly = true)]
+        [PXSelector(typeof(Search<APInvoice.refNbr, Where<APInvoice.docType, Equal<APDocType.invoice>>>))]
         public virtual string APRefNbr { get; set; }
         public abstract class aPRefNbr : PX.Data.BQL.BqlString.Field<aPRefNbr> { }
         #endregion

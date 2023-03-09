@@ -19,6 +19,13 @@ namespace HH_Customization.DAC
         }
         #endregion
 
+        #region Selected
+        [PXBool()]
+        [PXUIField(DisplayName = "Selected")]
+        public virtual bool? Selected { get; set; }
+        public abstract class selected : PX.Data.BQL.BqlBool.Field<selected> { }
+        #endregion
+
         #region TourGroupNbr
         [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Tour Group Nbr")]
@@ -87,7 +94,10 @@ namespace HH_Customization.DAC
         #region AccountID
         [PXDBInt()]
         [PXUIField(DisplayName = "Account", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(
+            typeof(Search<InventoryItem.cOGSAcctID,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Account.accountID, Where<Account.active, Equal<True>>>),
                 typeof(Account.accountCD),
                 typeof(Account.description),
@@ -101,7 +111,10 @@ namespace HH_Customization.DAC
         #region SubID
         [PXDBInt()]
         [PXUIField(DisplayName = "Sub Account", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(
+            typeof(Search<InventoryItem.cOGSSubID,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Sub.subID, Where<Sub.active, Equal<True>>>),
                 typeof(Sub.subCD),
                 typeof(Sub.description),
@@ -129,6 +142,7 @@ namespace HH_Customization.DAC
         #region APRefNbr
         [PXDBString(15)]
         [PXUIField(DisplayName = "AP Bill")]
+        [PXSelector(typeof(Search<APInvoice.refNbr,Where<APInvoice.docType,Equal<APDocType.invoice>>>))]
         public virtual string APRefNbr { get; set; }
         public abstract class aPRefNbr : PX.Data.BQL.BqlString.Field<aPRefNbr> { }
         #endregion

@@ -33,7 +33,7 @@
 			<px:PXGridLevel DataMember="CostStructures">
 			    <Columns>
 				<px:PXGridColumn DataField="Level" Width="70" ></px:PXGridColumn>
-				<px:PXGridColumn DataField="InventoryID" Width="70" ></px:PXGridColumn>
+				<px:PXGridColumn CommitChanges="True" DataField="InventoryID" Width="70" ></px:PXGridColumn>
 				<px:PXGridColumn DataField="ExtCost" Width="100" ></px:PXGridColumn>
 				<px:PXGridColumn DataField="AccountID" Width="120" ></px:PXGridColumn>
 				<px:PXGridColumn DataField="SubID" Width="140" ></px:PXGridColumn>

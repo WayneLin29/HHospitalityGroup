@@ -81,7 +81,7 @@ namespace HH_Customization.DAC
         #region Total
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Total", IsReadOnly = true)]
-        [PXFormula(typeof(Sub<baseRate, adjAmt>))]
+        [PXFormula(typeof(Add<baseRate, adjAmt>))]
         public virtual Decimal? Total { get; set; }
         public abstract class total : PX.Data.BQL.BqlDecimal.Field<total> { }
         #endregion
@@ -96,9 +96,9 @@ namespace HH_Customization.DAC
         #region CuryID
         [PXDBString(5, IsUnicode = true, InputMask = ">LLLLL")]
         [PXUIField(DisplayName = "Currency", Required = true)]
-        //[PXDefault(typeof(Search<LUMTourTypeClass.curyID,
-        //    Where<LUMTourTypeClass.typeClassID, Equal<Current<LUMTourGroup.tourTypeClassID>>>>),
-        //    PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(typeof(Search<LUMTourTypeClass.curyID,
+            Where<LUMTourTypeClass.typeClassID, Equal<Current<LUMTourGroup.tourTypeClassID>>>>),
+            PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Currency.curyID))]
         public virtual string CuryID { get; set; }
         public abstract class curyID : PX.Data.BQL.BqlString.Field<curyID> { }

@@ -3,6 +3,8 @@ using PX.Data;
 using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.CS;
 using PX.Objects.GL;
+using PX.Objects.SO;
+using PX.Data.BQL.Fluent;
 
 namespace HH_Customization.DAC
 {
@@ -144,28 +146,12 @@ namespace HH_Customization.DAC
 
         #region Unbound
 
-        #region RevenueTWD
-        [PXDecimal]
-        [PXUIField(DisplayName = "Revenue (TWD)",IsReadOnly = true)]
-        [PXUnboundDefault()]
-        public virtual decimal? RevenueTWD { get; set; }
-        public abstract class revenueTWD : PX.Data.BQL.BqlDecimal.Field<revenueTWD> { }
-        #endregion
-
         #region RevenuePHP
         [PXDecimal]
         [PXUIField(DisplayName = "Revenue (PHP)", IsReadOnly = true)]
         [PXUnboundDefault()]
         public virtual decimal? RevenuePHP { get; set; }
         public abstract class revenuePHP : PX.Data.BQL.BqlDecimal.Field<revenuePHP> { }
-        #endregion
-
-        #region GrossProfitTWD
-        [PXDecimal]
-        [PXUIField(DisplayName = "Gross Profit (TWD)", IsReadOnly = true)]
-        [PXUnboundDefault()]
-        public virtual decimal? GrossProfitTWD { get; set; }
-        public abstract class grossProfitTWD : PX.Data.BQL.BqlDecimal.Field<grossProfitTWD> { }
         #endregion
 
         #region GrossProfitPHP

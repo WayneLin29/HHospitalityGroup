@@ -87,6 +87,8 @@
     <Compile Include="DAC\LUMTourGuestLink.cs" />
     <Compile Include="DAC\LUMTourItem.cs" />
     <Compile Include="DAC\LUMTourReservation.cs" />
+    <Compile Include="Interface\IAPLink.cs" />
+    <Compile Include="Interface\ICreateAPData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

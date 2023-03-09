@@ -60,7 +60,7 @@ namespace HH_Customization.DAC
         #region ExtCost
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Ext Cost", Required = true)]
-        [PXDefault(0,PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(TypeCode.Decimal, "0.0", PersistingCheck = PXPersistingCheck.NullOrBlank)]
         public virtual Decimal? ExtCost { get; set; }
         public abstract class extCost : PX.Data.BQL.BqlDecimal.Field<extCost> { }
         #endregion
@@ -68,7 +68,10 @@ namespace HH_Customization.DAC
         #region AccountID
         [PXDBInt()]
         [PXUIField(DisplayName = "Account", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(
+            typeof(Search<InventoryItem.cOGSAcctID,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Account.accountID, Where<Account.active, Equal<True>>>),
                 typeof(Account.accountCD),
                 typeof(Account.description),
@@ -82,7 +85,10 @@ namespace HH_Customization.DAC
         #region SubID
         [PXDBInt()]
         [PXUIField(DisplayName = "Sub Account", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(
+            typeof(Search<InventoryItem.cOGSSubID,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Sub.subID, Where<Sub.active, Equal<True>>>),
                 typeof(Sub.subCD),
                 typeof(Sub.description),
