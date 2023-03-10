@@ -97,6 +97,7 @@ namespace HH_Customization.DAC
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Ext Cost")]
         [PXDefault(TypeCode.Decimal, "0.0")]
+        [PXFormula(typeof(Mult<unitPrice, pax>))]
         public virtual Decimal? ExtCost { get; set; }
         public abstract class extCost : PX.Data.BQL.BqlDecimal.Field<extCost> { }
         #endregion

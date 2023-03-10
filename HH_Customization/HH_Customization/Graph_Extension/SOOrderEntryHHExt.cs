@@ -69,7 +69,10 @@ namespace PX.Objects.SO
         public virtual IEnumerable EditLinkByFlight(PXAdapter adapter)
         {
             LUMTourFlight current = Flights.Current;
-            ShowLinkEdit(true, current.FligthID);
+            if (Flights.AllowUpdate)
+            {
+                ShowLinkEdit(true, current.FligthID);
+            }
             return adapter.Get();
         }
         #endregion
@@ -81,7 +84,10 @@ namespace PX.Objects.SO
         public virtual IEnumerable EditLinkByItem(PXAdapter adapter)
         {
             var current = Items.Current;
-            ShowLinkEdit(false, current.ItemID);
+            if (!HasAPLink(current) && Items.AllowUpdate)
+            {
+                ShowLinkEdit(false, current.ItemID);
+            }
             return adapter.Get();
         }
         #endregion
@@ -180,8 +186,14 @@ namespace PX.Objects.SO
         protected void _(Events.RowSelected<LUMTourItem> e)
         {
             if (e.Row == null) return;
-            SetAPlinkSelectedEnabled<LUMTourItem>(e.Cache, e.Row);
+            SetAPlinkEnabled(e.Cache, e.Row);
+            PXUIFieldAttribute.SetEnabled<LUMTourItem.inventoryID>(e.Cache,e.Row,!HasAPLink(e.Row));
+            PXUIFieldAttribute.SetEnabled<LUMTourItem.unitPrice>(e.Cache, e.Row, !HasAPLink(e.Row));
         }
+
+        protected void _(Events.RowDeleting<LUMTourItem> e) => ValidatoeAPLink(e.Row);
+        protected void _(Events.RowDeleting<LUMTourFlight> e) => ValidatoeAPLink(e.Row);
+        protected void _(Events.RowDeleting<LUMTourReservation> e) => ValidatoeAPLink(e.Row);
 
         protected void _(Events.FieldDefaulting<LUMTourItem, LUMTourItem.tranDesc> e)
         {
@@ -192,7 +204,7 @@ namespace PX.Objects.SO
         protected void _(Events.RowSelected<LUMTourFlight> e)
         {
             if (e.Row == null) return;
-            SetAPlinkSelectedEnabled<LUMTourFlight>(e.Cache, e.Row);
+            SetAPlinkEnabled(e.Cache, e.Row);
         }
 
         protected void _(Events.FieldDefaulting<LUMTourFlight, LUMTourFlight.tranDesc> e)
@@ -204,7 +216,7 @@ namespace PX.Objects.SO
         protected void _(Events.RowSelected<LUMTourReservation> e)
         {
             if (e.Row == null) return;
-            SetAPlinkSelectedEnabled<LUMTourReservation>(e.Cache, e.Row);
+            SetAPlinkEnabled(e.Cache, e.Row);
         }
 
         protected void _(Events.FieldDefaulting<LUMTourReservation, LUMTourReservation.tranDesc> e)
@@ -222,17 +234,26 @@ namespace PX.Objects.SO
         #endregion
 
         #region Method
+        public void ValidatoeAPLink(IAPLink row)
+        {
+            if (row == null) return;
+            if (HasAPLink(row))
+                throw new PXException($"Please delete AP Bill before delete the item", PXErrorLevel.RowError);
+        }
+
         public String DateToStr(DateTime? date)
         {
             return date?.ToString(DATE_FORMAT) ?? "";
         }
 
-        public void SetAPlinkSelectedEnabled<T>(PXCache cache, T data) where T : ICreateAPData, IAPLink
+        public void SetAPlinkEnabled<T>(PXCache cache, T data) where T : ICreateAPData, IAPLink
         {
-            PXUIFieldAttribute.SetEnabled(cache, data, "Selected", !HasAPLink<T>(data));
+            bool isAPLink = HasAPLink(data);
+            PXUIFieldAttribute.SetEnabled(cache, data, "Selected", !isAPLink);
+            PXUIFieldAttribute.SetEnabled(cache, data, "ExtCost", !isAPLink);
         }
 
-        public bool HasAPLink<T>(T data) where T : IAPLink
+        public bool HasAPLink(IAPLink data)
         {
             return data.APRefNbr != null && data.APDocType != null && data.APLineNbr != null;
         }
@@ -290,7 +311,7 @@ namespace PX.Objects.SO
                     foreach (T data in groupList)
                     {
                         //取得TranDesc
-                        cache.SetDefaultExt(data,"TranDesc");
+                        cache.SetDefaultExt(data, "TranDesc");
                         APTran tran = entry.Transactions.Insert(new APTran());
                         tran.InventoryID = data.InventoryID;
                         tran.AccountID = data.AccountID;

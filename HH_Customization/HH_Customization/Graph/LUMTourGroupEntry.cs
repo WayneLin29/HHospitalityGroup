@@ -125,11 +125,11 @@ namespace HH_Customization.Graph
                                 Branch branch = Branch.PK.Find(this, header.BranchID);
                                 var inventory = InventoryItemCurySettings.PK.Find(this, cost.InventoryID, branch.BaseCuryID);
                                 item.UnitPrice = inventory.BasePrice;
-                                item.ExtCost = cost.ExtCost;
+                                item.Pax = groupList.Count;
+                                item.ExtCost = item.UnitPrice * item.Pax;
                                 item.AccountID = cost.AccountID;
                                 item.SubID = cost.SubID;
                                 item.VendorID = cost.VendorID;
-                                item.Pax = groupList.Count;
                                 entryExt.Items.Update(item);
 
                                 #region Link Item
@@ -357,6 +357,14 @@ namespace HH_Customization.Graph
             if (e.Row == null) return;
             bool hasAP = e.Row.APDocType != null && e.Row.APRefNbr != null && e.Row.APLineNbr != null;
             PXUIFieldAttribute.SetEnabled<LUMTourGroupItem.selected>(e.Cache, e.Row, !hasAP);
+            PXUIFieldAttribute.SetEnabled<LUMTourGroupItem.extCost>(e.Cache, e.Row, !hasAP);
+        }
+
+        protected virtual void _(Events.RowDeleting<LUMTourGroupItem> e)
+        {
+            if (e.Row == null) return;
+            if (e.Row.APRefNbr != null && e.Row.APDocType != null && e.Row.APLineNbr != null)
+                throw new PXException($"Please delete AP Bill before delete the item", PXErrorLevel.RowError);
         }
 
         protected virtual void _(Events.FieldUpdated<LUMTourGroupItem, LUMTourGroupItem.inventoryID> e)
