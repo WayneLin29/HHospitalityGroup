@@ -222,6 +222,14 @@ namespace HH_Customization.DAC
         public virtual Decimal? ExtCostCB { get; set; }
         public abstract class extCostCB : PX.Data.BQL.BqlDecimal.Field<extCostCB> { }
         #endregion
+
+        #region TranDesc
+        [PXString()]
+        [PXUnboundDefault()]
+        public virtual string TranDesc { get; set; }
+        public abstract class tranDesc : PX.Data.BQL.BqlString.Field<tranDesc> { }
+        #endregion
+
         #endregion
     }
 }

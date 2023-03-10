@@ -326,12 +326,6 @@
                                                             </AddItem>
                                                             <AddItem>
                                                                 <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
-                                                                    <Prop Key="DataField" Value="Room" />
-                                                                    <Prop Key="Width" Value="70" />
-                                                                </PXGridColumn>
-                                                            </AddItem>
-                                                            <AddItem>
-                                                                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
                                                                     <Prop Key="DataField" Value="Type" />
                                                                     <Prop Key="Width" Value="70" />
                                                                 </PXGridColumn>
@@ -407,6 +401,12 @@
                                                     <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
                                                         <Prop Key="DataField" Value="Date" />
                                                         <Prop Key="Width" Value="90" />
+                                                    </PXGridColumn>
+                                                </AddItem>
+                                                <AddItem>
+                                                    <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
+                                                        <Prop Key="DataField" Value="Description" />
+                                                        <Prop Key="Width" Value="280" />
                                                     </PXGridColumn>
                                                 </AddItem>
                                                 <AddItem>

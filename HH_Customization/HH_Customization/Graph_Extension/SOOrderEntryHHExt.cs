@@ -23,6 +23,10 @@ namespace PX.Objects.SO
         }
         #endregion
 
+        #region Const
+        public const string DATE_FORMAT = "MMddyyyy";
+        #endregion
+
         #region View
         public PXSelect<LUMTourFlight,
             Where<LUMTourFlight.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
@@ -179,16 +183,34 @@ namespace PX.Objects.SO
             SetAPlinkSelectedEnabled<LUMTourItem>(e.Cache, e.Row);
         }
 
+        protected void _(Events.FieldDefaulting<LUMTourItem, LUMTourItem.tranDesc> e)
+        {
+            if (e.Row == null) return;
+            e.NewValue = $"{DateToStr(e.Row.Date)}-{e.Row.Description}";
+        }
+
         protected void _(Events.RowSelected<LUMTourFlight> e)
         {
             if (e.Row == null) return;
             SetAPlinkSelectedEnabled<LUMTourFlight>(e.Cache, e.Row);
         }
 
+        protected void _(Events.FieldDefaulting<LUMTourFlight, LUMTourFlight.tranDesc> e)
+        {
+            if (e.Row == null) return;
+            e.NewValue = $"{e.Row.BookCode}-{e.Row.DepartureAirport}-{e.Row.ArrivalAirport}";
+        }
+
         protected void _(Events.RowSelected<LUMTourReservation> e)
         {
             if (e.Row == null) return;
             SetAPlinkSelectedEnabled<LUMTourReservation>(e.Cache, e.Row);
+        }
+
+        protected void _(Events.FieldDefaulting<LUMTourReservation, LUMTourReservation.tranDesc> e)
+        {
+            if (e.Row == null) return;
+            e.NewValue = $"{e.Row.ReservationID}-{e.Row.Remark}";
         }
 
         protected void _(Events.FieldUpdated<LUMTourReservation, LUMTourReservation.reservationID> e)
@@ -200,6 +222,11 @@ namespace PX.Objects.SO
         #endregion
 
         #region Method
+        public String DateToStr(DateTime? date)
+        {
+            return date?.ToString(DATE_FORMAT) ?? "";
+        }
+
         public void SetAPlinkSelectedEnabled<T>(PXCache cache, T data) where T : ICreateAPData, IAPLink
         {
             PXUIFieldAttribute.SetEnabled(cache, data, "Selected", !HasAPLink<T>(data));
@@ -250,7 +277,7 @@ namespace PX.Objects.SO
                         BranchID = header.BranchID,
                         VendorID = group.Key.VendorID,
                         InvoiceNbr = header.OrderNbr,
-                        DocDesc = header.DocDesc
+                        DocDesc = header.OrderDesc
                     };
                     doc = entry.Document.Current = entry.Document.Insert(doc);
 
@@ -262,11 +289,14 @@ namespace PX.Objects.SO
                     entry.Save.Press();
                     foreach (T data in groupList)
                     {
+                        //取得TranDesc
+                        cache.SetDefaultExt(data,"TranDesc");
                         APTran tran = entry.Transactions.Insert(new APTran());
                         tran.InventoryID = data.InventoryID;
                         tran.AccountID = data.AccountID;
                         tran.SubID = data.SubID;
                         tran.CuryLineAmt = data.ExtCost;
+                        tran.TranDesc = $"{header.OrderNbr}-{data.TranDesc}";
                         entry.Transactions.Update(tran);
 
                         data.APRefNbr = doc.RefNbr;
@@ -520,7 +550,6 @@ namespace PX.Objects.SO
             public virtual DateTime? CheckOut { get; set; }
             public abstract class checkout : PX.Data.BQL.BqlDateTime.Field<checkout> { }
             #endregion
-
         }
         #endregion
 

@@ -74,6 +74,7 @@ namespace HH_Customization.DAC
         #region AdjAmt
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Adjustment")]
+        [PXDefault(TypeCode.Decimal, "0.0")]
         public virtual Decimal? AdjAmt { get; set; }
         public abstract class adjAmt : PX.Data.BQL.BqlDecimal.Field<adjAmt> { }
         #endregion
