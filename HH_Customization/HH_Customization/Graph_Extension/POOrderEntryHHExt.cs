@@ -52,6 +52,7 @@ namespace PX.Objects.PO
         {
             baseMethod?.Invoke(e.Cache, e.Args);
             if (e.Row == null) return;
+            if (e.Operation == PXDBOperation.Delete) return;
             if (Base.Document.Cache.GetStatus(Base.Document.Current) == PXEntryStatus.Inserted)
             {
                 LinkBranch();
@@ -59,7 +60,7 @@ namespace PX.Objects.PO
             //2023-02-03 每次存檔都檢核且提醒是否更新
             POOrder order = Base.Document.Current;
             POLine line = Base.Transactions.Select();
-            if (line.BranchID != null && order.BranchID != line.BranchID)
+            if (line?.BranchID != null && order.BranchID != line.BranchID)
             {
                 Branch branch = Branch.PK.Find(Base, line.BranchID);
                 if (Base.Document.Ask(string.Format(WANT_TO_LINK_BRANCH, branch.BranchCD), MessageButtons.YesNo) == WebDialogResult.Yes)

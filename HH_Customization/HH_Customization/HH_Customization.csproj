@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HH_APICustomization">
+      <HintPath>..\..\..\..\Bin\HH_APICustomization.dll</HintPath>
+    </Reference>
     <Reference Include="PX.Common">
       <HintPath>..\..\..\..\Bin\PX.Common.dll</HintPath>
     </Reference>
@@ -43,6 +46,10 @@
     </Reference>
     <Reference Include="PX.Data">
       <HintPath>..\..\..\..\Bin\PX.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.Data.BQL.Fluent, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Bin\PX.Data.BQL.Fluent.dll</HintPath>
     </Reference>
     <Reference Include="PX.Objects">
       <HintPath>..\..\..\..\Bin\PX.Objects.DLL</HintPath>
@@ -56,17 +63,32 @@
   <ItemGroup>
     <Compile Include="DAC_Extension\INPIClassHHExt.cs" />
     <Compile Include="DAC_Extension\RQRequestLineOwnedHHExt.cs" />
+    <Compile Include="Descriptor\LUMStringList.cs" />
     <Compile Include="Graph_Extension\APPaymentEntryHHExt.cs" />
     <Compile Include="Graph_Extension\APInvoiceEntryHHExt.cs" />
     <Compile Include="Graph_Extension\EPApprovalProcessHHExt.cs" />
     <Compile Include="Graph_Extension\POOrderEntryHHExt.cs" />
     <Compile Include="Graph_Extension\POReceiptEntryHHExt.cs" />
+    <Compile Include="Graph_Extension\SOOrderEntryHHExt.cs" />
     <Compile Include="Graph_Release\INDocumentReleaseHHExt.cs" />
     <Compile Include="Graph_Extension\INIssueEntryHHExt.cs" />
     <Compile Include="Graph_Extension\PIGeneratorHHExt.cs" />
     <Compile Include="Graph_Extension\RQRequestEntryHHExt.cs" />
     <Compile Include="Graph_Extension\RQRequisitionEntryHHExt.cs" />
     <Compile Include="DAC_Extension\INRegisterHHExt.cs" />
+    <Compile Include="Graph\LUMTourTypeClassMaint.cs" />
+    <Compile Include="DAC\LUMTourCostStructure.cs" />
+    <Compile Include="DAC\LUMTourTypeClass.cs" />
+    <Compile Include="DAC\LUMTourGuest.cs" />
+    <Compile Include="DAC\LUMTourGroup.cs" />
+    <Compile Include="DAC\LUMTourGroupItem.cs" />
+    <Compile Include="Graph\LUMTourGroupEntry.cs" />
+    <Compile Include="DAC\LUMTourFlight.cs" />
+    <Compile Include="DAC\LUMTourGuestLink.cs" />
+    <Compile Include="DAC\LUMTourItem.cs" />
+    <Compile Include="DAC\LUMTourReservation.cs" />
+    <Compile Include="Interface\IAPLink.cs" />
+    <Compile Include="Interface\ICreateAPData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
