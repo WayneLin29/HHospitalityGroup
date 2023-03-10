@@ -11,7 +11,7 @@
     </px:PXDataSource>
     <px:PXFormView ID="form" runat="server" DataSourceID="ds" DataMember="Filter" Width="100%" Height="100px" AllowAutoHide="false">
         <Template>
-            <px:PXSelector runat="server" ID="edBranchFilter" DataField="Branch" Width="180" CommitChanges="true"></px:PXSelector>
+            <px:PXSelector runat="server" ID="edBranchFilter" DataField="BranchID" Width="180" CommitChanges="true"></px:PXSelector>
             <px:PXDateTimeEdit runat="server" ID="edDateFrom" DataField="DateFrom" Width="180px" CommitChanges="true"></px:PXDateTimeEdit>
             <px:PXDateTimeEdit runat="server" ID="edDateTo" DataField="DateTo" Width="180px" CommitChanges="true"></px:PXDateTimeEdit>
         </Template>
@@ -26,7 +26,7 @@
                         <Levels>
                             <px:PXGridLevel DataMember="payrollHour">
                                 <Columns>
-                                    <px:PXGridColumn DataField="Branch" Width="120"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="BranchID" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="WorkingDate" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="EmployeeID" Width="150" DisplayMode="Hint"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="EarningType" Width="120"></px:PXGridColumn>

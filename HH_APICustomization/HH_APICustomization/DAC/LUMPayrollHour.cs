@@ -11,11 +11,11 @@ namespace HHAPICustomization.DAC
     [PXCacheName("LUMPayrollHour")]
     public class LUMPayrollHour : IBqlTable
     {
-        #region Branch
+        #region BranchID
         [PXUIField(DisplayName = "Branch")]
         [Branch(typeof(AccessInfo.branchID), IsDetail = false, TabOrder = 0, IsKey = true)]
-        public virtual int? Branch { get; set; }
-        public abstract class branch : PX.Data.BQL.BqlInt.Field<branch> { }
+        public virtual int? BranchID { get; set; }
+        public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
         #endregion
 
         #region WorkingDate
