@@ -24,6 +24,10 @@ namespace HH_Customization.Graph
         public const string PLZ_SAVE_FIRST = "Please save first";
         #endregion
 
+        #region const
+        public const string DATE_FORMAT = "MMddyyyy";
+        #endregion
+
         #region View
         public PXSelect<LUMTourGroup> Group;
         public PXSelect<LUMTourGuest,
@@ -63,6 +67,7 @@ namespace HH_Customization.Graph
                     }
                     else
                     {
+                        string soDescDate = header.DateFrom?.ToString(DATE_FORMAT) + "-" + (header.DateTo?.ToString(DATE_FORMAT) ?? "");
                         SOOrder so = new SOOrder()
                         {
                             OrderType = "IN",
@@ -70,9 +75,9 @@ namespace HH_Customization.Graph
                             CustomerID = groupCustomer.BAccountID,
                             OrderDate = header.DateFrom,
                             RequestDate = header.DateFrom,
-                            ProjectID = ProjectDefaultAttribute.NonProject(),
-                            DocDesc = $"{header.TourGroupNbr}-{groupDate.Key.SubGroupID}"
+                            ProjectID = ProjectDefaultAttribute.NonProject()
                         };
+                        so.OrderDesc = $"{header.TourGroupNbr}-{soDescDate}-{groupDate.Key.SubGroupID}";
                         entry.Document.Current = entry.Document.Insert(so);
                         isNewSO = true;
                     }
@@ -96,6 +101,7 @@ namespace HH_Customization.Graph
                         {
                             SOLine line = entry.Transactions.Insert(new SOLine());
                             line.InventoryID = inventoryPACKAGE.InventoryID;
+                            line.TranDesc = $"{header.TourGroupNbr}-{guest.SubGroupID}-{guest.NameCH}-{guest.Remark}";
                             line.Qty = 1;
                             line.UnitPrice = guest.Total;
                             line.CuryExtPrice = guest.Total;
@@ -119,11 +125,11 @@ namespace HH_Customization.Graph
                                 Branch branch = Branch.PK.Find(this, header.BranchID);
                                 var inventory = InventoryItemCurySettings.PK.Find(this, cost.InventoryID, branch.BaseCuryID);
                                 item.UnitPrice = inventory.BasePrice;
-                                item.ExtCost = cost.ExtCost;
+                                item.Pax = groupList.Count;
+                                item.ExtCost = item.UnitPrice * item.Pax;
                                 item.AccountID = cost.AccountID;
                                 item.SubID = cost.SubID;
                                 item.VendorID = cost.VendorID;
-                                item.Pax = groupList.Count;
                                 entryExt.Items.Update(item);
 
                                 #region Link Item
@@ -189,6 +195,7 @@ namespace HH_Customization.Graph
                 var groupby = Items.Select().RowCast<LUMTourGroupItem>().ToList()
                                 .FindAll(d => d.Selected ?? false)
                                 .GroupBy(d => new { d.VendorID, d.CuryID });
+                string soDescDate = header.DateFrom?.ToString(DATE_FORMAT) + "-" + (header.DateTo?.ToString(DATE_FORMAT) ?? "");
                 foreach (var group in groupby)
                 {
                     List<LUMTourGroupItem> groupList = group.ToList();
@@ -199,7 +206,7 @@ namespace HH_Customization.Graph
                         BranchID = header.BranchID,
                         VendorID = group.Key.VendorID,
                         InvoiceNbr = header.TourGroupNbr,
-                        DocDesc = header.Description
+                        DocDesc = $"{header.TourGroupNbr}-{soDescDate}-{header.Description}"
                     };
                     doc = entry.Document.Current = entry.Document.Insert(doc);
 
@@ -216,6 +223,7 @@ namespace HH_Customization.Graph
                         tran.AccountID = groupItem.AccountID;
                         tran.SubID = groupItem.SubID;
                         tran.CuryLineAmt = groupItem.ExtCost;
+                        tran.TranDesc = $"{header.TourGroupNbr}-{groupItem.Date?.ToString(DATE_FORMAT) ?? ""}-{groupItem.Description}";
                         entry.Transactions.Update(tran);
 
                         groupItem.APRefNbr = doc.RefNbr;
@@ -349,6 +357,14 @@ namespace HH_Customization.Graph
             if (e.Row == null) return;
             bool hasAP = e.Row.APDocType != null && e.Row.APRefNbr != null && e.Row.APLineNbr != null;
             PXUIFieldAttribute.SetEnabled<LUMTourGroupItem.selected>(e.Cache, e.Row, !hasAP);
+            PXUIFieldAttribute.SetEnabled<LUMTourGroupItem.extCost>(e.Cache, e.Row, !hasAP);
+        }
+
+        protected virtual void _(Events.RowDeleting<LUMTourGroupItem> e)
+        {
+            if (e.Row == null) return;
+            if (e.Row.APRefNbr != null && e.Row.APDocType != null && e.Row.APLineNbr != null)
+                throw new PXException($"Please delete AP Bill before delete the item", PXErrorLevel.RowError);
         }
 
         protected virtual void _(Events.FieldUpdated<LUMTourGroupItem, LUMTourGroupItem.inventoryID> e)
@@ -360,9 +376,6 @@ namespace HH_Customization.Graph
         #endregion
 
         #region Method
-        public virtual void CreateAPBill()
-        {
-        }
 
         public virtual void ValidatInsertByGroupItem()
         {

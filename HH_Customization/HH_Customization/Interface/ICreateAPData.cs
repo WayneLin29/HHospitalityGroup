@@ -14,6 +14,7 @@ namespace HH_Customization.Interface
         int? AccountID { get; set; }
         int? SubID { get; set; }
         decimal? ExtCost { get; set; }
+        string TranDesc { get; set; }
 
     }
 }

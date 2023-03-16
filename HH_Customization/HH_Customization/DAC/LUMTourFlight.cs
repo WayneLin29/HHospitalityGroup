@@ -62,8 +62,7 @@ namespace HH_Customization.DAC
 
         #region AirLine
         [PXDBString(30, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Air Line", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXUIField(DisplayName = "Air Line")]
         public virtual string AirLine { get; set; }
         public abstract class airLine : PX.Data.BQL.BqlString.Field<airLine> { }
         #endregion
@@ -141,7 +140,7 @@ namespace HH_Customization.DAC
 
         #region InventoryID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Inventory ID",Required = true)]
+        [PXUIField(DisplayName = "Inventory ID", Required = true)]
         [PXDefault(typeof(Search<InventoryItem.inventoryID, Where<InventoryItem.inventoryCD, Equal<flight>>>)
             , PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<InventoryItem.inventoryID>),
@@ -271,6 +270,15 @@ namespace HH_Customization.DAC
         [PXNote()]
         public virtual Guid? NoteID { get; set; }
         public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
+        #endregion
+
+        #region Unbouhd
+        #region TranDesc
+        [PXString()]
+        [PXUnboundDefault()]
+        public virtual string TranDesc { get; set; }
+        public abstract class tranDesc : PX.Data.BQL.BqlString.Field<tranDesc> { }
+        #endregion
         #endregion
     }
 }

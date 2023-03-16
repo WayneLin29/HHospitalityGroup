@@ -154,20 +154,21 @@ namespace HH_Customization.DAC
         public abstract class revenuePHP : PX.Data.BQL.BqlDecimal.Field<revenuePHP> { }
         #endregion
 
-        #region GrossProfitPHP
-        [PXDecimal]
-        [PXUIField(DisplayName = "Gross Profit (PHP)", IsReadOnly = true)]
-        [PXUnboundDefault()]
-        public virtual decimal? GrossProfitPHP { get; set; }
-        public abstract class grossProfitPHP : PX.Data.BQL.BqlDecimal.Field<grossProfitPHP> { }
-        #endregion
-
         #region CostPHP
         [PXDecimal]
         [PXUIField(DisplayName = "Cost (PHP)", IsReadOnly = true)]
         [PXUnboundDefault()]
         public virtual decimal? CostPHP { get; set; }
         public abstract class costPHP : PX.Data.BQL.BqlDecimal.Field<costPHP> { }
+        #endregion
+
+        #region GrossProfitPHP
+        [PXDecimal]
+        [PXUIField(DisplayName = "Gross Profit (PHP)", IsReadOnly = true)]
+        [PXUnboundDefault()]
+        //[PXFormula(typeof(Sub<revenuePHP,costPHP>))]
+        public virtual decimal? GrossProfitPHP { get; set; }
+        public abstract class grossProfitPHP : PX.Data.BQL.BqlDecimal.Field<grossProfitPHP> { }
         #endregion
 
         #region GrossProfitPer

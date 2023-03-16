@@ -82,10 +82,22 @@ namespace HH_Customization.DAC
         public abstract class unitPrice : PX.Data.BQL.BqlDecimal.Field<unitPrice> { }
         #endregion
 
+        #region Description
+        [PXDBString(255, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "Description")]
+        [PXDefault(typeof(
+            Search<InventoryItem.descr,
+                Where<InventoryItem.inventoryID, Equal<Current<inventoryID>>>>)
+            , PersistingCheck = PXPersistingCheck.Nothing)]
+        public virtual string Description { get; set; }
+        public abstract class description : PX.Data.BQL.BqlString.Field<description> { }
+        #endregion
+
         #region ExtCost
         [PXDBDecimal()]
         [PXUIField(DisplayName = "Ext Cost")]
         [PXDefault(TypeCode.Decimal, "0.0")]
+        [PXFormula(typeof(Mult<unitPrice, pax>))]
         public virtual Decimal? ExtCost { get; set; }
         public abstract class extCost : PX.Data.BQL.BqlDecimal.Field<extCost> { }
         #endregion
@@ -221,6 +233,15 @@ namespace HH_Customization.DAC
         [PXNote()]
         public virtual Guid? NoteID { get; set; }
         public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
+        #endregion
+
+        #region Unbouhd
+        #region TranDesc
+        [PXString()]
+        [PXUnboundDefault()]
+        public virtual string TranDesc { get; set; }
+        public abstract class tranDesc : PX.Data.BQL.BqlString.Field<tranDesc> { }
+        #endregion
         #endregion
     }
 }

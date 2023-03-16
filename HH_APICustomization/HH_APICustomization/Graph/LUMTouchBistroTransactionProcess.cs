@@ -51,13 +51,14 @@ namespace HH_APICustomization.Grpah
         [PXProcessButton]
         public virtual IEnumerable MarkImported(PXAdapter adapter)
         {
+            var isImport = Filter.Current.IsImported;
             PXLongOperation.StartOperation(this, () =>
             {
                 foreach (LUMTBTransactionSummary item in Transactions.Select())
                 {
                     if (item.Selected == true)
                     {
-                        item.IsImported = false;
+                        item.IsImported = !isImport;
                         this.Caches<LUMTBTransactionSummary>().Update(item);
                     }
                 }
@@ -73,7 +74,9 @@ namespace HH_APICustomization.Grpah
             if (e.Row == null) return;
             bool isAR = e.Row.DataType == ProcessFilter.AccountRefresh;
             PXUIFieldAttribute.SetEnabled<ProcessFilter.isImported>(e.Cache, e.Row, !isAR);
-            this.markImported.SetVisible(e.Row.IsImported ?? false);
+            //2023/03/13 改為正反皆可用
+            //this.markImported.SetVisible(e.Row.IsImported ?? false);
+            this.markImported.SetCaption(e.Row.IsImported ?? false ? "Mark Unimported" : "Mark Imported");
             bool isSalesByMenuItem = e.Row.DataType == TSDataType.SALES_BY_MENUITEM;
             bool isAccountSum = e.Row.DataType == TSDataType.ACCOUNTS_SUMMARY;
             bool isInOut = e.Row.DataType == TSDataType.PAY_INS || e.Row.DataType == TSDataType.PAY_OUTS;

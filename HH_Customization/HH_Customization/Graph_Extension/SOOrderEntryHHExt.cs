@@ -23,6 +23,10 @@ namespace PX.Objects.SO
         }
         #endregion
 
+        #region Const
+        public const string DATE_FORMAT = "MMddyyyy";
+        #endregion
+
         #region View
         public PXSelect<LUMTourFlight,
             Where<LUMTourFlight.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
@@ -65,7 +69,10 @@ namespace PX.Objects.SO
         public virtual IEnumerable EditLinkByFlight(PXAdapter adapter)
         {
             LUMTourFlight current = Flights.Current;
-            ShowLinkEdit(true, current.FligthID);
+            if (Flights.AllowUpdate)
+            {
+                ShowLinkEdit(true, current.FligthID);
+            }
             return adapter.Get();
         }
         #endregion
@@ -77,7 +84,10 @@ namespace PX.Objects.SO
         public virtual IEnumerable EditLinkByItem(PXAdapter adapter)
         {
             var current = Items.Current;
-            ShowLinkEdit(false, current.ItemID);
+            if (!HasAPLink(current) && Items.AllowUpdate)
+            {
+                ShowLinkEdit(false, current.ItemID);
+            }
             return adapter.Get();
         }
         #endregion
@@ -176,19 +186,43 @@ namespace PX.Objects.SO
         protected void _(Events.RowSelected<LUMTourItem> e)
         {
             if (e.Row == null) return;
-            SetAPlinkSelectedEnabled<LUMTourItem>(e.Cache, e.Row);
+            SetAPlinkEnabled(e.Cache, e.Row);
+            PXUIFieldAttribute.SetEnabled<LUMTourItem.inventoryID>(e.Cache,e.Row,!HasAPLink(e.Row));
+            PXUIFieldAttribute.SetEnabled<LUMTourItem.unitPrice>(e.Cache, e.Row, !HasAPLink(e.Row));
+        }
+
+        protected void _(Events.RowDeleting<LUMTourItem> e) => ValidatoeAPLink(e.Row);
+        protected void _(Events.RowDeleting<LUMTourFlight> e) => ValidatoeAPLink(e.Row);
+        protected void _(Events.RowDeleting<LUMTourReservation> e) => ValidatoeAPLink(e.Row);
+
+        protected void _(Events.FieldDefaulting<LUMTourItem, LUMTourItem.tranDesc> e)
+        {
+            if (e.Row == null) return;
+            e.NewValue = $"{DateToStr(e.Row.Date)}-{e.Row.Description}";
         }
 
         protected void _(Events.RowSelected<LUMTourFlight> e)
         {
             if (e.Row == null) return;
-            SetAPlinkSelectedEnabled<LUMTourFlight>(e.Cache, e.Row);
+            SetAPlinkEnabled(e.Cache, e.Row);
+        }
+
+        protected void _(Events.FieldDefaulting<LUMTourFlight, LUMTourFlight.tranDesc> e)
+        {
+            if (e.Row == null) return;
+            e.NewValue = $"{e.Row.BookCode}-{e.Row.DepartureAirport}-{e.Row.ArrivalAirport}";
         }
 
         protected void _(Events.RowSelected<LUMTourReservation> e)
         {
             if (e.Row == null) return;
-            SetAPlinkSelectedEnabled<LUMTourReservation>(e.Cache, e.Row);
+            SetAPlinkEnabled(e.Cache, e.Row);
+        }
+
+        protected void _(Events.FieldDefaulting<LUMTourReservation, LUMTourReservation.tranDesc> e)
+        {
+            if (e.Row == null) return;
+            e.NewValue = $"{e.Row.ReservationID}-{e.Row.Remark}";
         }
 
         protected void _(Events.FieldUpdated<LUMTourReservation, LUMTourReservation.reservationID> e)
@@ -200,12 +234,26 @@ namespace PX.Objects.SO
         #endregion
 
         #region Method
-        public void SetAPlinkSelectedEnabled<T>(PXCache cache, T data) where T : ICreateAPData, IAPLink
+        public void ValidatoeAPLink(IAPLink row)
         {
-            PXUIFieldAttribute.SetEnabled(cache, data, "Selected", !HasAPLink<T>(data));
+            if (row == null) return;
+            if (HasAPLink(row))
+                throw new PXException($"Please delete AP Bill before delete the item", PXErrorLevel.RowError);
         }
 
-        public bool HasAPLink<T>(T data) where T : IAPLink
+        public String DateToStr(DateTime? date)
+        {
+            return date?.ToString(DATE_FORMAT) ?? "";
+        }
+
+        public void SetAPlinkEnabled<T>(PXCache cache, T data) where T : ICreateAPData, IAPLink
+        {
+            bool isAPLink = HasAPLink(data);
+            PXUIFieldAttribute.SetEnabled(cache, data, "Selected", !isAPLink);
+            PXUIFieldAttribute.SetEnabled(cache, data, "ExtCost", !isAPLink);
+        }
+
+        public bool HasAPLink(IAPLink data)
         {
             return data.APRefNbr != null && data.APDocType != null && data.APLineNbr != null;
         }
@@ -250,7 +298,7 @@ namespace PX.Objects.SO
                         BranchID = header.BranchID,
                         VendorID = group.Key.VendorID,
                         InvoiceNbr = header.OrderNbr,
-                        DocDesc = header.DocDesc
+                        DocDesc = header.OrderDesc
                     };
                     doc = entry.Document.Current = entry.Document.Insert(doc);
 
@@ -262,11 +310,14 @@ namespace PX.Objects.SO
                     entry.Save.Press();
                     foreach (T data in groupList)
                     {
+                        //取得TranDesc
+                        cache.SetDefaultExt(data, "TranDesc");
                         APTran tran = entry.Transactions.Insert(new APTran());
                         tran.InventoryID = data.InventoryID;
                         tran.AccountID = data.AccountID;
                         tran.SubID = data.SubID;
                         tran.CuryLineAmt = data.ExtCost;
+                        tran.TranDesc = $"{header.OrderNbr}-{data.TranDesc}";
                         entry.Transactions.Update(tran);
 
                         data.APRefNbr = doc.RefNbr;
@@ -520,7 +571,6 @@ namespace PX.Objects.SO
             public virtual DateTime? CheckOut { get; set; }
             public abstract class checkout : PX.Data.BQL.BqlDateTime.Field<checkout> { }
             #endregion
-
         }
         #endregion
 
