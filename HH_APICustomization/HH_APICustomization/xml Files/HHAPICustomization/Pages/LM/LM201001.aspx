@@ -26,12 +26,17 @@
                         <Levels>
                             <px:PXGridLevel DataMember="payrollHour">
                                 <Columns>
+                                    <px:PXGridColumn DataField="Approved" Width="70" Type="CheckBox"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="BranchID" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="WorkingDate" Width="120"></px:PXGridColumn>
-                                    <px:PXGridColumn DataField="EmployeeID" Width="150" DisplayMode="Hint"></px:PXGridColumn>
-                                    <px:PXGridColumn DataField="EarningType" Width="120"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="EmployeeID" Width="150" DisplayMode="Hint" CommitChanges="true"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="EmployeeName" Width="200"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="EarningType" Width="120" CommitChanges="true"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="EarningDescrption" Width="200"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Hour" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Remark" Width="300"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="CutOffDate" Width="150"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="ApprovedAmount" Width="150"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="CreatedByID" Width="200"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="CreatedDateTime" Width="200"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="LastModifiedByID" Width="120"></px:PXGridColumn>
@@ -57,12 +62,17 @@
                         <Levels>
                             <px:PXGridLevel DataMember="payrollAdjustment">
                                 <Columns>
-                                    <px:PXGridColumn DataField="Branch" Width="120"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="Approved" Width="70" Type="CheckBox"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="BranchID" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="AdjustmentDate" Width="120"></px:PXGridColumn>
-                                    <px:PXGridColumn DataField="EmployeeID" Width="150" DisplayMode="Hint"></px:PXGridColumn>
-                                    <px:PXGridColumn DataField="AdjustmentType" Width="150"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="EmployeeID" Width="150" DisplayMode="Hint" CommitChanges="true"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="EmployeeName" Width="200"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="AdjustmentType" Width="150" CommitChanges="true"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="AdjustmentDescription" Width="200"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Amount" Width="120"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Remark" Width="180"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="CutOffDate" Width="150"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="ApprovedAmount" Width="150"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="CreatedByID" Width="200"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="CreatedDateTime" Width="200"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="LastModifiedByID" Width="120"></px:PXGridColumn>

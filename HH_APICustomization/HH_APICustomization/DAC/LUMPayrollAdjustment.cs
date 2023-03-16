@@ -40,19 +40,39 @@ namespace HHAPICustomization.DAC
                 typeof(Contact.eMail),
                 typeof(EPEmployee.status),
                 typeof(EPEmployee.classID),
-                SubstituteKey = typeof(EPEmployee.acctCD),
-                DescriptionField = typeof(EPEmployee.acctName))]
+                SubstituteKey = typeof(EPEmployee.acctCD))]
         public virtual int? EmployeeID { get; set; }
         public abstract class employeeID : PX.Data.BQL.BqlInt.Field<employeeID> { }
+        #endregion
+
+        #region EmployeeName
+        [PXString(IsUnicode = true)]
+        [PXFormula(typeof(Selector<employeeID, EPEmployee.acctName>))]
+        [PXDefault(typeof(Search<EPEmployee.acctName, Where<EPEmployee.bAccountID, Equal<Current<LUMPayrollHour.employeeID>>>>), PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Employee Name", Enabled = false)]
+        public virtual string EmployeeName { get; set; }
+        public abstract class employeeName : PX.Data.BQL.BqlString.Field<employeeName> { }
         #endregion
 
         #region AdjustmentType
         [PXDBString(20, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Adjustment Type")]
         [PXSelector(typeof(Search<CSAttributeDetail.valueID, Where<CSAttributeDetail.attributeID, Equal<PADJUSTAttr>>>),
-            typeof(CSAttributeDetail.description))]
+                    typeof(CSAttributeDetail.description))]
         public virtual string AdjustmentType { get; set; }
         public abstract class adjustmentType : PX.Data.BQL.BqlString.Field<adjustmentType> { }
+        #endregion
+
+        #region AdjustmentDescription
+        [PXString(IsUnicode = true)]
+        [PXFormula(typeof(Selector<adjustmentType, CSAttributeDetail.description>))]
+        [PXDefault(typeof(Search<CSAttributeDetail.description,
+                          Where<CSAttributeDetail.attributeID, Equal<Current<LUMPayrollAdjustment.adjustmentType>>,
+                            And<CSAttributeDetail.attributeID, Equal<PADJUSTAttr>>>>),
+                   PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Adjustment Description", Enabled = false)]
+        public virtual string AdjustmentDescription { get; set; }
+        public abstract class adjustmentDescription : PX.Data.BQL.BqlString.Field<adjustmentDescription> { }
         #endregion
 
         #region Amount
@@ -67,6 +87,27 @@ namespace HHAPICustomization.DAC
         [PXUIField(DisplayName = "Remark")]
         public virtual string Remark { get; set; }
         public abstract class remark : PX.Data.BQL.BqlString.Field<remark> { }
+        #endregion
+
+        #region Approved
+        [PXDBBool]
+        [PXUIField(DisplayName = "Apprvoed", Enabled = false)]
+        public virtual bool? Approved { get; set; }
+        public abstract class approved : PX.Data.BQL.BqlBool.Field<approved> { }
+        #endregion
+
+        #region CutOffDate
+        [PXDBDate]
+        [PXUIField(DisplayName = "Cut-Off Date")]
+        public virtual DateTime? CutOffDate { get; set; }
+        public abstract class cutOffDate : PX.Data.BQL.BqlBool.Field<cutOffDate> { }
+        #endregion
+
+        #region ApprovedAmount
+        [PXDecimal]
+        [PXUIField(DisplayName = "Approved Amount", Enabled = false)]
+        public virtual decimal? ApprovedAmount { get; set; }
+        public abstract class approvedAmount : PX.Data.BQL.BqlBool.Field<approvedAmount> { }
         #endregion
 
         #region Noteid

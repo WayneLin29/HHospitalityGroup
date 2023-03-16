@@ -39,10 +39,18 @@ namespace HHAPICustomization.DAC
                 typeof(Contact.eMail),
                 typeof(EPEmployee.status),
                 typeof(EPEmployee.classID),
-                SubstituteKey = typeof(EPEmployee.acctCD),
-                DescriptionField = typeof(EPEmployee.acctName))]
+                SubstituteKey = typeof(EPEmployee.acctCD))]
         public virtual int? EmployeeID { get; set; }
         public abstract class employeeID : PX.Data.BQL.BqlInt.Field<employeeID> { }
+        #endregion
+
+        #region EmployeeName
+        [PXString(IsUnicode = true)]
+        [PXFormula(typeof(Selector<employeeID, EPEmployee.acctName>))]
+        [PXDefault(typeof(Search<EPEmployee.acctName, Where<EPEmployee.bAccountID, Equal<Current<LUMPayrollHour.employeeID>>>>), PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Employee Name", Enabled = false)]
+        public virtual string EmployeeName { get; set; }
+        public abstract class employeeName : PX.Data.BQL.BqlString.Field<employeeName> { }
         #endregion
 
         #region EarningType
@@ -53,6 +61,15 @@ namespace HHAPICustomization.DAC
             typeof(EPEarningType.description))]
         public virtual string EarningType { get; set; }
         public abstract class earningType : PX.Data.BQL.BqlString.Field<earningType> { }
+        #endregion
+
+        #region Earning Description
+        [PXString(IsUnicode = true)]
+        [PXFormula(typeof(Selector<earningType, EPEarningType.description>))]
+        [PXDefault(typeof(Search<EPEarningType.description, Where<EPEarningType.typeCD, Equal<Current<LUMPayrollHour.earningType>>>>), PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Earning Description", Enabled = false)]
+        public virtual string EarningDescrption { get; set; }
+        public abstract class earningDescription : PX.Data.BQL.BqlString.Field<earningDescription> { }
         #endregion
 
         #region Hour
@@ -67,6 +84,27 @@ namespace HHAPICustomization.DAC
         [PXUIField(DisplayName = "Remark")]
         public virtual string Remark { get; set; }
         public abstract class remark : PX.Data.BQL.BqlString.Field<remark> { }
+        #endregion
+
+        #region Approved
+        [PXDBBool]
+        [PXUIField(DisplayName = "Apprvoed", Enabled = false)]
+        public virtual bool? Approved { get; set; }
+        public abstract class approved : PX.Data.BQL.BqlBool.Field<approved> { }
+        #endregion
+
+        #region CutOffDate
+        [PXDBDate]
+        [PXUIField(DisplayName = "Cut-Off Date")]
+        public virtual DateTime? CutOffDate { get; set; }
+        public abstract class cutOffDate : PX.Data.BQL.BqlBool.Field<cutOffDate> { }
+        #endregion
+
+        #region ApprovedAmount
+        [PXDecimal]
+        [PXUIField(DisplayName = "Approved Amount", Enabled = false)]
+        public virtual decimal? ApprovedAmount { get; set; }
+        public abstract class approvedAmount : PX.Data.BQL.BqlBool.Field<approvedAmount> { }
         #endregion
 
         #region Noteid
