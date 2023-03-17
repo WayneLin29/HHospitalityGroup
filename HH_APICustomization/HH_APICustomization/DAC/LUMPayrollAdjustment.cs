@@ -104,7 +104,7 @@ namespace HHAPICustomization.DAC
         #endregion
 
         #region ApprovedAmount
-        [PXDecimal]
+        [PXDBDecimal]
         [PXUIField(DisplayName = "Approved Amount", Enabled = false)]
         public virtual decimal? ApprovedAmount { get; set; }
         public abstract class approvedAmount : PX.Data.BQL.BqlBool.Field<approvedAmount> { }
