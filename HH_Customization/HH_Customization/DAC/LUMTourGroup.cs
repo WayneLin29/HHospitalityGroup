@@ -5,6 +5,12 @@ using PX.Objects.CS;
 using PX.Objects.GL;
 using PX.Objects.SO;
 using PX.Data.BQL.Fluent;
+using PX.Data.BQL;
+using System.Collections.Generic;
+using HH_Customization.Graph;
+using System.Linq;
+using PX.Objects.AP;
+using HH_Customization.Descriptor;
 
 namespace HH_Customization.DAC
 {
@@ -43,7 +49,7 @@ namespace HH_Customization.DAC
 
         #region TourTypeClassID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Tour Type Class ID",Required = true)]
+        [PXUIField(DisplayName = "Tour Type Class ID", Required = true)]
         [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<LUMTourTypeClass.typeClassID,
             Where<LUMTourTypeClass.branchID, Equal<Current<branchID>>>>),
@@ -149,7 +155,7 @@ namespace HH_Customization.DAC
         #region RevenuePHP
         [PXDecimal]
         [PXUIField(DisplayName = "Revenue (PHP)", IsReadOnly = true)]
-        [PXUnboundDefault()]
+        [DACFieldDefault(typeof(LUMTourGroup), "RevenuePHPDefault")]
         public virtual decimal? RevenuePHP { get; set; }
         public abstract class revenuePHP : PX.Data.BQL.BqlDecimal.Field<revenuePHP> { }
         #endregion
@@ -157,7 +163,7 @@ namespace HH_Customization.DAC
         #region CostPHP
         [PXDecimal]
         [PXUIField(DisplayName = "Cost (PHP)", IsReadOnly = true)]
-        [PXUnboundDefault()]
+        [DACFieldDefault(typeof(LUMTourGroup), "CostPHPDefault")]
         public virtual decimal? CostPHP { get; set; }
         public abstract class costPHP : PX.Data.BQL.BqlDecimal.Field<costPHP> { }
         #endregion
@@ -165,8 +171,8 @@ namespace HH_Customization.DAC
         #region GrossProfitPHP
         [PXDecimal]
         [PXUIField(DisplayName = "Gross Profit (PHP)", IsReadOnly = true)]
-        [PXUnboundDefault()]
-        //[PXFormula(typeof(Sub<revenuePHP,costPHP>))]
+        [DACFieldDefault(typeof(LUMTourGroup), "GrossProfitPHPDefault")]
+
         public virtual decimal? GrossProfitPHP { get; set; }
         public abstract class grossProfitPHP : PX.Data.BQL.BqlDecimal.Field<grossProfitPHP> { }
         #endregion
@@ -174,11 +180,119 @@ namespace HH_Customization.DAC
         #region GrossProfitPer
         [PXDecimal]
         [PXUIField(DisplayName = "Gross Profit %", IsReadOnly = true)]
-        [PXUnboundDefault()]
+        [DACFieldDefault(typeof(LUMTourGroup), "GrossProfitPerDefault")]
         public virtual decimal? GrossProfitPer { get; set; }
         public abstract class grossProfitPer : PX.Data.BQL.BqlDecimal.Field<grossProfitPer> { }
         #endregion
 
+        #endregion
+
+        #region Method
+        #region RevenuePHP Default
+        public static void RevenuePHPDefault(PXCache sender, PXFieldDefaultingEventArgs e) {
+            LUMTourGroup row = (LUMTourGroup)e.Row;
+            PXGraph graph = new PXGraph();
+            //因剛仔入畫面Guests尚未載入資料，造成資料為空，改為BQL查詢
+            var groupBy = GetGuest(graph, row.TourGroupNbr).GroupBy(d => new { d.SOOrderNbr, d.SOOrderType });
+            decimal total = 0m;
+            foreach (var group in groupBy)
+            {
+                SOOrder order = SOOrder.PK.Find(graph, group.Key.SOOrderType, group.Key.SOOrderNbr);
+                total += (order?.CuryOrderTotal ?? 0m);
+            }
+            e.NewValue = total;
+        }
+        #endregion
+
+        #region CostPHP Default
+        public static void CostPHPDefault(PXCache sender, PXFieldDefaultingEventArgs e)
+        {
+            LUMTourGroup row = (LUMTourGroup)e.Row;
+            PXGraph graph = new PXGraph();
+            decimal total = 0m;
+            List<LUMTourGroupItem> groupItems = SelectFrom<LUMTourGroupItem>
+                    .Where<LUMTourGroupItem.tourGroupNbr.IsEqual<@P.AsString>>
+                    .View.Select(graph, row.TourGroupNbr)
+                    .RowCast<LUMTourGroupItem>().ToList();
+            List<LUMTourGuest> guests = GetGuest(graph, row.TourGroupNbr);
+            //AP by GroupItem
+            var groupItemByAP = groupItems.GroupBy(d => new { d.APRefNbr, d.APDocType });
+            foreach (var ap in groupItemByAP)
+            {
+                APInvoice invoice = APInvoice.PK.Find(graph, ap.Key.APDocType, ap.Key.APRefNbr);
+                total += (invoice?.OrigDocAmt ?? 0m);
+            }
+            #region By SO
+            var soGroup = guests.GroupBy(d => new { d.SOOrderNbr, d.SOOrderType });
+            foreach (var so in soGroup)
+            {
+                //AP by SO Item
+                var itemByAp = SelectFrom<LUMTourItem>
+                    .Where<LUMTourItem.sOOrderNbr.IsEqual<@P.AsString>
+                    .And<LUMTourItem.sOOrderType.IsEqual<@P.AsString>>>
+                    .View.Select(graph, so.Key.SOOrderNbr,so.Key.SOOrderType)
+                    .RowCast<LUMTourItem>().ToList()
+                    .GroupBy(d => new { d.APRefNbr, d.APDocType });
+                foreach (var ap in itemByAp)
+                {
+                    APInvoice invoice = APInvoice.PK.Find(graph, ap.Key.APDocType, ap.Key.APRefNbr);
+                    total += (invoice?.OrigDocAmt ?? 0m);
+                }
+                //AP by SO Reservation
+                var reservationByAp = SelectFrom<LUMTourReservation>
+                    .Where<LUMTourReservation.sOOrderNbr.IsEqual<@P.AsString>
+                    .And<LUMTourReservation.sOOrderType.IsEqual<@P.AsString>>>
+                    .View.Select(graph, so.Key.SOOrderNbr, so.Key.SOOrderType)
+                    .RowCast<LUMTourReservation>().ToList()
+                    .GroupBy(d => new { d.APRefNbr, d.APDocType });
+                foreach (var ap in reservationByAp)
+                {
+                    APInvoice invoice = APInvoice.PK.Find(graph, ap.Key.APDocType, ap.Key.APRefNbr);
+                    total += (invoice?.OrigDocAmt ?? 0m);
+                }
+                //AP by SO Flight
+                var flightByAp = SelectFrom<LUMTourFlight>
+                    .Where<LUMTourFlight.sOOrderNbr.IsEqual<@P.AsString>
+                    .And<LUMTourFlight.sOOrderType.IsEqual<@P.AsString>>>
+                    .View.Select(graph, so.Key.SOOrderNbr, so.Key.SOOrderType)
+                    .RowCast<LUMTourFlight>().ToList().GroupBy(d => new { d.APRefNbr, d.APDocType });
+                foreach (var ap in flightByAp)
+                {
+                    APInvoice invoice = APInvoice.PK.Find(graph, ap.Key.APDocType, ap.Key.APRefNbr);
+                    total += (invoice?.OrigDocAmt ?? 0m);
+                }
+            }
+
+            #endregion
+            e.NewValue = total;
+        }
+        #endregion
+
+        #region GrossProfitPHP Default
+        public static void GrossProfitPHPDefault(PXCache sender, PXFieldDefaultingEventArgs e) {
+            LUMTourGroup row = (LUMTourGroup)e.Row;
+            e.NewValue = row.RevenuePHP - row.CostPHP;
+        }
+        #endregion
+
+        #region GrossProfitPer Default
+        public static void GrossProfitPerDefault(PXCache sender, PXFieldDefaultingEventArgs e) {
+            LUMTourGroup row = (LUMTourGroup)e.Row;
+            decimal revenuePHP = row.RevenuePHP ?? 0m;
+            decimal grossProfitPHP = row.GrossProfitPHP ?? 0m;
+            if (row.RevenuePHP == null || row.RevenuePHP == 0m) return;
+            e.NewValue = Decimal.Round(100 * grossProfitPHP / revenuePHP, 2, MidpointRounding.AwayFromZero);
+        }
+        #endregion
+        #endregion
+
+        #region BQL
+        private static List<LUMTourGuest> GetGuest(PXGraph graph,string tourGroupNbr) { 
+            return SelectFrom<LUMTourGuest>
+                    .Where<LUMTourGuest.tourGroupNbr.IsEqual<@P.AsString>>
+                    .View.Select(graph, tourGroupNbr)
+                    .RowCast<LUMTourGuest>().ToList();
+        }
         #endregion
     }
 }

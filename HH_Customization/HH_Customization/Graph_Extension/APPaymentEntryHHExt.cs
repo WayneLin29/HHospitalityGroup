@@ -24,8 +24,12 @@ namespace PX.Objects.AP
             using (PXTransactionScope ts = new PXTransactionScope())
             {
                 //baseMethod();
-                LinkFileByAdjdAP();
-                LinkBranch();
+                APPayment invoice = Base.Document.Current;
+                if (invoice != null && Base.Document.Cache.GetStatus(invoice) != PXEntryStatus.Deleted)
+                {
+                    LinkFileByAdjdAP();
+                    LinkBranch();
+                }
                 baseMethod();
                 ts.Complete();
             }
@@ -56,7 +60,8 @@ namespace PX.Objects.AP
             if (Base.Document.Cache.GetStatus(invoice) == PXEntryStatus.Inserted)
             {
                 CashAccount ca = CashAccount.PK.Find(Base, invoice.CashAccountID);
-                if (ca?.BranchID != null) { 
+                if (ca?.BranchID != null)
+                {
                     Base.Document.Cache.SetValueExt<APPayment.branchID>(invoice, ca.BranchID);
                     Base.Document.UpdateCurrent();
                 }

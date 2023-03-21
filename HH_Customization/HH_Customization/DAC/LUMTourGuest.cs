@@ -1,5 +1,9 @@
 using System;
+using HH_Customization.Descriptor;
+using HH_Customization.Graph;
 using PX.Data;
+using PX.Data.BQL;
+using PX.Data.BQL.Fluent;
 using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.CM.Extensions;
 using PX.Objects.SO;
@@ -183,7 +187,8 @@ namespace HH_Customization.DAC
         #region Age
         [PXInt()]
         [PXUIField(DisplayName = "Age", IsReadOnly = true)]
-        [PXUnboundDefault(typeof(Sub<DatePart<DatePart.year, Current<LUMTourGroup.dateFrom>>, DatePart<DatePart.year, Current<birthDay>>>))]
+        [DACFieldDefault(typeof(LUMTourGuest), "AgeDefault")]
+        //[PXUnboundDefault(typeof(Sub<DatePart<DatePart.year, Current<LUMTourGroup.dateFrom>>, DatePart<DatePart.year, Current<birthDay>>>))]
         public virtual int? Age { get; set; }
         public abstract class age : PX.Data.BQL.BqlInt.Field<age> { }
         #endregion
@@ -203,6 +208,25 @@ namespace HH_Customization.DAC
         public virtual Decimal? FinalPayAmount { get; set; }
         public abstract class finalPayAmount : PX.Data.BQL.BqlDecimal.Field<finalPayAmount> { }
         #endregion
+        #endregion
+
+
+        #region Method
+        public static void AgeDefault(PXCache sender, PXFieldDefaultingEventArgs e)
+        {
+            LUMTourGuest row = (LUMTourGuest)e.Row;
+            LUMTourGroupEntry graph = sender.Graph as LUMTourGroupEntry;
+            LUMTourGroup group;
+            if (graph == null)
+            {
+                group = SelectFrom<LUMTourGroup>.Where<LUMTourGroup.tourGroupNbr.IsEqual<@P.AsString>>.View.Select(new PXGraph(), row.TourGroupNbr);
+            }
+            else
+            {
+                group = graph.Group.Current;
+            }
+            e.NewValue = group?.DateFrom?.Year - row.BirthDay?.Year;
+        }
         #endregion
     }
 }

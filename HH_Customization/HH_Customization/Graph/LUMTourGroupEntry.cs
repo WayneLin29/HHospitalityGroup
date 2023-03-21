@@ -12,6 +12,7 @@ using PX.Objects.GL;
 using System.Collections.Generic;
 using PX.Objects.AP;
 using System;
+using HH_Customization.Descriptor;
 
 namespace HH_Customization.Graph
 {
@@ -256,75 +257,13 @@ namespace HH_Customization.Graph
             SetUI(e.Row);
         }
 
-        protected virtual void _(Events.FieldDefaulting<LUMTourGroup, LUMTourGroup.revenuePHP> e)
+        protected virtual void _(Events.FieldUpdated<LUMTourGroup, LUMTourGroup.dateFrom> e)
         {
             if (e.Row == null) return;
-            //因剛仔入畫面Guests尚未載入資料，造成資料為空，改為BQL查詢
-            var groupBy = GetGuest(e.Row.TourGroupNbr).GroupBy(d => new { d.SOOrderNbr, d.SOOrderType });
-            decimal total = 0m;
-            foreach (var group in groupBy)
+            foreach (var guest in Guests.Select())
             {
-                SOOrder order = SOOrder.PK.Find(this, group.Key.SOOrderType, group.Key.SOOrderNbr);
-                total += (order?.CuryOrderTotal ?? 0m);
+                Guests.Cache.SetDefaultExt<LUMTourGuest.age>(guest);
             }
-            e.NewValue = total;
-        }
-
-        protected virtual void _(Events.FieldDefaulting<LUMTourGroup, LUMTourGroup.costPHP> e)
-        {
-            if (e.Row == null) return;
-            decimal total = 0m;
-            //AP by GroupItem
-            var groupItemByAP = GetGroupItem(e.Row.TourGroupNbr).GroupBy(d => new { d.APRefNbr, d.APDocType });
-            foreach (var ap in groupItemByAP)
-            {
-                APInvoice invoice = APInvoice.PK.Find(this, ap.Key.APDocType, ap.Key.APRefNbr);
-                total += (invoice?.OrigDocAmt ?? 0m);
-            }
-            #region By SO
-            var soGroup = GetGuest(e.Row.TourGroupNbr).GroupBy(d => new { d.SOOrderNbr, d.SOOrderType });
-            foreach (var so in soGroup)
-            {
-                //AP by SO Item
-                var itemByAp = GetItem(so.Key.SOOrderNbr, so.Key.SOOrderType).GroupBy(d => new { d.APRefNbr, d.APDocType });
-                foreach (var ap in itemByAp)
-                {
-                    APInvoice invoice = APInvoice.PK.Find(this, ap.Key.APDocType, ap.Key.APRefNbr);
-                    total += (invoice?.OrigDocAmt ?? 0m);
-                }
-                //AP by SO Reservation
-                var reservationByAp = GetReservation(so.Key.SOOrderNbr, so.Key.SOOrderType).GroupBy(d => new { d.APRefNbr, d.APDocType });
-                foreach (var ap in reservationByAp)
-                {
-                    APInvoice invoice = APInvoice.PK.Find(this, ap.Key.APDocType, ap.Key.APRefNbr);
-                    total += (invoice?.OrigDocAmt ?? 0m);
-                }
-                //AP by SO Flight
-                var flightByAp = GetFlight(so.Key.SOOrderNbr, so.Key.SOOrderType).GroupBy(d => new { d.APRefNbr, d.APDocType });
-                foreach (var ap in flightByAp)
-                {
-                    APInvoice invoice = APInvoice.PK.Find(this, ap.Key.APDocType, ap.Key.APRefNbr);
-                    total += (invoice?.OrigDocAmt ?? 0m);
-                }
-            }
-
-            #endregion
-            e.NewValue = total;
-        }
-
-        protected virtual void _(Events.FieldDefaulting<LUMTourGroup, LUMTourGroup.grossProfitPHP> e)
-        {
-            if (e.Row == null) return;
-            e.NewValue = e.Row.RevenuePHP - e.Row.CostPHP;
-        }
-
-        protected virtual void _(Events.FieldDefaulting<LUMTourGroup, LUMTourGroup.grossProfitPer> e)
-        {
-            if (e.Row == null) return;
-            decimal revenuePHP = e.Row.RevenuePHP ?? 0m;
-            decimal grossProfitPHP = e.Row.GrossProfitPHP ?? 0m;
-            if (e.Row.RevenuePHP == null || e.Row.RevenuePHP == 0m) return;
-            e.NewValue = Decimal.Round(100 * grossProfitPHP / revenuePHP, 2, MidpointRounding.AwayFromZero);
         }
 
         #region LUMTourGuest
