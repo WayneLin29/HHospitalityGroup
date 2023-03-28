@@ -22,7 +22,11 @@ namespace PX.Objects.AP
         {
             using (PXTransactionScope ts = new PXTransactionScope())
             {
-                LinkFileByPO();
+                APInvoice invoice = Base.Document.Current;
+                if (invoice != null && Base.Document.Cache.GetStatus(invoice) != PXEntryStatus.Deleted)
+                {
+                    LinkFileByPO();
+                }
                 baseMethod();
                 ts.Complete();
             }

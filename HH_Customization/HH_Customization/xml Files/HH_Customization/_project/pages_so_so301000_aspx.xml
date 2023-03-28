@@ -320,6 +320,12 @@
                                                             </AddItem>
                                                             <AddItem>
                                                                 <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
+                                                                    <Prop Key="DataField" Value="RateDate" />
+                                                                    <Prop Key="Width" Value="90" />
+                                                                </PXGridColumn>
+                                                            </AddItem>
+                                                            <AddItem>
+                                                                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
                                                                     <Prop Key="DataField" Value="PropertyID" />
                                                                     <Prop Key="Width" Value="70" />
                                                                 </PXGridColumn>

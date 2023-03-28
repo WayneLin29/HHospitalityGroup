@@ -16,7 +16,7 @@
 			<px:PXLayoutRule ID="PXLayoutRule1" runat="server" StartRow="True"></px:PXLayoutRule>
 			<px:PXLayoutRule ControlSize="S" runat="server" ID="CstPXLayoutRule1" StartColumn="True" ></px:PXLayoutRule>
 			<px:PXSelector runat="server" ID="CstPXSelector30" DataField="TourGroupNbr" ></px:PXSelector>
-			<px:PXDateTimeEdit runat="server" ID="CstPXDateTimeEdit7" DataField="DateFrom" ></px:PXDateTimeEdit>
+			<px:PXDateTimeEdit CommitChanges="True" runat="server" ID="CstPXDateTimeEdit7" DataField="DateFrom" ></px:PXDateTimeEdit>
 			<px:PXLayoutRule runat="server" ID="CstLayoutRule14" ColumnSpan="4" ></px:PXLayoutRule>
 			<px:PXTextEdit runat="server" ID="CstPXTextEdit28" DataField="Description" ></px:PXTextEdit>
 			<px:PXLayoutRule ControlSize="S" runat="server" ID="CstPXLayoutRule2" StartColumn="True" ></px:PXLayoutRule>
