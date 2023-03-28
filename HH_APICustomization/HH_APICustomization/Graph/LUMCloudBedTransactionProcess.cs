@@ -437,6 +437,8 @@ namespace HH_APICustomization.Graph
                             RoomAssignment.RoomName = room?.roomName;
                             RoomAssignment.RoomType = room?.roomTypeID;
                             RoomAssignment.RoomTypeName = room?.roomTypeName;
+                            RoomAssignment.IsDeleted = row?.isDeleted;
+                            RoomAssignment.Status = row?.status;
                             var tempDate = new DateTime();
                             if (DateTime.TryParse(room?.roomCheckIn, out tempDate))
                                 RoomAssignment.Checkin = DateTime.Parse(room.roomCheckIn);

@@ -16,6 +16,8 @@
   <col name="LastModifiedByScreenID" type="Char(8)" />
   <col name="LastModifiedDateTime" type="DateTime" />
   <col name="tstamp" type="Timestamp" />
+  <col name="Status" type="NVarChar(50)" nullable="true" />
+  <col name="IsDeleted" type="Bit" nullable="true" />
   <index name="LUMCloudBedRoomAssignment_NoteID" unique="true">
     <col name="NoteID" />
     <col name="CompanyID" />

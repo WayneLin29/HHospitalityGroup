@@ -105,5 +105,19 @@ namespace HH_APICustomization.DAC
         public virtual byte[] Tstamp { get; set; }
         public abstract class tstamp : PX.Data.BQL.BqlByteArray.Field<tstamp> { }
         #endregion
+
+        #region Stauts
+        [PXDBString(50, IsUnicode = true)]
+        [PXUIField(DisplayName = "Status")]
+        public virtual string Status { get; set; }
+        public abstract class status : PX.Data.BQL.BqlString.Field<status> { }
+        #endregion
+
+        #region IsDeleted
+        [PXDBBool]
+        [PXUIField(DisplayName = "IsDeleted")]
+        public virtual bool? IsDeleted { get; set; }
+        public abstract class isDeleted : PX.Data.BQL.BqlBool.Field<isDeleted> { }
+        #endregion
     }
 }
