@@ -451,8 +451,12 @@ namespace HH_APICustomization.Graph
                             #region Room Rate
                             foreach (var rateRow in room.detailedRoomRates)
                             {
-                                var existsRoomRate = oldRoomRate.FirstOrDefault(x => x.ReservationID == currentReservationID && x.Roomid == room?.roomID && x.RateDate.Value.Date == DateTime.Parse(rateRow.Key).Date);
-                                baseGraph.RoomRateDetails.Cache.Delete(existsRoomRate);
+                                // 刪除相同ReservationID and Roomid的Rate資料
+                                oldRoomRate.Where(x => x.ReservationID == currentReservationID && x.Roomid == room?.roomID).ToList()
+                                    .ForEach(x =>
+                                    {
+                                        baseGraph.RoomRateDetails.Cache.Delete(x);
+                                    });
                                 var roomRate = baseGraph.RoomRateDetails.Cache.CreateInstance() as LUMCloudBedRoomRateDetails;
                                 #region Mapping Rate Field
                                 roomRate.ReservationID = currentReservationID;
