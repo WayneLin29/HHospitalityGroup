@@ -449,14 +449,14 @@ namespace HH_APICustomization.Graph
                             #endregion
 
                             #region Room Rate
+                            // 刪除相同ReservationID and Roomid的Rate資料
+                            oldRoomRate.Where(x => x.ReservationID == currentReservationID && x.Roomid == room?.roomID).ToList()
+                                .ForEach(x =>
+                                {
+                                    baseGraph.RoomRateDetails.Cache.Delete(x);
+                                });
                             foreach (var rateRow in room.detailedRoomRates)
                             {
-                                // 刪除相同ReservationID and Roomid的Rate資料
-                                oldRoomRate.Where(x => x.ReservationID == currentReservationID && x.Roomid == room?.roomID).ToList()
-                                    .ForEach(x =>
-                                    {
-                                        baseGraph.RoomRateDetails.Cache.Delete(x);
-                                    });
                                 var roomRate = baseGraph.RoomRateDetails.Cache.CreateInstance() as LUMCloudBedRoomRateDetails;
                                 #region Mapping Rate Field
                                 roomRate.ReservationID = currentReservationID;
