@@ -30,7 +30,8 @@ namespace PX.Objects.SO
         #region View
         public PXSelect<LUMTourFlight,
             Where<LUMTourFlight.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
-            And<LUMTourFlight.sOOrderType, Equal<Current<SOOrder.orderType>>>>> Flights;
+            And<LUMTourFlight.sOOrderType, Equal<Current<SOOrder.orderType>>>>,
+            OrderBy<Asc<LUMTourFlight.seq, Desc<LUMTourFlight.seqDate>>>> Flights;
 
         public PXSelect<LUMTourReservation,
             Where<LUMTourReservation.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
@@ -41,7 +42,8 @@ namespace PX.Objects.SO
 
         public PXSelect<LUMTourItem,
             Where<LUMTourItem.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
-            And<LUMTourItem.sOOrderType, Equal<Current<SOOrder.orderType>>>>> Items;
+            And<LUMTourItem.sOOrderType, Equal<Current<SOOrder.orderType>>>>,
+            OrderBy<Asc<LUMTourItem.seq, Desc<LUMTourItem.seqDate>>>> Items;
 
         #region Dialog
         public PXFilter<DailogControl> DialogCtrl;

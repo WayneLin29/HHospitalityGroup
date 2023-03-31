@@ -114,8 +114,8 @@ namespace HH_Customization.DAC
 
         #region VendorID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Vendor", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXUIField(DisplayName = "Vendor")]
+        //[PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Vendor.bAccountID>),
                 typeof(Vendor.acctCD),
                 typeof(Vendor.acctName),
@@ -229,7 +229,6 @@ namespace HH_Customization.DAC
         public virtual string TranDesc { get; set; }
         public abstract class tranDesc : PX.Data.BQL.BqlString.Field<tranDesc> { }
         #endregion
-
         #endregion
     }
 }

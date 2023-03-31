@@ -13,6 +13,21 @@ namespace HH_Customization.Descriptor
 
         protected FieldDefaultDelegate _defaultFun;
 
+        /// <summary>
+        /// default = true , 是否在RowSelected觸發刷新
+        /// </summary>
+        public bool IsRowSelected = true;
+
+        /// <summary>
+        /// default = false , 是否每次RowSelected都刷新值，否則只會在null時刷新
+        /// </summary>
+        public bool IsAllowRefresh = false;
+
+        /// <summary>
+        /// default = true , 是否在RowUpdated觸發刷新
+        /// </summary>
+        public bool IsRowUpdated = true;
+
         public DACFieldDefaultAttribute(FieldDefaultDelegate defaultFun)
         {
             this._defaultFun = defaultFun;
@@ -32,12 +47,14 @@ namespace HH_Customization.Descriptor
 
         public void RowSelected(PXCache sender, PXRowSelectedEventArgs e)
         {
-            if (e.Row == null || sender.GetValue(e.Row, _FieldName) != null) return;
+            if (e.Row == null || !IsRowSelected) return;
+            if (IsAllowRefresh || sender.GetValue(e.Row, _FieldName) != null) return;
             sender.SetDefaultExt(e.Row, _FieldName);
         }
 
         public void RowUpdated(PXCache sender, PXRowUpdatedEventArgs e)
         {
+            if (e.Row == null || !IsRowUpdated) return;
             sender.SetDefaultExt(e.Row, _FieldName);
         }
     }
