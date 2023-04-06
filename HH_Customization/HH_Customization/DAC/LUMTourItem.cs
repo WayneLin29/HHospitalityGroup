@@ -238,6 +238,7 @@ namespace HH_Customization.DAC
         #endregion
 
         #region Unbouhd
+        public decimal? ExtCostCB { get; set; }
         #region TranDesc
         [PXString()]
         [PXUnboundDefault()]

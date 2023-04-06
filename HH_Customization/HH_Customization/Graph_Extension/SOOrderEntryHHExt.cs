@@ -189,7 +189,7 @@ namespace PX.Objects.SO
         {
             if (e.Row == null) return;
             SetAPlinkEnabled(e.Cache, e.Row);
-            PXUIFieldAttribute.SetEnabled<LUMTourItem.inventoryID>(e.Cache,e.Row,!HasAPLink(e.Row));
+            PXUIFieldAttribute.SetEnabled<LUMTourItem.inventoryID>(e.Cache, e.Row, !HasAPLink(e.Row));
             PXUIFieldAttribute.SetEnabled<LUMTourItem.unitPrice>(e.Cache, e.Row, !HasAPLink(e.Row));
         }
 
@@ -308,6 +308,8 @@ namespace PX.Objects.SO
                     CM.Extensions.CurrencyInfo curyInfo = entry.currencyinfo.Current;
                     entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, header.CuryID);
                     entry.currencyinfo.Update(curyInfo);
+                    entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, header.CuryID);
+                    doc = entry.Document.Update(doc);
                     #endregion
                     entry.Save.Press();
                     foreach (T data in groupList)
@@ -318,7 +320,7 @@ namespace PX.Objects.SO
                         tran.InventoryID = data.InventoryID;
                         tran.AccountID = data.AccountID;
                         tran.SubID = data.SubID;
-                        tran.CuryLineAmt = data.ExtCost;
+                        tran.CuryLineAmt = data.ExtCostCB == 0 || data.ExtCostCB == null ? data.ExtCost : data.ExtCostCB;
                         tran.TranDesc = $"{header.OrderNbr}-{data.TranDesc}";
                         entry.Transactions.Update(tran);
 
