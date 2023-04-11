@@ -427,8 +427,8 @@ namespace HH_APICustomization.Graph
                         {
                             if (string.IsNullOrEmpty(room?.roomID))
                                 continue;
-                            #region Room Assignment
-                            var existsRoomAssignment = oldRoomAssignment.FirstOrDefault(x => x.ReservationID == currentReservationID && x.Roomid == room?.roomID && x.RoomType == room?.roomTypeID);
+                            #region Room Assignment(Json:Rooms)
+                            var existsRoomAssignment = oldRoomAssignment.FirstOrDefault(x => x.ReservationID == currentReservationID);
                             baseGraph.RoomAssignment.Cache.Delete(existsRoomAssignment);
                             var RoomAssignment = baseGraph.RoomAssignment.Cache.CreateInstance() as LUMCloudBedRoomAssignment;
                             #region Mapping Assignment Field
@@ -448,7 +448,7 @@ namespace HH_APICustomization.Graph
                             baseGraph.RoomAssignment.Cache.Insert(RoomAssignment);
                             #endregion
 
-                            #region Room Rate
+                            #region Room Rate(Json: Rooms/detailedRoomRates)
                             // 刪除相同ReservationID and Roomid的Rate資料
                             oldRoomRate.Where(x => x.ReservationID == currentReservationID && x.Roomid == room?.roomID).ToList()
                                 .ForEach(x =>
