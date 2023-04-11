@@ -189,8 +189,8 @@ namespace HH_Customization.DAC
 
         #region VendorID
         [PXDBInt()]
-        [PXUIField(DisplayName = "Vendor", Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXUIField(DisplayName = "Vendor")]
+        //[PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
         [PXSelector(typeof(Search<Vendor.bAccountID>),
                 typeof(Vendor.acctCD),
                 typeof(Vendor.acctName),
@@ -273,11 +273,32 @@ namespace HH_Customization.DAC
         #endregion
 
         #region Unbouhd
+        public decimal? ExtCostCB { get; set ; }
+
         #region TranDesc
         [PXString()]
         [PXUnboundDefault()]
         public virtual string TranDesc { get; set; }
         public abstract class tranDesc : PX.Data.BQL.BqlString.Field<tranDesc> { }
+        #endregion
+
+        #region MaxInt
+        public class maxInt : PX.Data.BQL.BqlInt.Constant<maxInt> { public maxInt() : base(Int32.MaxValue) { } }
+        #endregion
+
+        #region Order
+        [PXInt]
+        [PXUnboundDefault(typeof(Switch<
+                Case<Where<fligthID.FromCurrent, Greater<Zero>>, fligthID.FromCurrent>,
+               maxInt
+            >))]
+        public virtual int? Seq { get; set; }
+        public abstract class seq : PX.Data.BQL.BqlInt.Field<seq> { }
+
+        [PXDateAndTime(DisplayMask = "g", InputMask = "g", UseTimeZone = true)]
+        [PXUnboundDefault(typeof(AccessInfo.businessDate))]
+        public virtual DateTime? SeqDate { get; set; }
+        public abstract class seqDate : PX.Data.BQL.BqlDateTime.Field<seqDate> { }
         #endregion
         #endregion
     }

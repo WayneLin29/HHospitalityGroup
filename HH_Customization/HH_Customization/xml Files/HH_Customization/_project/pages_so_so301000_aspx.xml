@@ -354,6 +354,12 @@
                                                                     <Prop Key="Width" Value="90" />
                                                                 </PXGridColumn>
                                                             </AddItem>
+                                                            <AddItem>
+                                                                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
+                                                                    <Prop Key="DataField" Value="Room" />
+                                                                    <Prop Key="Width" Value="70" />
+                                                                </PXGridColumn>
+                                                            </AddItem>
                                                         </Children>
                                                     </PXGridLevel>
                                                 </AddItem>

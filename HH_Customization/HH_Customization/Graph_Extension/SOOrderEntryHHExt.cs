@@ -30,7 +30,8 @@ namespace PX.Objects.SO
         #region View
         public PXSelect<LUMTourFlight,
             Where<LUMTourFlight.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
-            And<LUMTourFlight.sOOrderType, Equal<Current<SOOrder.orderType>>>>> Flights;
+            And<LUMTourFlight.sOOrderType, Equal<Current<SOOrder.orderType>>>>,
+            OrderBy<Asc<LUMTourFlight.seq, Desc<LUMTourFlight.seqDate>>>> Flights;
 
         public PXSelect<LUMTourReservation,
             Where<LUMTourReservation.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
@@ -41,7 +42,8 @@ namespace PX.Objects.SO
 
         public PXSelect<LUMTourItem,
             Where<LUMTourItem.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
-            And<LUMTourItem.sOOrderType, Equal<Current<SOOrder.orderType>>>>> Items;
+            And<LUMTourItem.sOOrderType, Equal<Current<SOOrder.orderType>>>>,
+            OrderBy<Asc<LUMTourItem.seq, Desc<LUMTourItem.seqDate>>>> Items;
 
         #region Dialog
         public PXFilter<DailogControl> DialogCtrl;
@@ -187,7 +189,7 @@ namespace PX.Objects.SO
         {
             if (e.Row == null) return;
             SetAPlinkEnabled(e.Cache, e.Row);
-            PXUIFieldAttribute.SetEnabled<LUMTourItem.inventoryID>(e.Cache,e.Row,!HasAPLink(e.Row));
+            PXUIFieldAttribute.SetEnabled<LUMTourItem.inventoryID>(e.Cache, e.Row, !HasAPLink(e.Row));
             PXUIFieldAttribute.SetEnabled<LUMTourItem.unitPrice>(e.Cache, e.Row, !HasAPLink(e.Row));
         }
 
@@ -306,6 +308,8 @@ namespace PX.Objects.SO
                     CM.Extensions.CurrencyInfo curyInfo = entry.currencyinfo.Current;
                     entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, header.CuryID);
                     entry.currencyinfo.Update(curyInfo);
+                    entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, header.CuryID);
+                    doc = entry.Document.Update(doc);
                     #endregion
                     entry.Save.Press();
                     foreach (T data in groupList)
@@ -316,7 +320,7 @@ namespace PX.Objects.SO
                         tran.InventoryID = data.InventoryID;
                         tran.AccountID = data.AccountID;
                         tran.SubID = data.SubID;
-                        tran.CuryLineAmt = data.ExtCost;
+                        tran.CuryLineAmt = data.ExtCostCB == 0 || data.ExtCostCB == null ? data.ExtCost : data.ExtCostCB;
                         tran.TranDesc = $"{header.OrderNbr}-{data.TranDesc}";
                         entry.Transactions.Update(tran);
 

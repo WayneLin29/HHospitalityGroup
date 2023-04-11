@@ -87,6 +87,8 @@ namespace HH_Customization.Graph
                     CM.CurrencyInfo curyInfo = entry.currencyinfo.Current;
                     entry.currencyinfo.Cache.SetValueExt<CM.CurrencyInfo.curyID>(curyInfo, groupDate.Key.CuryID);
                     entry.currencyinfo.Update(curyInfo);
+                    entry.Document.Cache.SetValueExt<SOOrder.curyID>(entry.Document.Current, groupDate.Key.CuryID);
+                    entry.Document.UpdateCurrent();
                     #endregion
                     entry.Save.Press();
                     #region Guest link SO
@@ -215,6 +217,8 @@ namespace HH_Customization.Graph
                     CM.Extensions.CurrencyInfo curyInfo = entry.currencyinfo.Current;
                     entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, group.Key.CuryID);
                     entry.currencyinfo.Update(curyInfo);
+                    entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, group.Key.CuryID);
+                    doc = entry.Document.Update(doc);
                     #endregion
                     entry.Save.Press();
                     foreach (LUMTourGroupItem groupItem in groupList)

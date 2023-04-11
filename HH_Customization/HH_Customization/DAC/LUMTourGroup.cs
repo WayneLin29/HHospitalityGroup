@@ -155,7 +155,7 @@ namespace HH_Customization.DAC
         #region RevenuePHP
         [PXDecimal]
         [PXUIField(DisplayName = "Revenue (PHP)", IsReadOnly = true)]
-        [DACFieldDefault(typeof(LUMTourGroup), "RevenuePHPDefault")]
+        [DACFieldDefault(typeof(LUMTourGroup), "RevenuePHPDefault", IsRowUpdated = false)]
         public virtual decimal? RevenuePHP { get; set; }
         public abstract class revenuePHP : PX.Data.BQL.BqlDecimal.Field<revenuePHP> { }
         #endregion
@@ -163,7 +163,7 @@ namespace HH_Customization.DAC
         #region CostPHP
         [PXDecimal]
         [PXUIField(DisplayName = "Cost (PHP)", IsReadOnly = true)]
-        [DACFieldDefault(typeof(LUMTourGroup), "CostPHPDefault")]
+        [DACFieldDefault(typeof(LUMTourGroup), "CostPHPDefault", IsRowUpdated = false)]
         public virtual decimal? CostPHP { get; set; }
         public abstract class costPHP : PX.Data.BQL.BqlDecimal.Field<costPHP> { }
         #endregion
@@ -171,7 +171,7 @@ namespace HH_Customization.DAC
         #region GrossProfitPHP
         [PXDecimal]
         [PXUIField(DisplayName = "Gross Profit (PHP)", IsReadOnly = true)]
-        [DACFieldDefault(typeof(LUMTourGroup), "GrossProfitPHPDefault")]
+        [DACFieldDefault(typeof(LUMTourGroup), "GrossProfitPHPDefault", IsRowUpdated = false)]
 
         public virtual decimal? GrossProfitPHP { get; set; }
         public abstract class grossProfitPHP : PX.Data.BQL.BqlDecimal.Field<grossProfitPHP> { }
@@ -180,7 +180,7 @@ namespace HH_Customization.DAC
         #region GrossProfitPer
         [PXDecimal]
         [PXUIField(DisplayName = "Gross Profit %", IsReadOnly = true)]
-        [DACFieldDefault(typeof(LUMTourGroup), "GrossProfitPerDefault")]
+        [DACFieldDefault(typeof(LUMTourGroup), "GrossProfitPerDefault", IsRowUpdated = false)]
         public virtual decimal? GrossProfitPer { get; set; }
         public abstract class grossProfitPer : PX.Data.BQL.BqlDecimal.Field<grossProfitPer> { }
         #endregion
@@ -189,7 +189,8 @@ namespace HH_Customization.DAC
 
         #region Method
         #region RevenuePHP Default
-        public static void RevenuePHPDefault(PXCache sender, PXFieldDefaultingEventArgs e) {
+        public static void RevenuePHPDefault(PXCache sender, PXFieldDefaultingEventArgs e)
+        {
             LUMTourGroup row = (LUMTourGroup)e.Row;
             PXGraph graph = new PXGraph();
             //因剛仔入畫面Guests尚未載入資料，造成資料為空，改為BQL查詢
@@ -230,7 +231,7 @@ namespace HH_Customization.DAC
                 var itemByAp = SelectFrom<LUMTourItem>
                     .Where<LUMTourItem.sOOrderNbr.IsEqual<@P.AsString>
                     .And<LUMTourItem.sOOrderType.IsEqual<@P.AsString>>>
-                    .View.Select(graph, so.Key.SOOrderNbr,so.Key.SOOrderType)
+                    .View.Select(graph, so.Key.SOOrderNbr, so.Key.SOOrderType)
                     .RowCast<LUMTourItem>().ToList()
                     .GroupBy(d => new { d.APRefNbr, d.APDocType });
                 foreach (var ap in itemByAp)
@@ -269,14 +270,16 @@ namespace HH_Customization.DAC
         #endregion
 
         #region GrossProfitPHP Default
-        public static void GrossProfitPHPDefault(PXCache sender, PXFieldDefaultingEventArgs e) {
+        public static void GrossProfitPHPDefault(PXCache sender, PXFieldDefaultingEventArgs e)
+        {
             LUMTourGroup row = (LUMTourGroup)e.Row;
             e.NewValue = row.RevenuePHP - row.CostPHP;
         }
         #endregion
 
         #region GrossProfitPer Default
-        public static void GrossProfitPerDefault(PXCache sender, PXFieldDefaultingEventArgs e) {
+        public static void GrossProfitPerDefault(PXCache sender, PXFieldDefaultingEventArgs e)
+        {
             LUMTourGroup row = (LUMTourGroup)e.Row;
             decimal revenuePHP = row.RevenuePHP ?? 0m;
             decimal grossProfitPHP = row.GrossProfitPHP ?? 0m;
@@ -287,7 +290,8 @@ namespace HH_Customization.DAC
         #endregion
 
         #region BQL
-        private static List<LUMTourGuest> GetGuest(PXGraph graph,string tourGroupNbr) { 
+        private static List<LUMTourGuest> GetGuest(PXGraph graph, string tourGroupNbr)
+        {
             return SelectFrom<LUMTourGuest>
                     .Where<LUMTourGuest.tourGroupNbr.IsEqual<@P.AsString>>
                     .View.Select(graph, tourGroupNbr)
