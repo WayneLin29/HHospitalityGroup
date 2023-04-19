@@ -449,7 +449,7 @@ namespace HH_APICustomization.Graph
                             #endregion
 
                             #region Room Rate(Json: Rooms/detailedRoomRates)
-                            // 刪除相同ReservationID and Roomid的Rate資料
+                            // 刪除相同ReservationID 的Rate資料
                             oldRoomRate.Where(x => x.ReservationID == currentReservationID).ToList()
                                 .ForEach(x =>
                                 {

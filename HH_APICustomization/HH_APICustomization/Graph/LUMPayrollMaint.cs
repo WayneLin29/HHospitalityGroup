@@ -23,14 +23,16 @@ namespace HH_APICustomization.Graph
         public SelectFrom<LUMPayrollHour>
                .Where<LUMPayrollHour.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>.Or<PayrollFilter.branchID.FromCurrent.IsNull>
                  .And<LUMPayrollHour.workingDate.IsGreaterEqual<PayrollFilter.dateFrom.FromCurrent>.Or<PayrollFilter.dateFrom.FromCurrent.IsNull>>
-                 .And<LUMPayrollHour.workingDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>>
+                 .And<LUMPayrollHour.workingDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>
+                 .And<LUMPayrollHour.approved.IsEqual<False>.Or<LUMPayrollHour.approved.IsNull>>>
                .View payrollHour;
 
         [PXImport(typeof(LUMPayrollAdjustment))]
         public SelectFrom<LUMPayrollAdjustment>
                .Where<LUMPayrollAdjustment.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>.Or<PayrollFilter.branchID.FromCurrent.IsNull>
                  .And<LUMPayrollAdjustment.adjustmentDate.IsGreaterEqual<PayrollFilter.dateFrom.FromCurrent>.Or<PayrollFilter.dateFrom.FromCurrent.IsNull>>
-                 .And<LUMPayrollAdjustment.adjustmentDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>>
+                 .And<LUMPayrollAdjustment.adjustmentDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>
+                 .And<LUMPayrollAdjustment.approved.IsEqual<False>.Or<LUMPayrollAdjustment.approved.IsNull>>>
                .View payrollAdjustment;
 
         #region Events
