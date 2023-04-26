@@ -1,6 +1,7 @@
 ﻿using PX.Data;
 using PX.Objects.AP;
 using PX.Objects.GL;
+using PX.Objects.RQ;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,6 +101,13 @@ namespace PX.Objects.PO
                 And<POReceiptLine.pOType, Equal<Required<POReceiptLine.pOType>>>>>
                 .Select(Base, orderNbr, orderType).RowCast<POReceiptLine>().ToList();
         }
+        #endregion
+
+        #region CacheAttached
+        [PXMergeAttributes(Method = MergeMethod.Append)]
+        [PXUIField(DisplayName ="RI RefNbr",IsReadOnly = true)]
+        [PXSelector(typeof(Search<RQRequisition.reqNbr>))]
+        public virtual void _(Events.CacheAttached<POLine.rQReqNbr> e) { }
         #endregion
 
         #region Table
