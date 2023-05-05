@@ -1,0 +1,11 @@
+﻿<Page path="~/Pages/LM/LM505003.aspx" ControlId="4" pageSource="nVXfb9owEH5upf0PUaa+kgDtplWA1gZaKsGEgLZ7Q25ygFXHzmwHSh/2t++cH2DasqbNk3P2fXf33Xd26+SnMyILcAaEL1JctN3gq+sMidIgzcYVZWj76+0syrsSMu6CJpTV4szsOhepFr0VcH1PJaRJ29UyBde5I4xGRMMY/qSgdNudE6bQHoioQB4Mz/wz32/WiEqeaqFynRu+BEm1arsm2qw84DpTqo3HLddmEWV5u85J58txC6vIE5xuEnDuqNQpYSOilxVSNwAIgfHPA8E11uDcdNtuiOu6yTQzjRgJoS9YBNJsJsvuxHXGKSdY0wTkCoEQ5qiVPJ2PfneJJhORyhAypAiLkvlRlR/FDBV9MMVMM5ruaWRSrfv+ifvl2Ck+U8svEuOpfn8WpEqLmD4TTQWvXUuSLGuD22F/fJEkUqywWilCUMryH0kaE7m5o7Buu8i2qXa3a9I9agWEsQcSPgYijgmPVMYF2r03NtD6ojxDvWcR1znAY+Mwj1eHaTS9MslnMHP8eUXjLpOSZ2MZQvwAclvyHrtOH+hiiRD1pp88oW4ZE2sj3j6NoJRnTs0U4oShdrO/IqUB2YhUj1OWd9Y21F9lN9FE6rFYF13uFPTtXDo74K4USVes+UsMEyVQenfgNK/xigKLMIG86UYphuI4pjpY4iSDKqVVRi397ZhY3JTG0IuoPhzXOtTYix0ga/O52X8vtAVhhZ8Ag1ALeTB0eaC+F/ZSEh4ub7rvBC2dPxOwuRewhzIQG4DqIVuerZ1it1Rz1ZlpHp6Z68Mzcy1plEEscFFhXt6ejbNsNiaPlJtz+X2p/jssA1gBU/aomEwy695MFoI1ROSeR+YuagWCpTFXWbMs/9xsNyPnGKJt5t98N7sosYVLCB8vRTnU2S+uyi5574Pbii7gf/iVPHeiLPy+V/OztVW24vSjrrPeqPyZkTDU5s3YwjUa1eA+U3V+7Xww7z7qz9ZdJaeLWKRcv3TDV6rQTa47b194uTI9S5otI94JfYZstAjlRpL3lEdi7To9TvBJjkq9DCm35sGEyxFC8wBfElk8oN7WYM26SeHVnP8D">
+    <PXGridColumn DataField="Selected" ParentId="phG_grid_Levels#0_Columns#0" TypeFullName="PX.Web.UI.PXGridColumn">
+        <Prop Key="TextAlign" Value="Center" />
+    </PXGridColumn>
+    <PXGrid ID="grid" ParentId="phG_grid" TypeFullName="PX.Web.UI.PXGrid">
+        <Prop Key="SyncPosition" Value="True" />
+    </PXGrid>
+    <PXFormView ID="form" ParentId="phF_form" TypeFullName="PX.Web.UI.PXFormView">
+        <Prop Key="SyncPosition" Value="True" />
+    </PXFormView>
+</Page>

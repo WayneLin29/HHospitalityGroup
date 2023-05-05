@@ -90,6 +90,9 @@
     <Compile Include="DAC\LUMTourReservation.cs" />
     <Compile Include="Interface\IAPLink.cs" />
     <Compile Include="Interface\ICreateAPData.cs" />
+    <Compile Include="Graph\LUMAPApplicationMaint.cs" />
+    <Compile Include="DAC\LUMHRApprovalV.cs" />
+    <Compile Include="Graph\LUMHRApprovalProcess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

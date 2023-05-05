@@ -1,0 +1,35 @@
+﻿<Sql TableName="Create_LUMHRApprovalV" SqlScriptPriority="2" CustomScript="#CDATA">
+    <CDATA name="CustomScript"><![CDATA[Create or Alter View LUMHRApprovalV
+as
+select 
+	ph.CompanyID,
+	'PH' DataType,
+	ph.CutoffDate,
+	ph.BranchID,
+	ph.EmployeeID,
+	ph.WorkingDate Date,
+	ph.EarningType Type,
+	ph.Hour,
+	v.Amount,
+	ph.Approved
+from LUMPayrollHour ph
+inner join VHRPayroll v
+	on ph.CompanyID = v.CompanyID
+	and ph.WorkingDate = v.WorkingDate
+	and ph.BranchID = v.BranchID
+	and ph.EmployeeID = v.EmployeeID
+	and ph.EarningType = v.Type
+UNION ALL
+Select 
+	pa.CompanyID,
+	'PA' DataType,
+	pa.CutoffDate,
+	pa.BranchID,
+	pa.EmployeeID,
+	pa.AdjustmentDate Date,
+	pa.AdjustmentType Type,
+	null Hour,
+	pa.Amount,
+	pa.Approved
+From LUMPayrollAdjustment pa]]></CDATA>
+</Sql>
