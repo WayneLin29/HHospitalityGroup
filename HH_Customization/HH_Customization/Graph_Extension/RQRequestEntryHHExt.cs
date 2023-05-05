@@ -15,12 +15,12 @@ namespace PX.Objects.RQ
         #endregion
 
         #region Event
-        protected virtual void _(Events.FieldDefaulting<RQRequest, RQRequest.shipDestType> e,PXFieldDefaulting baseMethod)
-        {
-            baseMethod.Invoke(e.Cache,e.Args);
-            if (e.Row == null) return;
-            e.NewValue = POShippingDestination.Site;
-        }
+        //protected virtual void _(Events.FieldDefaulting<RQRequest, RQRequest.shipDestType> e,PXFieldDefaulting baseMethod)
+        //{
+        //    baseMethod.Invoke(e.Cache,e.Args);
+        //    if (e.Row == null) return;
+        //    e.NewValue = POShippingDestination.Site;
+        //}
         #endregion
     }
 }
