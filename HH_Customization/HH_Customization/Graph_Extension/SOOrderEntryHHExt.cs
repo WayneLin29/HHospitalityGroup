@@ -306,9 +306,13 @@ namespace PX.Objects.SO
 
                     #region 更新幣別
                     CM.Extensions.CurrencyInfo curyInfo = entry.currencyinfo.Current;
-                    entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, header.CuryID);
+                    //20230506 Eva重病時說寫死PHP
+                    //entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, header.CuryID);
+                    entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, "PHP");
                     entry.currencyinfo.Update(curyInfo);
-                    entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, header.CuryID);
+                    //entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, header.CuryID);
+                    entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, "PHP");
+                    entry.Document.Cache.SetValueExt<APInvoice.docDate>(doc, header.OrderDate);
                     doc = entry.Document.Update(doc);
                     #endregion
                     entry.Save.Press();

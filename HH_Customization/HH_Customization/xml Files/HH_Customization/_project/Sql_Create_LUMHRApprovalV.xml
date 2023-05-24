@@ -1,5 +1,5 @@
 ﻿<Sql TableName="Create_LUMHRApprovalV" SqlScriptPriority="2" CustomScript="#CDATA">
-    <CDATA name="CustomScript"><![CDATA[Create or Alter View LUMHRApprovalV
+    <CDATA name="CustomScript"><![CDATA[Create or Alter View dbo.LUMHRApprovalV
 as
 select 
 	ph.CompanyID,
@@ -11,7 +11,7 @@ select
 	ph.EarningType Type,
 	ph.Hour,
 	v.Amount,
-	ph.Approved
+	IsNull(ph.Approved,0) Approved
 from LUMPayrollHour ph
 inner join VHRPayroll v
 	on ph.CompanyID = v.CompanyID
@@ -30,6 +30,6 @@ Select
 	pa.AdjustmentType Type,
 	null Hour,
 	pa.Amount,
-	pa.Approved
+	IsNull(pa.Approved,0) Approved
 From LUMPayrollAdjustment pa]]></CDATA>
 </Sql>
