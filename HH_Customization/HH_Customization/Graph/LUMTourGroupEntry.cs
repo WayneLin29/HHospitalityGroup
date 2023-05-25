@@ -215,9 +215,13 @@ namespace HH_Customization.Graph
 
                     #region 更新幣別
                     CM.Extensions.CurrencyInfo curyInfo = entry.currencyinfo.Current;
-                    entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, group.Key.CuryID);
+                    //20230506 Eva重病時說寫死PHP
+                    //entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, group.Key.CuryID);
+                    entry.currencyinfo.Cache.SetValueExt<CM.Extensions.CurrencyInfo.curyID>(curyInfo, "PHP");
                     entry.currencyinfo.Update(curyInfo);
-                    entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, group.Key.CuryID);
+                    //entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, group.Key.CuryID);
+                    entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, "PHP");
+                    entry.Document.Cache.SetValueExt<APInvoice.docDate>(doc, header.DateFrom);
                     doc = entry.Document.Update(doc);
                     #endregion
                     entry.Save.Press();
