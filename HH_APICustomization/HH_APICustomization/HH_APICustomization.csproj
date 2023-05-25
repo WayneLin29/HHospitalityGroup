@@ -70,6 +70,7 @@
     <Compile Include="DAC\LUMCloudBedRoomRateDetails.cs" />
     <Compile Include="DAC\LUMPayrollAdjustment.cs" />
     <Compile Include="DAC\LUMPayrollHour.cs" />
+    <Compile Include="DAC_Extension\GLTranExtension.cs" />
     <Compile Include="DAC_Extension\UploadFileHHExt.cs" />
     <Compile Include="Descriptor\Type.cs" />
     <Compile Include="Entity\CloudBed_ReservationEntity.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="Graph\LUMCloudBedPreferenceMaint.cs" />
     <Compile Include="Graph\LUMCloudBedTransactionProcess.cs" />
     <Compile Include="Graph\LUMPayrollMaint.cs" />
+    <Compile Include="Graph\LUMReconcilidProcess.cs" />
     <Compile Include="Graph\LUMTouchBistroImportProcess.cs" />
     <Compile Include="Graph\LUMTouchBistroPreferenceMaint.cs" />
     <Compile Include="Graph\SelectFrom.cs" />
