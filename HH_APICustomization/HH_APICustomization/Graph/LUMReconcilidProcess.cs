@@ -40,18 +40,7 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "SELECT ALL", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
         public virtual IEnumerable SelectAll(PXAdapter adapter)
         {
-
-            foreach (var item in this.DebitTransactions.View.SelectMulti().RowCast<GLTranDebit>())
-            {
-                this.DebitTransactions.SetValueExt<GLTranDebit.selected>(item, true);
-                this.DebitTransactions.Update(item);
-            }
-
-            foreach (var item in this.CreditTransactions.View.SelectMulti().RowCast<GLTran>())
-            {
-                this.CreditTransactions.SetValueExt<GLTran.selected>(item, true);
-                this.CreditTransactions.Update(item);
-            }
+            SettingSelectedValue(true);
             return adapter.Get();
         }
 
@@ -111,16 +100,74 @@ namespace HH_APICustomization.Graph
         public virtual void _(Events.CacheAttached<Users.username> e) { }
 
         public virtual void _(Events.RowSelected<ReconcilidFilter> e)
-            => CheckButtnAvailable();
+        {
+            CheckButtnAvailable();
+        }
+
+        public virtual void _(Events.RowSelected<GLTran> e)
+        {
+            PXUIFieldAttribute.SetEnabled<GLTran.batchNbr>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTran.lineNbr>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTran.tranDesc>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTran.tranDate>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTran.creditAmt>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTran.refNbr>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTran.referenceID>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranExtension.usrReconciled>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranExtension.usrReconciledBatch>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranExtension.usrReconciledDate>(e.Cache, null, false);
+        }
+
+        public virtual void _(Events.RowSelected<GLTranDebit> e)
+        {
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.batchNbr>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.lineNbr>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.tranDesc>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.tranDate>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.debitAmt>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.refNbr>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.referenceID>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.usrReconciled>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.usrReconciledBatch>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.usrReconciledDate>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.thirdPartyIdentifier>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.startDate>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.endDate>(e.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<GLTranDebit.source>(e.Cache, null, false);
+        }
 
         public virtual void _(Events.FieldUpdated<GLTranDebit.selected> e)
-           => RecalculateBalance();
+           => RecalculateBalanceAndCount();
 
         public virtual void _(Events.FieldUpdated<GLTran.selected> e)
-            => RecalculateBalance();
+            => RecalculateBalanceAndCount();
 
         public virtual void _(Events.FieldUpdated<ReconcilidFilter.showReconciledTrans> e)
-            => CheckButtnAvailable();
+        {
+            CheckButtnAvailable();
+            RecalculateBalanceAndCount();
+        }
+
+        public virtual void _(Events.FieldUpdated<ReconcilidFilter.branchID> e)
+        {
+            CleanupCache();
+            CheckButtnAvailable();
+            RecalculateBalanceAndCount();
+        }
+
+        public virtual void _(Events.FieldUpdated<ReconcilidFilter.accountID> e)
+        {
+            CleanupCache();
+            CheckButtnAvailable();
+            RecalculateBalanceAndCount();
+        }
+
+        public virtual void _(Events.FieldUpdated<ReconcilidFilter.subID> e)
+        {
+            CleanupCache();
+            CheckButtnAvailable();
+            RecalculateBalanceAndCount();
+        }
 
         #endregion
 
@@ -136,12 +183,19 @@ namespace HH_APICustomization.Graph
             this.Actions["Reverse"].SetEnabled((this.Filter.Current?.ShowReconciledTrans ?? false));
         }
 
-        /// <summary> 計算畫面上的Balance amount </summary>
-        public void RecalculateBalance()
+        /// <summary> 計算畫面上的Balance amount and count </summary>
+        public void RecalculateBalanceAndCount()
         {
             var filter = this.Filter.Current;
-            filter.PostingSelectedBalance = this.DebitTransactions.Cache.Cached.RowCast<GLTranDebit>().ToList().Where(x => x.Selected ?? false).Sum(x => x.DebitAmt);
-            filter.ReconciledSelectedBalance = this.CreditTransactions.Cache.Cached.RowCast<GLTran>().ToList().Where(x => x.Selected ?? false).Sum(x => x.CreditAmt);
+            var debitTrans = this.DebitTransactions.View.SelectMulti().RowCast<GLTranDebit>();
+            var creditTrans = this.CreditTransactions.View.SelectMulti().RowCast<GLTran>();
+
+            filter.PostingSelectedBalance = debitTrans.Where(x => x.Selected ?? false).Sum(x => x.DebitAmt);
+            filter.ReconciledSelectedBalance = creditTrans.Where(x => x.Selected ?? false).Sum(x => x.CreditAmt);
+
+            filter.PostingSelectedCount = debitTrans.Count(x => x.Selected ?? false);
+            filter.ReconciledSelectedCount = creditTrans.Count(x => x.Selected ?? false);
+
             filter.DifferenceAmt = filter.PostingSelectedBalance - filter.ReconciledSelectedBalance;
             this.Filter.UpdateCurrent();
             CheckButtnAvailable();
@@ -167,6 +221,50 @@ namespace HH_APICustomization.Graph
                     module,
                     batchNbr,
                     lineNbr);
+        }
+
+        /// <summary> 更新GLTran </summary>
+        public void UpdateGLTran(string usrReconciledBatch)
+        {
+            PXUpdate<Set<GLTranExtension.usrReconciled, Required<GLTranExtension.usrReconciled>,
+                     Set<GLTranExtension.usrReconciledDate, Required<GLTranExtension.usrReconciledDate>,
+                     Set<GLTranExtension.usrReconciledBatch, Required<GLTranExtension.usrReconciledBatch>,
+                     Set<GLTranExtension.usrReconciledBy, Required<GLTranExtension.usrReconciledBy>>>>>,
+                GLTran,
+                Where<GLTranExtension.usrReconciledBatch, Equal<Required<GLTranExtension.usrReconciledBatch>>>>.
+                Update(
+                    this,
+                    false,
+                    null,
+                    null,
+                    null,
+                    usrReconciledBatch);
+        }
+
+        /// <summary> 設定畫面上所有資料是否Selected </summary>
+        public void SettingSelectedValue(bool selected)
+        {
+            // Clean up selected
+            foreach (var item in this.DebitTransactions.View.SelectMulti().RowCast<GLTranDebit>())
+            {
+                this.DebitTransactions.Cache.SetValueExt<GLTranDebit.selected>(item, selected);
+                this.DebitTransactions.Update(item);
+            }
+
+            foreach (var item in this.CreditTransactions.View.SelectMulti().RowCast<GLTran>())
+            {
+                this.CreditTransactions.Cache.SetValueExt<GLTran.selected>(item,selected);
+                this.CreditTransactions.Update(item);
+            }
+        }
+
+        public void CleanupCache()
+        {
+            this.DebitTransactions.Cache.ClearQueryCache();
+            this.DebitTransactions.Cache.Clear();
+
+            this.CreditTransactions.Cache.ClearQueryCache();
+            this.CreditTransactions.Cache.Clear();
         }
 
         /// <summary> 執行Release </summary>
@@ -198,20 +296,10 @@ namespace HH_APICustomization.Graph
         {
             var selectedDebit = baseGraph.DebitTransactions.View.SelectMulti().RowCast<GLTranDebit>().Where(x => x.Selected ?? false);
             var selectedCredit = baseGraph.CreditTransactions.View.SelectMulti().RowCast<GLTran>().Where(x => x.Selected ?? false);
-            var extension = new GLTranExtension()
-            {
-                UsrReconciledDate = null,
-                UsrReconciled = false,
-                UsrReconciledBy = baseGraph.Accessinfo.UserID,
-                UsrReconciledBatch = null
-            };
-            // Update Debit 
-            foreach (var item in selectedDebit)
-                baseGraph.UpdateGLTran(item.Module, item.BatchNbr, item.LineNbr, extension);
 
-            // Update Credit
-            foreach (var item in selectedCredit)
-                baseGraph.UpdateGLTran(item.Module, item.BatchNbr, item.LineNbr, extension);
+            // Update Debit 
+            foreach (var batchNbr in selectedDebit.Select(x => x.UsrReconciledBatch).Union(selectedCredit.Select(x => x.GetExtension<GLTranExtension>().UsrReconciledBatch)).Distinct())
+                baseGraph.UpdateGLTran(batchNbr);
         }
 
         #endregion
@@ -273,6 +361,19 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "Difference", Enabled = false)]
         public virtual decimal? DifferenceAmt { get; set; }
         public abstract class differenceAmt : PX.Data.BQL.BqlDecimal.Field<differenceAmt> { }
+
+        [PXInt]
+        [PXDefault(TypeCode.Int32, "0")]
+        [PXUIField(DisplayName = "Posting Selected Count", Enabled = false)]
+        public virtual int? PostingSelectedCount { get; set; }
+        public abstract class postingSelectedCount : PX.Data.BQL.BqlInt.Field<postingSelectedCount> { }
+
+        [PXInt]
+        [PXDefault(TypeCode.Int32, "0")]
+        [PXUIField(DisplayName = "Reconciled Selected Count", Enabled = false)]
+        public virtual int? ReconciledSelectedCount { get; set; }
+        public abstract class reconciledSelectedCount : PX.Data.BQL.BqlInt.Field<reconciledSelectedCount> { }
+
     }
 
 
