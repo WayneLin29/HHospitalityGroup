@@ -11,7 +11,7 @@ namespace PX.Objects.GL
     public class GLTranExtension : PXCacheExtension<GLTran>
     {
         [PXDBBool]
-        [PXDefault(false)]
+        [PXDefault(false,PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Reconciled", Enabled = false)]
         public virtual bool? UsrReconciled { get; set; }
         public abstract class usrReconciled : PX.Data.BQL.BqlBool.Field<usrReconciled> { }
