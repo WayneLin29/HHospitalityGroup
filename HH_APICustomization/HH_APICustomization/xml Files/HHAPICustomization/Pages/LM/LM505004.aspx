@@ -39,6 +39,7 @@
                     <px:PXGridLevel DataMember="DebitTransactions">
                         <Columns>
                             <px:PXGridColumn AllowCheckAll="True" DataField="Selected" Width="40" Type="CheckBox" TextAlign="Center" CommitChanges="True"></px:PXGridColumn>
+                            <px:PXGridColumn DataField="BranchID"></px:PXGridColumn>
                             <px:PXGridColumn DataField="BatchNbr"></px:PXGridColumn>
                             <px:PXGridColumn DataField="LineNbr"></px:PXGridColumn>
                             <px:PXGridColumn DataField="TranDesc"></px:PXGridColumn>
@@ -69,6 +70,7 @@
                     <px:PXGridLevel DataMember="CreditTransactions">
                         <Columns>
                             <px:PXGridColumn AllowCheckAll="True" DataField="Selected" Width="40" Type="CheckBox" TextAlign="Center" CommitChanges="True"></px:PXGridColumn>
+                            <px:PXGridColumn DataField="BranchID"></px:PXGridColumn>
                             <px:PXGridColumn DataField="BatchNbr"></px:PXGridColumn>
                             <px:PXGridColumn DataField="LineNbr"></px:PXGridColumn>
                             <px:PXGridColumn DataField="TranDesc"></px:PXGridColumn>

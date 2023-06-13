@@ -23,6 +23,7 @@ namespace HH_APICustomization.Graph
                LeftJoin<Users>.On<GLTranDebit.usrReconciledBy.IsEqual<Users.pKID>>.
                Where<GLTranDebit.accountID.IsEqual<ReconcilidFilter.accountID.FromCurrent>.
                  And<GLTranDebit.subID.IsEqual<ReconcilidFilter.subID.FromCurrent>>.
+                 And<GLTranDebit.branchID.IsEqual<ReconcilidFilter.branchID.FromCurrent>>.
                  And<GLTranDebit.usrReconciled.IfNullThen<False>.IsEqual<ReconcilidFilter.showReconciledTrans.FromCurrent>>.
                  And<GLTranDebit.tranDate.IsBetween<ReconcilidFilter.dateFrom.FromCurrent, ReconcilidFilter.dateTo.FromCurrent>>>.View DebitTransactions;
 
@@ -32,6 +33,7 @@ namespace HH_APICustomization.Graph
                Where<GLTran.curyCreditAmt.IsNotEqual<Zero>.
                  And<GLTran.accountID.IsEqual<ReconcilidFilter.accountID.FromCurrent>>.
                  And<GLTran.subID.IsEqual<ReconcilidFilter.subID.FromCurrent>>.
+                 And<GLTran.branchID.IsEqual<ReconcilidFilter.branchID.FromCurrent>>.
                  And<GLTranExtension.usrReconciled.IfNullThen<False>.IsEqual<ReconcilidFilter.showReconciledTrans.FromCurrent>>.
                  And<GLTran.tranDate.IsBetween<ReconcilidFilter.dateFrom.FromCurrent, ReconcilidFilter.dateTo.FromCurrent>>>.View CreditTransactions;
 
@@ -253,7 +255,7 @@ namespace HH_APICustomization.Graph
 
             foreach (var item in this.CreditTransactions.View.SelectMulti().RowCast<GLTran>())
             {
-                this.CreditTransactions.Cache.SetValueExt<GLTran.selected>(item,selected);
+                this.CreditTransactions.Cache.SetValueExt<GLTran.selected>(item, selected);
                 this.CreditTransactions.Update(item);
             }
         }
@@ -391,6 +393,12 @@ namespace HH_APICustomization.Graph
         [PXBool]
         [PXUIField(DisplayName = "Selected", Visible = false)]
         public virtual bool? Selected { get; set; }
+        #endregion
+
+        #region BranchID
+        [Branch(typeof(Batch.branchID), BqlField = typeof(GLTran.branchID))]
+        public virtual Int32? BranchID { get; set; }
+        public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
         #endregion
 
         #region BatchNbr
