@@ -509,7 +509,7 @@ namespace PX.Objects.SO
         Select2<LUMCloudBedReservations,
             InnerJoin<LUMCloudBedRoomRateDetails,
                 On<LUMCloudBedReservations.reservationID, Equal<LUMCloudBedRoomRateDetails.reservationID>>,
-            LeftJoin<LUMCloudBedRoomAssignment,
+            InnerJoin<LUMCloudBedRoomAssignment,
                 On<LUMCloudBedRoomRateDetails.reservationID, Equal<LUMCloudBedRoomAssignment.reservationID>,
                 And<LUMCloudBedRoomRateDetails.roomid, Equal<LUMCloudBedRoomAssignment.roomid>>>>>
         >))]
