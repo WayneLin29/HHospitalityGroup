@@ -11,7 +11,7 @@
     </px:PXDataSource>
 </asp:Content>
 <asp:Content ID="cont2" ContentPlaceHolderID="phF" runat="Server">
-    <px:PXFormView ID="transactionForm" runat="server" DataSourceID="ds" DataMember="Filter" Width="100%" Height="200px" AllowAutoHide="false">
+    <px:PXFormView ID="transactionForm" runat="server" DataSourceID="ds" DataMember="Filter" Width="100%" Height="250px" AllowAutoHide="false">
         <Template>
             <px:PXLayoutRule runat="server" StartGroup="true" GroupCaption="AP FILTER"></px:PXLayoutRule>
             <px:PXLayoutRule runat="server" StartColumn="true" LabelsWidth="M" ControlSize="S" />
