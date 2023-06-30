@@ -16,6 +16,7 @@ namespace PX.Objects.AP
         #region UsrORTaxZone
         [PXDBString(10, IsUnicode = true)]
         [PXUIField(DisplayName = "OR TaxZone", Visibility = PXUIVisibility.Visible)]
+        [PXDefault(typeof(APInvoice.taxZoneID),PersistingCheck = PXPersistingCheck.Nothing)]
         [PXSelector(typeof(TaxZone.taxZoneID), DescriptionField = typeof(TaxZone.descr), Filterable = true)]
         [PXFormula(typeof(Default<APInvoice.suppliedByVendorLocationID, APInvoice.suppliedByVendorID, APInvoice.vendorLocationID>))]
         public virtual string UsrORTaxZone { get; set; }

@@ -76,12 +76,29 @@ namespace HH_APICustomization.Graph
             if (((bool?)e.NewValue) ?? false)
             {
                 var row = e.Row as ORMaintFilter;
+                row.UpdORBranch = null;
                 row.UpdORDate = null;
                 row.UpdORVendor = null;
                 row.UpdORNumber = null;
                 row.UpdORStatus = null;
                 row.UpdORTaxZone = null;
                 this.Filter.UpdateCurrent();
+
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORBranch>(e.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORDate>(e.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORVendor>(e.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORNumber>(e.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORStatus>(e.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORTaxZone>(e.Cache, null, false);
+            }
+            else
+            {
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORBranch>(e.Cache, null, true);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORDate>(e.Cache, null, true);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORVendor>(e.Cache, null, true);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORNumber>(e.Cache, null, true);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORStatus>(e.Cache, null, true);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORTaxZone>(e.Cache, null, true);
             }
         }
         #endregion
@@ -101,8 +118,6 @@ namespace HH_APICustomization.Graph
                 PXProcessing.SetCurrentItem(selectedItem);
                 try
                 {
-                    if (!filter.UpdORBranch.HasValue)
-                        continue;
                     PXUpdate<Set<APTranExtension.usrORBranch, Required<APTranExtension.usrORBranch>,
                              Set<APTranExtension.usrORDate, Required<APTranExtension.usrORDate>,
                              Set<APTranExtension.usrORVendor, Required<APTranExtension.usrORVendor>,
@@ -115,12 +130,12 @@ namespace HH_APICustomization.Graph
                               And<APTran.lineNbr, Equal<Required<APTran.lineNbr>>>>>>
                     .Update(
                         baseGraph,
-                        filter.UpdORBranch,
-                        filter.UpdORDate,
-                        filter.UpdORVendor,
-                        filter.UpdORNumber,
-                        filter.UpdORStatus,
-                        filter.UpdORTaxZone,
+                        filter.UpdORBranch ?? selectedItem.GetExtension<APTranExtension>()?.UsrORBranch,
+                        filter.UpdORDate ?? selectedItem.GetExtension<APTranExtension>()?.UsrORDate,
+                        filter.UpdORVendor ?? selectedItem.GetExtension<APTranExtension>()?.UsrORVendor,
+                        filter.UpdORNumber ?? selectedItem.GetExtension<APTranExtension>()?.UsrOrNumber,
+                        filter.UpdORStatus ?? selectedItem.GetExtension<APTranExtension>()?.UsrORStatus,
+                        filter.UpdORTaxZone ?? selectedItem.GetExtension<APTranExtension>()?.UsrORTaxZone,
                         selectedItem.TranType,
                         selectedItem.RefNbr,
                         selectedItem.LineNbr
@@ -181,14 +196,14 @@ namespace HH_APICustomization.Graph
                       CacheGlobal = true,
                       Filterable = true)]
         [PXDefault(typeof(APInvoice.vendorID), PersistingCheck = PXPersistingCheck.Nothing)]
-        [PXUIField(DisplayName = "AP OR Vendor")]
+        [PXUIField(DisplayName = "AP Vendor")]
         public virtual int? APVendor { get; set; }
         public abstract class apVendor : PX.Data.BQL.BqlInt.Field<apVendor> { }
         #endregion
 
         #region APBranch
         [Branch(typeof(APRegister.branchID))]
-        [PXUIField(DisplayName = "AP OR Branch")]
+        [PXUIField(DisplayName = "AP Branch")]
         public virtual int? APBranch { get; set; }
         public abstract class apBranch : PX.Data.BQL.BqlInt.Field<apBranch> { }
         #endregion
@@ -254,7 +269,7 @@ namespace HH_APICustomization.Graph
         [PXDBString]
         [PXUIField(DisplayName = "OR Number")]
         public virtual string UpdORNumber { get; set; }
-        public abstract class updORNumberFrom : PX.Data.BQL.BqlString.Field<updORNumberFrom> { }
+        public abstract class updORNumber : PX.Data.BQL.BqlString.Field<updORNumber> { }
         #endregion
 
         #region UpdORBranch
