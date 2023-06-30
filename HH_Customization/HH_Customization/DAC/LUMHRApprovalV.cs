@@ -95,5 +95,12 @@ namespace HH_Customization.DAC
         public virtual bool? Approved { get; set; }
         public abstract class approved : PX.Data.BQL.BqlBool.Field<approved> { }
         #endregion
+
+        #region Remark
+        [PXDBString]
+        [PXUIField(DisplayName = "Remark")]
+        public virtual string Remark { get; set; }
+        public abstract class remark : PX.Data.BQL.BqlString.Field<remark> { }
+        #endregion
     }
 }

@@ -11,7 +11,8 @@ select
 	ph.EarningType Type,
 	ph.Hour,
 	v.Amount,
-	IsNull(ph.Approved,0) Approved
+	IsNull(ph.Approved,0) Approved,
+	ph.Remark
 from LUMPayrollHour ph
 inner join VHRPayroll v
 	on ph.CompanyID = v.CompanyID
@@ -30,6 +31,7 @@ Select
 	pa.AdjustmentType Type,
 	null Hour,
 	pa.Amount,
-	IsNull(pa.Approved,0) Approved
+	IsNull(pa.Approved,0) Approved,
+	pa.Remark
 From LUMPayrollAdjustment pa]]></CDATA>
 </Sql>
