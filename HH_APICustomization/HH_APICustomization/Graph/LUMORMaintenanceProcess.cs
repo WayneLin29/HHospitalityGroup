@@ -118,6 +118,7 @@ namespace HH_APICustomization.Graph
                 PXProcessing.SetCurrentItem(selectedItem);
                 try
                 {
+                    var aptranExtensionInfo = selectedItem.GetExtension<APTranExtension>();
                     PXUpdate<Set<APTranExtension.usrORBranch, Required<APTranExtension.usrORBranch>,
                              Set<APTranExtension.usrORDate, Required<APTranExtension.usrORDate>,
                              Set<APTranExtension.usrORVendor, Required<APTranExtension.usrORVendor>,
@@ -130,12 +131,12 @@ namespace HH_APICustomization.Graph
                               And<APTran.lineNbr, Equal<Required<APTran.lineNbr>>>>>>
                     .Update(
                         baseGraph,
-                        filter.UpdORBranch ?? selectedItem.GetExtension<APTranExtension>()?.UsrORBranch,
-                        filter.UpdORDate ?? selectedItem.GetExtension<APTranExtension>()?.UsrORDate,
-                        filter.UpdORVendor ?? selectedItem.GetExtension<APTranExtension>()?.UsrORVendor,
-                        filter.UpdORNumber ?? selectedItem.GetExtension<APTranExtension>()?.UsrOrNumber,
-                        filter.UpdORStatus ?? selectedItem.GetExtension<APTranExtension>()?.UsrORStatus,
-                        filter.UpdORTaxZone ?? selectedItem.GetExtension<APTranExtension>()?.UsrORTaxZone,
+                        (filter.UpdCleanUp ?? false) ? null : filter.UpdORBranch ?? aptranExtensionInfo?.UsrORBranch,
+                        (filter.UpdCleanUp ?? false) ? null : filter.UpdORDate ?? aptranExtensionInfo?.UsrORDate,
+                        (filter.UpdCleanUp ?? false) ? null : filter.UpdORVendor ?? aptranExtensionInfo?.UsrORVendor,
+                        (filter.UpdCleanUp ?? false) ? null : filter.UpdORNumber ?? aptranExtensionInfo?.UsrOrNumber,
+                        (filter.UpdCleanUp ?? false) ? null : filter.UpdORStatus ?? aptranExtensionInfo?.UsrORStatus,
+                        (filter.UpdCleanUp ?? false) ? null : filter.UpdORTaxZone ?? aptranExtensionInfo?.UsrORTaxZone,
                         selectedItem.TranType,
                         selectedItem.RefNbr,
                         selectedItem.LineNbr
