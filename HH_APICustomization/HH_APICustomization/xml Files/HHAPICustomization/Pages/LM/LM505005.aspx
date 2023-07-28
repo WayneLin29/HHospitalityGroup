@@ -41,6 +41,9 @@
             <px:PXSelector runat="server" ID="edUpdORStatus" DataField="UpdORStatus" Width="150px" CommitChanges="true"></px:PXSelector>
             <px:PXSelector runat="server" ID="edUpdORTaxZone" DataField="UpdORTaxZone" Width="150px" CommitChanges="true"></px:PXSelector>
             <px:PXCheckBox runat="server" ID="edUpdCleanUp" DataField="UpdCleanUp" CommitChanges="true"></px:PXCheckBox>
+            <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
+            <px:PXSelector runat="server" ID="edUpdProjectID" DataField="UpdProjectID" Width="150px" CommitChanges="true"></px:PXSelector>
+            <px:PXSelector runat="server" ID="edUpdTaskID" DataField="UpdTaskID" Width="150px" CommitChanges="true" AutoRefresh="true"></px:PXSelector>
         </Template>
     </px:PXFormView>
 </asp:Content>
@@ -62,6 +65,7 @@
                     <px:PXGridColumn DataField="APTran__LineNbr"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__TranDesc"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__ProjectID"></px:PXGridColumn>
+                    <px:PXGridColumn DataField="APTran__TaskID"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__CuryLineAmt"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__UsrORBranch"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__UsrORVendor"></px:PXGridColumn>
