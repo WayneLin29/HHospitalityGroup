@@ -8,6 +8,18 @@ namespace PX.Objects.AP
 {
     public class APPaymentEntryHHExt : PXGraphExtension<APPaymentEntry>
     {
+        #region AttributeName
+        public const string UD_BANKCODE = "AttributeBANKCODE";
+        public const string UD_BANK = "AttributeBANK";
+        public const string UD_BANKACCT = "AttributeBANKACCT";
+        public const string UD_PAYEECLASS = "AttributePAYEECLASS";
+        public const string UD_BANKACCTN = "AttributeBANKACCTN";
+        public const string UD_BANKACCTF = "AttributeBANKACCTF";
+        public const string UD_BANKACCTM = "AttributeBANKACCTM";
+        public const string UD_BANKACCTL = "AttributeBANKACCTL";
+        public const string UD_BANKACCTAD = "AttributeBANKACCTAD";
+        #endregion
+
         #region View
         public PXSelectJoin<NoteDoc,
                 InnerJoin<NoteDoc2, On<NoteDoc2.fileID, Equal<NoteDoc.fileID>>,
@@ -47,6 +59,21 @@ namespace PX.Objects.AP
                 return adapter.Get();
         }
         #endregion
+        #endregion
+
+        #region Events
+        public virtual void _(Events.FieldUpdated<APPayment, APPayment.vendorID> e)
+        {
+            if (e.Row == null || e.Row.VendorID == null) return;
+            string[] copyList = { UD_BANKCODE, UD_BANK, UD_BANKACCT, UD_PAYEECLASS, UD_BANKACCTN, UD_BANKACCTF, UD_BANKACCTM, UD_BANKACCTL, UD_BANKACCTAD };
+            Vendor vendor = Vendor.PK.Find(Base, e.Row.VendorID);
+            foreach (var copyName in copyList)
+            {
+                var value = Base.Caches<Vendor>().GetValueExt(vendor, copyName);
+                e.Cache.SetValueExt(e.Row, copyName, value);
+                var _value = e.Cache.GetValueExt(e.Row, copyName);
+            }
+        }
         #endregion
 
         #region Method
