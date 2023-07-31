@@ -166,8 +166,8 @@ namespace HH_APICustomization.Graph
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORNumber ?? aptranExtensionInfo?.UsrOrNumber,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORStatus ?? aptranExtensionInfo?.UsrORStatus,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORTaxZone ?? aptranExtensionInfo?.UsrORTaxZone,
-                        (filter.UpdCleanUp ?? false) ? null : filter.UpdProjectID ?? selectedItem?.ProjectID,
-                        (filter.UpdCleanUp ?? false) ? null : filter.UpdTaskID ?? selectedItem?.TaskID,
+                        (filter.UpdCleanUp ?? false) ? selectedItem?.ProjectID : filter.UpdProjectID ?? selectedItem?.ProjectID,
+                        (filter.UpdCleanUp ?? false) ? selectedItem?.TaskID : filter.UpdTaskID ?? selectedItem?.TaskID,
                         selectedItem.TranType,
                         selectedItem.RefNbr,
                         selectedItem.LineNbr
@@ -372,6 +372,7 @@ namespace HH_APICustomization.Graph
             typeof(PMTask.description),
             typeof(PMTask.isActive),
             SubstituteKey = typeof(PMTask.taskCD))]
+        [PXUIField(DisplayName = "Project Task")]
         public virtual Int32? UpdTaskID { get; set; }
         public abstract class updTaskID : PX.Data.BQL.BqlInt.Field<updTaskID> { }
         #endregion
