@@ -1,0 +1,1 @@
+﻿<Sql TableName="CHANGELENGTH" SqlScriptPriority="100" CustomScript="ALTER TABLE FADetails ALTER COLUMN UsrLongDescription text NULL;" />

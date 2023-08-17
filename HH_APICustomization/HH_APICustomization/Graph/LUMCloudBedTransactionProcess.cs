@@ -84,12 +84,22 @@ namespace HH_APICustomization.Graph
                 row.ToDate = DateTime.Now;
         }
 
+        public virtual void _(Events.FieldDefaulting<ReservationFilter.reservationFromDate> e)
+        {
+            var row = e.Row as ReservationFilter;
+            if (!row.ReservationFromDate.HasValue)
+            {
+                row.ReservationFromDate = PX.Common.PXTimeZoneInfo.Now.AddDays(-1);
+                var ts = new TimeSpan(23, 30, 0);
+                row.ReservationFromDate = row.ReservationFromDate.Value.Date + ts;
+            }
+        }
 
         public virtual void _(Events.FieldDefaulting<ReservationFilter.reservationToDate> e)
         {
             var row = e.Row as ReservationFilter;
             if (!row.ReservationToDate.HasValue)
-                row.ReservationToDate = PX.Common.PXTimeZoneInfo.Now;
+                row.ReservationToDate = PX.Common.PXTimeZoneInfo.Now.AddDays(1).Date;
         }
 
         #endregion
@@ -532,7 +542,7 @@ namespace HH_APICustomization.Graph
     public class ReservationFilter : IBqlTable
     {
         [PXDateAndTime(DisplayMask = "g", InputMask = "g")]
-        [PXDefault(typeof(AccessInfo.businessDate))]
+        [PXDefault]
         [PXUIField(DisplayName = "ReservationUpdate From")]
         public virtual DateTime? ReservationFromDate { get; set; }
         public abstract class reservationFromDate : PX.Data.BQL.BqlDateTime.Field<reservationFromDate> { }
