@@ -109,8 +109,8 @@ namespace PX.Objects.AP
                 Branch hb = Branch.PK.Find(Base, payment.BranchID);
                 Branch db = Branch.PK.Find(Base, ca.BranchID);
                 return Base.Document.Ask(
-                    $"Document Branch - [{hb?.BranchCD?.Trim()}] differs from bank account branch [{db?.BranchCD?.Trim()}]. This will result in inter-company posting. Are you sure you want to proceed?"
-                    , MessageButtons.OKCancel);
+                           $"Cash Account {db?.BranchCD} is differenct from Finance {hb?.BranchCD}. This will lead to inter-branch posting, please confirm whether you want to continue."
+                           , MessageButtons.OKCancel);
             }
             return WebDialogResult.OK;
         }

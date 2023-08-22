@@ -3,7 +3,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{474B82F2-122E-47E1-B0F6-B237729F7552}</ProjectGuid>
+    <ProjectGuid>{9BC6D61A-5D4B-4D57-BC6B-5E3F9D04377E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HH_Customization</RootNamespace>
@@ -67,6 +67,8 @@
     <Compile Include="Descriptor\LUMStringList.cs" />
     <Compile Include="Graph_Extension\APPaymentEntryHHExt.cs" />
     <Compile Include="Graph_Extension\APInvoiceEntryHHExt.cs" />
+    <Compile Include="Graph_Extension\ARInvoiceEntryHHExt.cs" />
+    <Compile Include="Graph_Extension\ARPaymentEntryHHExt.cs" />
     <Compile Include="Graph_Extension\EPApprovalProcessHHExt.cs" />
     <Compile Include="Graph_Extension\POOrderEntryHHExt.cs" />
     <Compile Include="Graph_Extension\POReceiptEntryHHExt.cs" />

@@ -1,12 +1,20 @@
 ﻿using PX.Data;
+using PX.Data.BQL;
+using PX.Data.BQL.Fluent;
 using PX.Objects.PO;
 using PX.Objects.GL;
 using System.Collections;
+using PX.Objects.CA;
+using System.Collections.Generic;
 
 namespace PX.Objects.AP
 {
     public class APInvoiceEntryHHExt : PXGraphExtension<APInvoiceEntry>
     {
+        #region AttributeName
+        public const string UD_MAINBANK = "AttributeMAINBANK";
+        #endregion
+
         #region View
         public PXSelectJoin<NoteDoc,
                 InnerJoin<NoteDoc2, On<NoteDoc2.fileID, Equal<NoteDoc.fileID>>,
@@ -47,8 +55,10 @@ namespace PX.Objects.AP
         #endregion
 
         #region Event
-        protected virtual void _(Events.RowPersisting<APInvoice> e) {
+        protected virtual void _(Events.RowPersisting<APInvoice> e)
+        {
             LinkBranch();
+            SetPayAccount4CashAccount();
         }
 
         #endregion
@@ -64,7 +74,8 @@ namespace PX.Objects.AP
             if (Base.Document.Cache.GetStatus(invoice) == PXEntryStatus.Inserted)
             {
                 APTran tran = Base.Transactions.Select();
-                if (tran?.BranchID != null) { 
+                if (tran?.BranchID != null)
+                {
                     Base.Document.Cache.SetValueExt<APInvoice.branchID>(invoice, tran.BranchID);
                     Base.Document.UpdateCurrent();
                 }
@@ -115,6 +126,42 @@ namespace PX.Objects.AP
                 PXCache<POLine> lineCache = Base.Caches<POLine>();
                 PXNoteAttribute.CopyNoteAndFiles(lineCache, line, Base.Transactions.Cache, tran, false, true);
             }
+        }
+
+        /// <summary>
+        /// 更新PayAccountID為該Branch對應的CashAccount(Is Main Bank = true) 之AccountID
+        /// , ps. 抓到多筆或沒抓到就不更新
+        /// </summary>
+        public virtual void SetPayAccount4CashAccount()
+        {
+            var doc = Base.Document.Current;
+
+            if (Base.Document.Cache.GetStatus(doc) == PXEntryStatus.Inserted)
+            {
+                var cashAccounts = GetCashAccountByBranch(doc.BranchID);
+                List<int?> accountIDs = new List<int?>();
+                foreach (CashAccount ca in cashAccounts)
+                {
+                    PXFieldState isMainBank = (PXFieldState)Base.Caches<CashAccount>().GetValueExt(ca, UD_MAINBANK);
+                    if (((bool?)isMainBank?.Value) == true) accountIDs.Add(ca.CashAccountID);
+                }
+                if (accountIDs.Count == 1)
+                {
+                    int? payAccountID = accountIDs[0];
+                    Base.Document.Cache.SetValueExt<APInvoice.payAccountID>(doc, payAccountID);
+                    Base.Document.UpdateCurrent();
+                }
+            }
+        }
+        #endregion
+
+        #region BQL
+        public virtual PXResultset<CashAccount> GetCashAccountByBranch(int? branchID)
+        {
+            return SelectFrom<CashAccount>
+                .Where<CashAccount.branchID.IsEqual<@P.AsInt>
+                .And<CashAccount.active.IsEqual<True>>>
+                .View.Select(Base, branchID);
         }
         #endregion
 
