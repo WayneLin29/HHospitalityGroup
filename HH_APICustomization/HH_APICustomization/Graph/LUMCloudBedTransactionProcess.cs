@@ -401,16 +401,17 @@ namespace HH_APICustomization.Graph
                         #region Mapping Field
                         reservation.PropertyID = row.propertyID;
                         reservation.ReservationID = row.reservationID;
-                        reservation.DateCreated = DateTime.Parse(row.dateCreated);
-                        reservation.DateModified = DateTime.Parse(row.dateModified);
+                        // 因API回傳統一為UTC+0,故時區+8寫入DB
+                        reservation.DateCreated = DateTime.Parse(row.dateCreated).AddHours(8);
+                        reservation.DateModified = DateTime.Parse(row.dateModified).AddHours(8);
                         reservation.Source = row.sourceName;
                         reservation.ThirdPartyIdentifier = row.thirdPartyIdentifier;
                         reservation.Status = row.status;
                         var tempDate = new DateTime();
                         if (DateTime.TryParse(row.startDate, out tempDate))
-                            reservation.StartDate = DateTime.Parse(row.startDate);
+                            reservation.StartDate = DateTime.Parse(row.startDate).AddHours(8);
                         if (DateTime.TryParse(row.endDate, out tempDate))
-                            reservation.EndDate = DateTime.Parse(row.endDate);
+                            reservation.EndDate = DateTime.Parse(row.endDate).AddHours(8);
                         reservation.Balance = (decimal?)row.balance;
                         #endregion
                         if (existsRow != null)
