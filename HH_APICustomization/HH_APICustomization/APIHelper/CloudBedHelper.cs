@@ -119,9 +119,10 @@ namespace HH_APICustomization.APIHelper
             var accessToken = UpdateAccessToken();
             try
             {
+                // 查詢Reservation 因沒給Property，故實區統一為UTC+0
                 int pageNumber = 1;
                 var reservationData = new List<HH_APICustomization.Entity.Reservation>();
-                var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     throw new PXException(response.Content.ReadAsStringAsync().Result);
@@ -134,7 +135,7 @@ namespace HH_APICustomization.APIHelper
                     int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                     for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                     {
-                        url = url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                        url = url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
                         response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                         reservationEntity = JsonConvert.DeserializeObject<CloudBed_ReservationEntity>(response.Content.ReadAsStringAsync().Result);
                         reservationData.AddRange(reservationEntity.data);

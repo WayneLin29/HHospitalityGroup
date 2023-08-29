@@ -22,14 +22,14 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region DateCreated
-        [PXDBDate(UseTimeZone = false)]
+        [PXDBDateAndTime(UseTimeZone = false)]
         [PXUIField(DisplayName = "Date Created")]
         public virtual DateTime? DateCreated { get; set; }
         public abstract class dateCreated : PX.Data.BQL.BqlDateTime.Field<dateCreated> { }
         #endregion
 
         #region DateModified
-        [PXDBDate(UseTimeZone = false)]
+        [PXDBDateAndTime(UseTimeZone = false)]
         [PXUIField(DisplayName = "Date Modified")]
         public virtual DateTime? DateModified { get; set; }
         public abstract class dateModified : PX.Data.BQL.BqlDateTime.Field<dateModified> { }
