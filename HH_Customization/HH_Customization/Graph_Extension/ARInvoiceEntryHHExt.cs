@@ -46,7 +46,7 @@ namespace PX.Objects.AR
                 if (tran?.BranchID != null)
                 {
                     Base.Document.Cache.SetValueExt<ARInvoice.branchID>(invoice, tran.BranchID);
-                    Base.Document.UpdateCurrent();
+                    //Base.Document.UpdateCurrent();
                 }
             }
         }
