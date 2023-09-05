@@ -15,10 +15,13 @@ namespace PX.Objects.EP
             EntityHelper helper = new EntityHelper(Base);
             //取得對應的簽核資料
             var refRow = helper.GetEntityRow(e.Row.RefNoteID);
-            //取得對應資料之Cache
-            PXCache cache = Base.Caches[refRow.GetType()];
-            //取得BranchID
-            e.NewValue = cache.GetValue(refRow, "BranchID");
+            //因為Eva導入請假簽核，原廠抓不到客製資料
+            if (refRow != null) { 
+                //取得對應資料之Cache
+                PXCache cache = Base.Caches[refRow.GetType()];
+                //取得BranchID
+                e.NewValue = cache.GetValue(refRow, "BranchID");
+            }
         }
         #endregion
 
