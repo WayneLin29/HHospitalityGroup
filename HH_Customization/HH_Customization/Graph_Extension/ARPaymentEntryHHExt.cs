@@ -44,8 +44,7 @@ namespace PX.Objects.AR
             if (Base.Document.Cache.GetStatus(doc) == PXEntryStatus.Inserted)
             {
                 var ca = CashAccount.PK.Find(Base, doc.CashAccountID);
-                Base.Document.Cache.SetValueExt<ARInvoice.branchID>(doc, ca?.BranchID);
-                Base.Document.UpdateCurrent();
+                Base.Document.Cache.SetValueExt<ARPayment.branchID>(doc, ca?.BranchID);
             }
         }
 
