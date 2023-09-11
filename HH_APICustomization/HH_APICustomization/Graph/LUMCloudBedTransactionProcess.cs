@@ -428,19 +428,32 @@ namespace HH_APICustomization.Graph
                         sc.Dispose();
                         throw new PXException("Get Reservation Rate Detail failed!!");
                     }
-                    baseGraph.RoomAssignment.Cache.Delete(baseGraph.RoomAssignment.Select().RowCast<LUMCloudBedRoomAssignment>());
+                    //baseGraph.RoomAssignment.Cache.Delete(baseGraph.RoomAssignment.Select().RowCast<LUMCloudBedRoomAssignment>());
                     var oldRoomAssignment = baseGraph.RoomAssignment.Select().RowCast<LUMCloudBedRoomAssignment>();
                     var oldRoomRate = baseGraph.RoomRateDetails.Select().RowCast<LUMCloudBedRoomRateDetails>();
                     foreach (var row in rateDetails)
                     {
                         var currentReservationID = row?.reservationID;
+                        #region Delete RoomAssignment & DetailRoomRate
+                        //  刪除相同ReservationID的 RoomAssignment
+                        oldRoomAssignment.ToList()
+                            .ForEach(x =>
+                            {
+                                if (x.ReservationID == currentReservationID)
+                                    baseGraph.RoomAssignment.Delete(x);
+                            });
+                        // 刪除相同ReservationID detailedRoomRates
+                        oldRoomRate.Where(x => x.ReservationID == currentReservationID).ToList()
+                            .ForEach(x =>
+                            {
+                                baseGraph.RoomRateDetails.Delete(x);
+                            });
+                        #endregion
                         foreach (var room in row.rooms)
                         {
                             if (string.IsNullOrEmpty(room?.roomID))
                                 continue;
                             #region Room Assignment(Json:Rooms)
-                            var existsRoomAssignment = oldRoomAssignment.FirstOrDefault(x => x.ReservationID == currentReservationID);
-                            baseGraph.RoomAssignment.Cache.Delete(existsRoomAssignment);
                             var RoomAssignment = baseGraph.RoomAssignment.Cache.CreateInstance() as LUMCloudBedRoomAssignment;
                             #region Mapping Assignment Field
                             RoomAssignment.ReservationID = currentReservationID;
@@ -456,16 +469,10 @@ namespace HH_APICustomization.Graph
                             if (DateTime.TryParse(room?.roomCheckOut, out tempDate))
                                 RoomAssignment.Checkout = DateTime.Parse(room.roomCheckOut);
                             #endregion
-                            baseGraph.RoomAssignment.Cache.Insert(RoomAssignment);
+                            baseGraph.RoomAssignment.Insert(RoomAssignment);
                             #endregion
 
                             #region Room Rate(Json: Rooms/detailedRoomRates)
-                            // 刪除相同ReservationID 的Rate資料
-                            oldRoomRate.Where(x => x.ReservationID == currentReservationID).ToList()
-                                .ForEach(x =>
-                                {
-                                    baseGraph.RoomRateDetails.Cache.Delete(x);
-                                });
                             foreach (var rateRow in room.detailedRoomRates)
                             {
                                 var roomRate = baseGraph.RoomRateDetails.Cache.CreateInstance() as LUMCloudBedRoomRateDetails;
@@ -475,7 +482,7 @@ namespace HH_APICustomization.Graph
                                 roomRate.RateDate = DateTime.Parse(rateRow.Key);
                                 roomRate.Rate = Decimal.Parse(rateRow.Value.ToString());
                                 #endregion
-                                baseGraph.RoomRateDetails.Cache.Insert(roomRate);
+                                baseGraph.RoomRateDetails.Insert(roomRate);
                             }
                             #endregion
                         }

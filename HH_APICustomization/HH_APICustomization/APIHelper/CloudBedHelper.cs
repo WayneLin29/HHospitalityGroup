@@ -88,6 +88,7 @@ namespace HH_APICustomization.APIHelper
                 int pageNumber = 1;
                 var transactionData = new List<HH_APICustomization.Entity.Transaction>();
                 var url = $"https://hotels.cloudbeds.com/api/v1.1/getTransactions?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}";
+                PXTrace.WriteInformation($"Get Transaction Data : {url}");
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 var transactionEntity = JsonConvert.DeserializeObject<CloudBed_TransactionEntity>(response.Content.ReadAsStringAsync().Result);
                 transactionData.AddRange(transactionEntity.data);
@@ -123,6 +124,7 @@ namespace HH_APICustomization.APIHelper
                 int pageNumber = 1;
                 var reservationData = new List<HH_APICustomization.Entity.Reservation>();
                 var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                PXTrace.WriteInformation($"Get Reservation Data : {url}");
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     throw new PXException(response.Content.ReadAsStringAsync().Result);
@@ -162,6 +164,7 @@ namespace HH_APICustomization.APIHelper
                 {
                     int pageNumber = 1;
                     var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservationsWithRateDetails?propertyID={propertyID}&modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                    PXTrace.WriteInformation($"Get Reservation WithRate : {url}");
                     HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                         throw new PXException(response.Content.ReadAsStringAsync().Result);
