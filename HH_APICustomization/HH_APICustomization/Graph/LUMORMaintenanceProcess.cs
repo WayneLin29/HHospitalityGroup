@@ -14,6 +14,7 @@ using System.Collections;
 using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.PM;
 using PX.Data.BQL;
+using PX.Objects.CA;
 
 namespace HH_APICustomization.Graph
 {
@@ -82,6 +83,8 @@ namespace HH_APICustomization.Graph
                 row.UpdORTaxZone = null;
                 row.UpdProjectID = null;
                 row.UpdTaskID = null;
+                row.UpdAccountID = null;
+                row.UpdSubID = null;
                 this.Filter.UpdateCurrent();
 
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORBranch>(e.Cache, null, false);
@@ -92,6 +95,8 @@ namespace HH_APICustomization.Graph
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORTaxZone>(e.Cache, null, false);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updProjectID>(e.Cache, null, false);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updTaskID>(e.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updAccountID>(e.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updSubID>(e.Cache, null, false);
             }
             else
             {
@@ -103,6 +108,8 @@ namespace HH_APICustomization.Graph
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORTaxZone>(e.Cache, null, true);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updProjectID>(e.Cache, null, true);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updTaskID>(e.Cache, null, true);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updAccountID>(e.Cache, null, true);
+                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updSubID>(e.Cache, null, true);
             }
         }
 
@@ -153,7 +160,9 @@ namespace HH_APICustomization.Graph
                              Set<APTranExtension.usrORStatus, Required<APTranExtension.usrORStatus>,
                              Set<APTranExtension.usrORTaxZone, Required<APTranExtension.usrORTaxZone>,
                              Set<APTran.projectID, Required<APTran.projectID>,
-                             Set<APTran.taskID, Required<APTran.taskID>>>>>>>>>,
+                             Set<APTran.taskID, Required<APTran.taskID>,
+                             Set<APTran.accountID,Required<APTran.accountID>,
+                             Set<APTran.subID,Required<APTran.subID>>>>>>>>>>>,
                         APTran,
                         Where<APTran.tranType, Equal<Required<APTran.tranType>>,
                               And<APTran.refNbr, Equal<Required<APTran.refNbr>>,
@@ -166,8 +175,10 @@ namespace HH_APICustomization.Graph
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORNumber ?? aptranExtensionInfo?.UsrOrNumber,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORStatus ?? aptranExtensionInfo?.UsrORStatus,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORTaxZone ?? aptranExtensionInfo?.UsrORTaxZone,
-                        (filter.UpdCleanUp ?? false) ? selectedItem?.ProjectID : filter.UpdProjectID ?? selectedItem?.ProjectID,
-                        (filter.UpdCleanUp ?? false) ? selectedItem?.TaskID : filter.UpdTaskID ?? selectedItem?.TaskID,
+                        (filter.UpdCleanUp ?? false) && (selectedItem.Released ?? false) ? selectedItem?.ProjectID : filter.UpdProjectID ?? selectedItem?.ProjectID,
+                        (filter.UpdCleanUp ?? false) && (selectedItem.Released ?? false) ? selectedItem?.TaskID : filter.UpdTaskID ?? selectedItem?.TaskID,
+                        (filter.UpdCleanUp ?? false) && (selectedItem.Released ?? false) ? selectedItem?.AccountID : filter.UpdAccountID ?? selectedItem?.AccountID,
+                        (filter.UpdCleanUp ?? false) && (selectedItem.Released ?? false) ? selectedItem?.SubID : filter.UpdSubID ?? selectedItem?.SubID,
                         selectedItem.TranType,
                         selectedItem.RefNbr,
                         selectedItem.LineNbr
@@ -179,7 +190,19 @@ namespace HH_APICustomization.Graph
                     PXProcessing.SetError<APInvoice>(ex.Message);
                 }
             }
-
+            #region Clean up Update Filter
+            filter.UpdORBranch = null;
+            filter.UpdORDate = null;
+            filter.UpdORVendor = null;
+            filter.UpdORNumber = null;
+            filter.UpdORStatus = null;
+            filter.UpdORTaxZone = null;
+            filter.UpdProjectID = null;
+            filter.UpdTaskID = null;
+            filter.UpdAccountID = null;
+            filter.UpdSubID = null;
+            this.Filter.UpdateCurrent();
+            #endregion
         }
 
         #endregion
@@ -356,7 +379,7 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region UpdProjectID
-        [ProjectDefault(BatchModule.AP, typeof(Search<PX.Objects.CR.Location.vDefProjectID, Where<PX.Objects.CR.Location.bAccountID, Equal<Current<APInvoice.vendorID>>, And<PX.Objects.CR.Location.locationID, Equal<Current<APInvoice.vendorLocationID>>>>>), typeof(APTran.accountID))]
+        [ProjectDefault(BatchModule.AP, typeof(Search<PX.Objects.CR.Location.vDefProjectID, Where<PX.Objects.CR.Location.bAccountID, Equal<Current<APInvoice.vendorID>>, And<PX.Objects.CR.Location.locationID, Equal<Current<APInvoice.vendorLocationID>>>>>), typeof(APTran.accountID),PersistingCheck = PXPersistingCheck.Nothing)]
         [APActiveProject]
         [PXForeignReference(typeof(Field<updProjectID>.IsRelatedTo<PMProject.contractID>))]
         public virtual Int32? UpdProjectID { get; set; }
@@ -376,5 +399,20 @@ namespace HH_APICustomization.Graph
         public virtual Int32? UpdTaskID { get; set; }
         public abstract class updTaskID : PX.Data.BQL.BqlInt.Field<updTaskID> { }
         #endregion
+
+        #region UpdAccountID
+        [Account(typeof(ORMaintFilter.updORBranch),DisplayName = "Account", Visibility = PXUIVisibility.Visible, Filterable = false, DescriptionField = typeof(Account.description))]
+        public virtual int? UpdAccountID { get;set;}
+        public abstract class updAccountID : PX.Data.BQL.BqlInt.Field<updAccountID> { }
+
+        #endregion
+
+        #region UpdSubID
+        [SubAccount(typeof(ORMaintFilter.updAccountID), typeof(ORMaintFilter.updORBranch), true, DisplayName = "Subaccount", Visibility = PXUIVisibility.Visible, Filterable = true, TabOrder = 100)]
+        public virtual int? UpdSubID { get;set;}
+        public abstract class updSubID : PX.Data.BQL.BqlInt.Field<updSubID> { }
+
+        #endregion
+
     }
 }
