@@ -28,7 +28,8 @@ namespace HH_APICustomization.Graph
                .InnerJoin<APInvoice>.On<APInvoice.docType.IsEqual<APTran.tranType>
                      .And<APInvoice.refNbr.IsEqual<APTran.refNbr>>>
                .Where<APInvoice.docDate.IsBetween<ORMaintFilter.apStartDate.FromCurrent, ORMaintFilter.apEndDate.FromCurrent>
-                 .And<APTran.branchID.IsEqual<ORMaintFilter.apBranch.FromCurrent>>>.ProcessingView.FilteredBy<ORMaintFilter> Transactions;
+                 .And<APTran.branchID.IsEqual<ORMaintFilter.apBranch.FromCurrent>>
+                 .And<APInvoice.branchID.IsEqual<ORMaintFilter.apHBranch.FromCurrent>.Or<ORMaintFilter.apHBranch.FromCurrent.IsNull>>>.ProcessingView.FilteredBy<ORMaintFilter> Transactions;
 
         public IEnumerable transactions()
         {
@@ -70,6 +71,11 @@ namespace HH_APICustomization.Graph
         }
 
         #region Event
+
+        [PXUIField(DisplayName = "APH Branch")]
+        [PXMergeAttributes(Method = MergeMethod.Merge)]
+        public virtual void _(Events.CacheAttached<APInvoice.branchID> e) { }
+        
         public virtual void _(Events.FieldUpdated<ORMaintFilter.updCleanUp> e)
         {
             if (((bool?)e.NewValue) ?? false)
@@ -261,6 +267,13 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "AP Branch")]
         public virtual int? APBranch { get; set; }
         public abstract class apBranch : PX.Data.BQL.BqlInt.Field<apBranch> { }
+        #endregion
+
+        #region APHBranch
+        [Branch(typeof(APRegister.branchID),PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "APH Branch")]
+        public virtual int? APHBranch { get; set; }
+        public abstract class apHBranch : PX.Data.BQL.BqlInt.Field<apHBranch> { }
         #endregion
 
         #region ORStatus

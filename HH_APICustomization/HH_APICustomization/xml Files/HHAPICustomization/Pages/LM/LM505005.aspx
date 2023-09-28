@@ -20,6 +20,7 @@
             <px:PXDateTimeEdit runat="server" ID="edAPStartDate" DataField="APStartDate" Width="150px" CommitChanges="true"></px:PXDateTimeEdit>
             <px:PXDateTimeEdit runat="server" ID="edAPEndDate" DataField="APEndDate" Width="150px" CommitChanges="true"></px:PXDateTimeEdit>
             <px:PXSelector runat="server" ID="edAPBranch" DataField="APBranch" Width="150px" CommitChanges="true"></px:PXSelector>
+            <px:PXSelector runat="server" ID="edAPHBranch" DataField="APHBranch" Width="150px" CommitChanges="true"></px:PXSelector>
             <px:PXSelector runat="server" ID="edAPVendor" DataField="APVendor" Width="150px" CommitChanges="true"></px:PXSelector>
 
             <px:PXLayoutRule runat="server" StartGroup="true" GroupCaption="OR FILTER"></px:PXLayoutRule>
@@ -63,6 +64,7 @@
                     <px:PXGridColumn DataField="APInvoice__VendorID"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APInvoice__RefNbr"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APInvoice__BranchID"></px:PXGridColumn>
+                    <px:PXGridColumn DataField="APTran__BranchID"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APInvoice__DocDesc"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__LineNbr"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__TranDesc"></px:PXGridColumn>
