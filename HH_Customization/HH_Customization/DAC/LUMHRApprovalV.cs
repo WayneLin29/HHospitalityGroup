@@ -102,5 +102,20 @@ namespace HH_Customization.DAC
         public virtual string Remark { get; set; }
         public abstract class remark : PX.Data.BQL.BqlString.Field<remark> { }
         #endregion
+
+        #region Hold
+        [PXDBBool]
+        [PXDefault(false, PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Hold", Enabled = false)]
+        public virtual bool? Hold { get; set; }
+        public abstract class hold : PX.Data.BQL.BqlBool.Field<hold> { }
+        #endregion
+
+        #region BatchNbr
+        [PXDBString(15, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "Batch Nbr")]
+        public virtual string BatchNbr { get; set; }
+        public abstract class batchNbr : PX.Data.BQL.BqlString.Field<batchNbr> { }
+        #endregion
     }
 }

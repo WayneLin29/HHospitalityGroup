@@ -107,6 +107,21 @@ namespace HHAPICustomization.DAC
         public abstract class approvedAmount : PX.Data.BQL.BqlBool.Field<approvedAmount> { }
         #endregion
 
+        #region Hold
+        [PXDBBool]
+        [PXDefault(false,PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Hold", Enabled = false)]
+        public virtual bool? Hold { get; set; }
+        public abstract class hold : PX.Data.BQL.BqlBool.Field<hold> { }
+        #endregion
+
+        #region BatchNbr
+        [PXDBString(15, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "Batch Nbr")]
+        public virtual string BatchNbr { get; set; }
+        public abstract class batchNbr : PX.Data.BQL.BqlString.Field<batchNbr> { }
+        #endregion
+
         #region Noteid
         [PXNote()]
         public virtual Guid? Noteid { get; set; }

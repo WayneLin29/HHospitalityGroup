@@ -1,0 +1,28 @@
+﻿<Sql TableName="LUMHRPayrollAccountMapping" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMHRPayrollAccountMapping">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="PayrollType" type="NVarChar(200)" />
+  <col name="Branch" type="Int" />
+  <col name="DebitAccount" type="Int" />
+  <col name="DebitSub" type="Int" />
+  <col name="CreditAcount" type="Int" />
+  <col name="CreditSub" type="Int" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="LUMHRPayrollAccountMapping_NoteID" unique="true">
+    <col name="NoteID" />
+    <col name="CompanyID" />
+  </index>
+  <index name="PK_LUMHRPayrollAccountMapping" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="PayrollType" />
+    <col name="Branch" />
+  </index>
+</table>]]></CDATA>
+</Sql>

@@ -12,7 +12,9 @@ select
 	ph.Hour,
 	v.Amount,
 	IsNull(ph.Approved,0) Approved,
-	ph.Remark
+	ph.Remark,
+	ph.Hold,
+	ph.BatchNbr
 from LUMPayrollHour ph
 inner join VHRPayroll v
 	on ph.CompanyID = v.CompanyID
@@ -32,6 +34,8 @@ Select
 	null Hour,
 	pa.Amount,
 	IsNull(pa.Approved,0) Approved,
-	pa.Remark
+	pa.Remark,
+	pa.Hold,
+	pa.BatchNbr
 From LUMPayrollAdjustment pa]]></CDATA>
 </Sql>

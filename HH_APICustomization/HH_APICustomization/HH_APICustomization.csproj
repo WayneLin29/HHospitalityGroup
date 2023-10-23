@@ -68,6 +68,8 @@
     <Compile Include="DAC\LUMConactReview.cs" />
     <Compile Include="DAC\LUMCloudBedRoomAssignment.cs" />
     <Compile Include="DAC\LUMCloudBedRoomRateDetails.cs" />
+    <Compile Include="DAC\LUMHRContributionTable.cs" />
+    <Compile Include="DAC\LUMHRPayrollAccountMapping.cs" />
     <Compile Include="DAC\LUMPayrollAdjustment.cs" />
     <Compile Include="DAC\LUMPayrollHour.cs" />
     <Compile Include="DAC_Extension\APTranExtension.cs" />
@@ -84,6 +86,7 @@
     <Compile Include="DAC\LUMCloudBedAPIPreference.cs" />
     <Compile Include="Graph\LUMCloudBedPreferenceMaint.cs" />
     <Compile Include="Graph\LUMCloudBedTransactionProcess.cs" />
+    <Compile Include="Graph\LUMHRPayrollPreferenceMaint.cs" />
     <Compile Include="Graph\LUMORMaintenanceProcess.cs" />
     <Compile Include="Graph\LUMPayrollMaint.cs" />
     <Compile Include="Graph\LUMReconcilidProcess.cs" />

@@ -35,6 +35,7 @@
     <Reference Include="HH_APICustomization">
       <HintPath>..\..\..\..\Bin\HH_APICustomization.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="PX.Common">
       <HintPath>..\..\..\..\Bin\PX.Common.dll</HintPath>
     </Reference>

@@ -1,0 +1,31 @@
+﻿<Sql TableName="LUMHRContributionTable" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMHRContributionTable">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="Type" type="NVarChar(50)" />
+  <col name="EffectiveDate" type="DateTime" />
+  <col name="RangeFrom" type="Int" />
+  <col name="RangeTo" type="Int" />
+  <col name="Method" type="NVarChar(200)" />
+  <col name="Employer" type="Int" />
+  <col name="Employee" type="Int" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="LUMHRContributionTable_NoteID" unique="true">
+    <col name="NoteID" />
+    <col name="CompanyID" />
+  </index>
+  <index name="PK_LUMHRContributionTable" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="Type" />
+    <col name="EffectiveDate" />
+    <col name="RangeFrom" />
+    <col name="Method" />
+  </index>
+</table>]]></CDATA>
+</Sql>
