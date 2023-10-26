@@ -1,4 +1,5 @@
 ﻿using System;
+using HH_APICustomization.Descriptor;
 using PX.Data;
 
 namespace HH_APICustomization.DAC
@@ -22,21 +23,21 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region RangeFrom
-        [PXDBInt(IsKey = true)]
+        [PXDBDecimal(IsKey = true)]
         [PXUIField(DisplayName = "Range From")]
-        public virtual int? RangeFrom { get; set; }
-        public abstract class rangeFrom : PX.Data.BQL.BqlInt.Field<rangeFrom> { }
+        public virtual decimal? RangeFrom { get; set; }
+        public abstract class rangeFrom : PX.Data.BQL.BqlDecimal.Field<rangeFrom> { }
         #endregion
 
         #region RangeTo
-        [PXDBInt()]
+        [PXDBDecimal()]
         [PXUIField(DisplayName = "Range To")]
-        public virtual int? RangeTo { get; set; }
-        public abstract class rangeTo : PX.Data.BQL.BqlInt.Field<rangeTo> { }
+        public virtual decimal? RangeTo { get; set; }
+        public abstract class rangeTo : PX.Data.BQL.BqlDecimal.Field<rangeTo> { }
         #endregion
 
         #region Method
-        [PXStringList]
+        [LUMDDLAttribute("CALEMETHOD")]
         [PXDBString(200, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Method")]
         public virtual string Method { get; set; }
@@ -44,17 +45,17 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region Employer
-        [PXDBInt()]
+        [PXDBDecimal()]
         [PXUIField(DisplayName = "Employer")]
-        public virtual int? Employer { get; set; }
-        public abstract class employer : PX.Data.BQL.BqlInt.Field<employer> { }
+        public virtual decimal? Employer { get; set; }
+        public abstract class employer : PX.Data.BQL.BqlDecimal.Field<employer> { }
         #endregion
 
         #region Employee
-        [PXDBInt()]
+        [PXDBDecimal()]
         [PXUIField(DisplayName = "Employee")]
-        public virtual int? Employee { get; set; }
-        public abstract class employee : PX.Data.BQL.BqlInt.Field<employee> { }
+        public virtual decimal? Employee { get; set; }
+        public abstract class employee : PX.Data.BQL.BqlDecimal.Field<employee> { }
         #endregion
 
         #region Noteid

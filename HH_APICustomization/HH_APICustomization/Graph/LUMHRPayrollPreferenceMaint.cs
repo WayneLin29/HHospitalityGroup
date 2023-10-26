@@ -15,21 +15,20 @@ namespace HH_APICustomization.Graph
     /// </summary>
     public class LUMHRPayrollPreferenceMaint : PXGraph<LUMHRPayrollPreferenceMaint>
     {
-        public PXSave<LUMHRContributionTable> Save;
-        public PXCancel<LUMHRContributionTable> Cancel;
+        public PXSave<EmptyFilter> Save;
+        public PXCancel<EmptyFilter> Cancel;
 
+        public PXFilter<EmptyFilter> MasterFilter;
         public SelectFrom<LUMHRContributionTable>.View Contribution;
         public SelectFrom<LUMHRPayrollAccountMapping>.View PayrollAccountMapping;
 
-        #region Event
-        public virtual void _(Events.RowSelected<LUMHRContributionTable> e)
-        {
-            var attrMethod = SelectFrom<PX.Objects.CS.CSAttributeDetail>
-                            .Where<PX.Objects.CS.CSAttributeDetail.attributeID.IsEqual<P.AsString>>
-                            .View.Select(this, "CALEMETHOD").RowCast<PX.Objects.CS.CSAttributeDetail>();
-
-            PXStringListAttribute.SetList<LUMHRContributionTable.method>(base.Caches[typeof(LUMHRContributionTable)], null, attrMethod.Select(x => x?.ValueID).ToArray(), attrMethod.Select(x => x?.Description).ToArray());
-        }
-        #endregion
     }
+
+    #region Table
+    [Serializable]
+    [PXCacheName("Empty Filter")]
+    public class EmptyFilter : IBqlTable
+    { }
+    #endregion
+
 }

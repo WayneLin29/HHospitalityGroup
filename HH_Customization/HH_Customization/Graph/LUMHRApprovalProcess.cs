@@ -125,6 +125,11 @@ namespace HH_Customization.Graph
         {
             var filter = self.Filter.Current;
             bool isRelease = filter.ProcessType == HRApprovalFilter.RELEASE;
+
+            var ptypeAttrs = SelectFrom<PX.Objects.CS.CSAttributeDetail>
+                          .Where<PX.Objects.CS.CSAttributeDetail.attributeID.IsEqual<P.AsString>>
+                          .View.Select(self, "PTYPE").RowCast<PX.Objects.CS.CSAttributeDetail>();
+            var ptypeDescr = ptypeAttrs.FirstOrDefault(x => x.ValueID == filter?.PType);
             using (PXTransactionScope ts = new PXTransactionScope())
             {
                 // Validation and Process (GENERATE JE)
@@ -132,7 +137,7 @@ namespace HH_Customization.Graph
                 {
                     ValidAccountMapping(list, self);
                     if (string.IsNullOrEmpty(filter.PType))
-                        throw new Exception("PType can not be empty!");
+                        throw new Exception("Please select payroll type");
 
                     var accountMapping = SelectFrom<LUMHRPayrollAccountMapping>.View.Select(self).RowCast<LUMHRPayrollAccountMapping>();
                     var processData = from t in list
@@ -147,7 +152,7 @@ namespace HH_Customization.Graph
                                           DebitSub = m.DebitSub,
                                           Amount = t.Amount
                                       };
-                    foreach (var GroupData in processData.GroupBy(x => new { x.Branch, x.CreditAccount, x.CreditSubAccount, x.DebitAccount, x.DebitSub }))
+                    foreach (var GroupData in processData.GroupBy(x => new { x.Branch }))
                     {
                         #region Header
                         var glGraph = PXGraph.CreateInstance<JournalEntry>();
@@ -155,33 +160,37 @@ namespace HH_Customization.Graph
                         doc.Module = "GL";
                         doc = glGraph.BatchModule.Cache.Insert(doc) as Batch;
                         doc.BranchID = GroupData?.Key?.Branch;
-                        doc.Description = $"{filter.PType} - {filter.CutoffDate}";
+                        doc.Description = $"{ptypeDescr?.Description} - {filter.CutoffDate}";
                         glGraph.BatchModule.Cache.Update(doc);
                         #endregion
 
-                        #region Details
-                        // Set CurrentItem
-                        #region Credit
-                        var line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
-                        line.BranchID = GroupData.Key.Branch;
-                        line.AccountID = GroupData.Key.CreditAccount;
-                        line.SubID = GroupData.Key.CreditSubAccount;
-                        line.CuryCreditAmt = GroupData.Sum(x => x.Amount ?? 0);
-                        line.TranDesc = $"{filter.PType} - {filter.CutoffDate}";
-                        line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
-                        #endregion
+                        foreach (var item in GroupData.GroupBy(x => new { x.CreditAccount, x.CreditSubAccount, x.DebitAccount, x.DebitSub }))
+                        {
+                            #region Details
+                            // Set CurrentItem
+                            #region Credit
+                            var line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
+                            line.BranchID = GroupData.Key.Branch;
+                            line.AccountID = item.Key.CreditAccount;
+                            line.SubID = item.Key.CreditSubAccount;
+                            line.CuryCreditAmt = item.Sum(x => x.Amount ?? 0);
+                            line.TranDesc = $"{ptypeDescr?.Description} - {filter.CutoffDate}";
+                            line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
+                            #endregion
 
-                        #region Debit
-                        line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
-                        line.BranchID = GroupData.Key.Branch;
-                        line.AccountID = GroupData.Key.DebitAccount;
-                        line.SubID = GroupData.Key.DebitSub;
-                        line.CuryDebitAmt = GroupData.Sum(x => x.Amount ?? 0);
-                        line.TranDesc = $"{filter.PType} - {filter.CutoffDate}";
-                        line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
-                        #endregion
+                            #region Debit
+                            line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
+                            line.BranchID = GroupData.Key.Branch;
+                            line.AccountID = item.Key.DebitAccount;
+                            line.SubID = item.Key.DebitSub;
+                            line.CuryDebitAmt = item.Sum(x => x.Amount ?? 0);
+                            line.TranDesc = $"{ptypeDescr?.Description} - {filter.CutoffDate}";
+                            line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
+                            #endregion
 
-                        #endregion
+                            #endregion
+                        }
+
 
                         glGraph.Save.Press();
                         // ¦^¼g¸ê®Æ
@@ -244,7 +253,7 @@ namespace HH_Customization.Graph
             var accountMapping = SelectFrom<LUMHRPayrollAccountMapping>.View.Select(self).RowCast<LUMHRPayrollAccountMapping>();
             var ExceptList = selectedTypes.Except(accountMapping.Select(x => x.PayrollType));
             if (ExceptList.Count() > 0)
-                throw new Exception($"Can not find account corresponding to {string.Join(",", ExceptList)}");
+                throw new Exception($"[{list.FirstOrDefault().BranchID}]  No account mapping for [{string.Join(",", ExceptList)}]");
         }
 
         #endregion
@@ -285,7 +294,7 @@ namespace HH_Customization.Graph
             public const string RELEASE_L = "Release";
             public const string REVERSE_L = "Reverse";
             public const string HOLD_L = "HOLD";
-            public const string UNBOUND_L = "UNBOUND";
+            public const string UNHOLD_L = "UNHOLD";
             public const string GENERATEJE_L = "GENERATE JE";
             #endregion
 
@@ -295,7 +304,7 @@ namespace HH_Customization.Graph
             [PXUnboundDefault(RELEASE)]
             [PXStringList(
                 new string[] { RELEASE, REVERSE, HOLD, UNBOUND, GENERATEJE },
-                new string[] { RELEASE_L, REVERSE_L, HOLD_L, UNBOUND_L, GENERATEJE_L }
+                new string[] { RELEASE_L, REVERSE_L, HOLD_L, UNHOLD_L, GENERATEJE_L }
                 )]
             public virtual string ProcessType { get; set; }
             public abstract class processType : PX.Data.BQL.BqlString.Field<processType> { }

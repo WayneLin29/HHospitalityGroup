@@ -76,6 +76,7 @@
     <Compile Include="DAC_Extension\FADetailsExtension.cs" />
     <Compile Include="DAC_Extension\GLTranExtension.cs" />
     <Compile Include="DAC_Extension\UploadFileHHExt.cs" />
+    <Compile Include="Descriptor\LUMAttributes.cs" />
     <Compile Include="Descriptor\Type.cs" />
     <Compile Include="Entity\CloudBed_ReservationEntity.cs" />
     <Compile Include="Entity\CloudBed_ReservationWithRateDetailEntity.cs" />

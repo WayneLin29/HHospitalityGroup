@@ -3,11 +3,11 @@
   <col name="CompanyID" type="Int" default="Zero" />
   <col name="Type" type="NVarChar(50)" />
   <col name="EffectiveDate" type="DateTime" />
-  <col name="RangeFrom" type="Int" />
-  <col name="RangeTo" type="Int" />
+  <col name="RangeFrom" type="Decimal(18,6)" />
+  <col name="RangeTo" type="Decimal(18,6)" nullable="true" />
   <col name="Method" type="NVarChar(200)" />
-  <col name="Employer" type="Int" />
-  <col name="Employee" type="Int" />
+  <col name="Employer" type="Decimal(18,6)" nullable="true" />
+  <col name="Employee" type="Decimal(18,6)" nullable="true" />
   <col name="NoteID" type="UniqueIdentifier" nullable="true" />
   <col name="CreatedByID" type="UniqueIdentifier" />
   <col name="CreatedByScreenID" type="Char(8)" />

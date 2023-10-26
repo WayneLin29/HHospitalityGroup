@@ -4,7 +4,7 @@
 
 <asp:Content ID="cont1" ContentPlaceHolderID="phDS" runat="Server">
     <px:PXDataSource ID="ds" runat="server" Visible="True" Width="100%"
-        TypeName="HH_APICustomization.Graph.LUMHRPayrollPreferenceMaint" PrimaryView="Contribution">
+        TypeName="HH_APICustomization.Graph.LUMHRPayrollPreferenceMaint" PrimaryView="MasterFilter">
         <CallbackCommands>
         </CallbackCommands>
     </px:PXDataSource>
@@ -16,8 +16,9 @@
         </Template>
     </px:PXFormView>--%>
 </asp:Content>
+
 <asp:Content ID="cont2" ContentPlaceHolderID="phF" runat="Server">
-    <px:PXTab DataMember="Contribution" ID="TAB" runat="server" DataSourceID="ds" Height="150px" Style="z-index: 100" Width="100%" AllowAutoHide="false">
+    <px:PXTab DataMember="MasterFilter" ID="TAB" runat="server" DataSourceID="ds" Height="150px" Style="z-index: 100" Width="100%" AllowAutoHide="false">
         <Items>
             <px:PXTabItem Text="CONTRIBUTION">
                 <Template>
@@ -29,7 +30,7 @@
                                     <px:PXGridColumn DataField="EffectiveDate" Width="300"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="RangeFrom" Width="150"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="RangeTo" Width="150"></px:PXGridColumn>
-                                    <px:PXGridColumn DataField="Method" Type="DropDownList" MatrixMode="True" Width="200"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="Method" Type="DropDownList" MatrixMode="True" Width="200" CommitChanges="True"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Employer" Width="200"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Employee" Width="120"></px:PXGridColumn>
                                 </Columns>
