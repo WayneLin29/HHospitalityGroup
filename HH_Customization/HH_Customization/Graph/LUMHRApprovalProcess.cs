@@ -174,7 +174,7 @@ namespace HH_Customization.Graph
                             line.AccountID = item.Key.CreditAccount;
                             line.SubID = item.Key.CreditSubAccount;
                             line.CuryCreditAmt = item.Sum(x => x.Amount ?? 0);
-                            line.TranDesc = $"{ptypeDescr?.Description} - {filter.CutoffDate}";
+                            line.TranDesc = $"{ptypeDescr?.Description} - {filter.CutoffDate?.ToString("yyyy/MM/dd")}";
                             line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
                             #endregion
 
@@ -184,7 +184,7 @@ namespace HH_Customization.Graph
                             line.AccountID = item.Key.DebitAccount;
                             line.SubID = item.Key.DebitSub;
                             line.CuryDebitAmt = item.Sum(x => x.Amount ?? 0);
-                            line.TranDesc = $"{ptypeDescr?.Description} - {filter.CutoffDate}";
+                            line.TranDesc = $"{ptypeDescr?.Description} - {filter.CutoffDate?.ToString("yyyy/MM/dd")}";
                             line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
                             #endregion
 

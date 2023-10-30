@@ -19,7 +19,9 @@ namespace HH_APICustomization.Graph
         public PXCancel<EmptyFilter> Cancel;
 
         public PXFilter<EmptyFilter> MasterFilter;
+        [PXImport]
         public SelectFrom<LUMHRContributionTable>.View Contribution;
+        [PXImport]
         public SelectFrom<LUMHRPayrollAccountMapping>.View PayrollAccountMapping;
 
     }

@@ -37,7 +37,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region Method
-        [LUMDDLAttribute("CALEMETHOD")]
+        [LUMDDLAttribute("CALMETHOD")]
         [PXDBString(200, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Method")]
         public virtual string Method { get; set; }
