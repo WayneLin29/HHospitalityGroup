@@ -160,11 +160,11 @@ namespace HH_Customization.Graph
                         doc.Module = "GL";
                         doc = glGraph.BatchModule.Cache.Insert(doc) as Batch;
                         doc.BranchID = GroupData?.Key?.Branch;
-                        doc.Description = $"{ptypeDescr?.Description} - {filter.CutoffDate}";
+                        doc.Description = $"{ptypeDescr?.Description} - {filter.CutoffDate?.ToString("yyyy/MM/dd")}";
                         glGraph.BatchModule.Cache.Update(doc);
                         #endregion
 
-                        foreach (var item in GroupData.GroupBy(x => new { x.CreditAccount, x.CreditSubAccount, x.DebitAccount, x.DebitSub }))
+                        foreach (var item in GroupData.GroupBy(x => new { x.CreditAccount, x.CreditSubAccount }))
                         {
                             #region Details
                             // Set CurrentItem
@@ -178,8 +178,15 @@ namespace HH_Customization.Graph
                             line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
                             #endregion
 
+                            #endregion
+                        }
+
+                        foreach (var item in GroupData.GroupBy(x => new { x.DebitAccount, x.DebitSub }))
+                        {
+                            #region Details
+
                             #region Debit
-                            line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
+                            var line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
                             line.BranchID = GroupData.Key.Branch;
                             line.AccountID = item.Key.DebitAccount;
                             line.SubID = item.Key.DebitSub;
@@ -190,7 +197,6 @@ namespace HH_Customization.Graph
 
                             #endregion
                         }
-
 
                         glGraph.Save.Press();
                         // ¦^¼g¸ê®Æ
