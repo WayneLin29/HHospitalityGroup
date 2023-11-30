@@ -1,5 +1,6 @@
 using System;
 using PX.Data;
+using PX.Data.ReferentialIntegrity.Attributes;
 
 namespace HH_APICustomization.DAC
 {
@@ -7,6 +8,11 @@ namespace HH_APICustomization.DAC
     [PXCacheName("LUMCloudBedReservations")]
     public class LUMCloudBedReservations : IBqlTable
     {
+        public class PK : PrimaryKeyOf<LUMCloudBedReservations>.By<propertyID, reservationID>
+        {
+            public static LUMCloudBedReservations Find(PXGraph graph, string propertyID, string reservationID) => FindBy(graph, propertyID, reservationID);
+        }
+
         #region PropertyID
         [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Property ID")]
@@ -173,6 +179,13 @@ namespace HH_APICustomization.DAC
         [PXUIField(DisplayName = "Tstamp")]
         public virtual byte[] Tstamp { get; set; }
         public abstract class tstamp : PX.Data.BQL.BqlByteArray.Field<tstamp> { }
+        #endregion
+
+        #region GuestName
+        [PXDBString(100, IsUnicode = true)]
+        [PXUIField(DisplayName = "Guest Name")]
+        public virtual string GuestName { get; set; }
+        public abstract class guestName : PX.Data.BQL.BqlString.Field<guestName> { }
         #endregion
     }
 }

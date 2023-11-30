@@ -35,6 +35,9 @@ namespace HH_APICustomization.Graph
                        LUMCloudBedAccountMapping.houseAccount.Asc,
                        LUMCloudBedAccountMapping.description.Asc>.View AccountMapping;
 
+        public SelectFrom<LUMHHSetup>.View Setup;
+
+        public SelectFrom<LUMRemitRequestApproval>.View RemitApproval;
 
         #region Action
         public PXAction<LUMCloudBedAPIPreference> signIn;
@@ -45,6 +48,33 @@ namespace HH_APICustomization.Graph
             var url = this.APIPreference.Current?.OauthUrl;
             throw new PXRedirectToUrlException(url, "CloudBed");
         }
+
+        public PXAction<LUMCloudBedAPIPreference> subscribe;
+        [PXUIField(DisplayName = "SUBSCRIBE", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
+        [PXButton]
+        public virtual void Subscribe()
+        {
+            PXLongOperation.StartOperation(this, () =>
+            {
+                var preference = this.APIPreference.Current;
+                foreach (var item in CloudBedSetup.View.SelectMulti().RowCast<LUMCloudBedPreference>().Where(x => x.Selected ?? false))
+                {
+                    Dictionary<string, string> param = new Dictionary<string, string>();
+                    param.Add("endpointUrl", preference?.WebHookUrl);
+                    param.Add("object", "roomblock");
+                    param.Add("action", "created,details_changed,removed");
+                    param.Add("propertyID", item?.CloudBedPropertyID);
+                    var subscribeResult = CloudBedHelper.SubscribeClodbedWebhook(preference?.AccessToken, param);
+
+                    item.SubscriptionID = subscribeResult?.data?.subscriptionID;
+                    item.SubscriptionError = subscribeResult?.message;
+                    this.CloudBedSetup.Cache.Update(item);
+                }
+                this.Save.Press();
+
+            });
+        }
+
         #endregion
     }
 
@@ -61,7 +91,7 @@ namespace HH_APICustomization.Graph
            typeof(LUMCloudBedPreference.creditAcct),
            typeof(LUMCloudBedPreference.creditSub))]
         public virtual string CloudBedPropertyID { get; set; }
-        public abstract class cloudBedPropertyID : PX.Data.BQL.BqlString.Field<cloudBedPropertyID> { } 
+        public abstract class cloudBedPropertyID : PX.Data.BQL.BqlString.Field<cloudBedPropertyID> { }
         #endregion
     }
 }

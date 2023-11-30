@@ -8,6 +8,13 @@ namespace HH_APICustomization.DAC
     [PXCacheName("LUMCloudBedPreference")]
     public class LUMCloudBedPreference : IBqlTable
     {
+        #region Selected
+        [PXBool]
+        [PXUIField(DisplayName = "Selected")]
+        public virtual bool? Selected { get; set; }
+        public abstract class selected : PX.Data.BQL.BqlBool.Field<selected> { }
+        #endregion
+
         #region CloudBedPropertyID
         [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Cloud Bed Property ID")]
@@ -146,6 +153,31 @@ namespace HH_APICustomization.DAC
         [PXUIField(DisplayName = "Tstamp")]
         public virtual byte[] Tstamp { get; set; }
         public abstract class tstamp : PX.Data.BQL.BqlByteArray.Field<tstamp> { }
+        #endregion
+
+        #region IsSubscribe
+        [PXBool]
+        [PXFormula(typeof(Switch<
+            Case<Where<
+                subscriptionID, IsNotNull>,
+                True>, False>))]
+        [PXUIField(DisplayName = "IsSubscribe", Enabled = false)]
+        public virtual bool? IsSubscribe { get; set; }
+        public abstract class isSubscribe : PX.Data.BQL.BqlBool.Field<isSubscribe> { }
+        #endregion
+
+        #region SubscriptionID
+        [PXDBString(200, IsUnicode = true)]
+        [PXUIField(DisplayName = "Subscription ID", Visible = false, Enabled = false)]
+        public virtual string SubscriptionID { get; set; }
+        public abstract class subscriptionID : PX.Data.BQL.BqlString.Field<subscriptionID> { }
+        #endregion
+
+        #region SubscriptionError
+        [PXDBString(300, IsUnicode = true)]
+        [PXUIField(DisplayName = "Subscription Error Message", Enabled = false)]
+        public virtual string SubscriptionError { get; set; }
+        public abstract class subscriptionError : PX.Data.BQL.BqlString.Field<subscriptionError> { }
         #endregion
     }
 }

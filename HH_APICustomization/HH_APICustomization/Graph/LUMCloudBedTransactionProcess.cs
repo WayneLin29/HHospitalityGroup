@@ -187,7 +187,7 @@ namespace HH_APICustomization.Graph
                                 // 只比對相同PropertyID
                                 if (acctMapRow.CloudBedPropertyID != target.CloudBedPropertyID)
                                     continue;
-                                var matchScore = CompareProps(target, acctMapRow);
+                                var matchScore = CloudBedHelper.CompareProps(target, acctMapRow);
                                 if (matchScore > maxScore)
                                 {
                                     sameScoureList.Clear();
@@ -501,17 +501,6 @@ namespace HH_APICustomization.Graph
                     sc.Dispose();
                 }
             }
-        }
-
-        private static int CompareProps(LUMCloudBedAccountMapping target, LUMCloudBedAccountMapping source)
-        {
-            var match = 0;
-            var availableName = new string[] { "CloudBedPropertyID", "TransCategory", "HouseAccount", "TransactionCode", "Description", "Source" };
-            var aValues = target.GetType().GetProperties().Where(x => availableName.Contains(x.Name)).Select(x => string.IsNullOrEmpty((string)x.GetValue(target, null)) ? "" : x.GetValue(target, null));
-            var bValues = source.GetType().GetProperties().Where(x => availableName.Contains(x.Name)).Select(x => string.IsNullOrEmpty((string)x.GetValue(source, null)) ? "" : x.GetValue(source, null));
-            for (int i = 0; i < aValues.Count(); i++)
-                match = aValues.ElementAt(i)?.ToString()?.Trim()?.ToUpper() == bValues.ElementAt(i)?.ToString()?.Trim()?.ToUpper() ? match + 1 : match;
-            return match;
         }
 
         #endregion

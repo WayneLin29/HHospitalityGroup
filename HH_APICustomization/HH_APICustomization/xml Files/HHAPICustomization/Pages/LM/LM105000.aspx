@@ -34,6 +34,7 @@
                         <Levels>
                             <px:PXGridLevel DataMember="CloudBedSetup">
                                 <Columns>
+                                    <px:PXGridColumn DataField="Selected" Type="CheckBox"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="CloudBedPropertyID" CommitChanges="true" />
                                     <px:PXGridColumn DataField="BranchID" />
                                     <px:PXGridColumn DataField="ClearingAcct" />
@@ -43,6 +44,9 @@
                                     <px:PXGridColumn DataField="CreditAcct" />
                                     <px:PXGridColumn DataField="CreditSub" />
                                     <px:PXGridColumn DataField="Active" Type="CheckBox"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="IsSubscribe" Type="CheckBox"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="SubscriptionID"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="SubscriptionError"></px:PXGridColumn>
                                 </Columns>
                                 <RowTemplate>
                                     <px:PXSelector runat="server" ID="edBranchID" DataField="BranchID"></px:PXSelector>
@@ -89,6 +93,34 @@
                             </px:PXGridLevel>
                         </Levels>
                         <Mode AllowUpload="True" />
+                    </px:PXGrid>
+                </Template>
+            </px:PXTabItem>
+            <px:PXTabItem Text="SETUP">
+                <Template>
+                    <px:PXFormView ID="SetupFrom" runat="server" DataSourceID="ds" DataMember="Setup" Width="100%" Height="120px" AllowAutoHide="false">
+                        <Template>
+                            <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
+                            <px:PXLayoutRule ControlSize="L" runat="server" ID="CstPXLayoutRule4" StartGroup="True" GroupCaption="SETUP"></px:PXLayoutRule>
+                            <px:PXSelector runat="server" ID="edRemitSequenceID" DataField="RemitSequenceID"></px:PXSelector>
+                            <px:PXCheckBox runat="server" ID="edRemitRequestApproval" DataField="RemitRequestApproval"></px:PXCheckBox>
+                        </Template>
+                    </px:PXFormView>
+                    <px:PXGrid ID="gridApproval" runat="server" DataSourceID="ds" SkinID="Details" Width="100%">
+                        <AutoSize Enabled="True" />
+                        <Levels>
+                            <px:PXGridLevel DataMember="RemitApproval">
+                                <RowTemplate>
+                                    <px:PXLayoutRule runat="server" StartColumn="True" LabelsWidth="M" ControlSize="XM" />
+                                    <px:PXSelector ID="edAssignmentMapID" runat="server" DataField="AssignmentMapID" AllowEdit="True" CommitChanges="True" />
+                                    <px:PXSelector ID="edAssignmentNotificationID" runat="server" DataField="AssignmentNotificationID" AllowEdit="True" />
+                                </RowTemplate>
+                                <Columns>
+                                    <px:PXGridColumn DataField="AssignmentMapID" Width="250px" RenderEditorText="True" />
+                                    <px:PXGridColumn DataField="AssignmentNotificationID" Width="250px" RenderEditorText="True" />
+                                </Columns>
+                            </px:PXGridLevel>
+                        </Levels>
                     </px:PXGrid>
                 </Template>
             </px:PXTabItem>

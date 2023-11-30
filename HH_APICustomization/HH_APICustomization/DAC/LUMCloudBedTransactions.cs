@@ -1,5 +1,6 @@
 using System;
 using PX.Data;
+using PX.Objects.GL;
 
 namespace HH_APICustomization.DAC
 {
@@ -313,6 +314,37 @@ namespace HH_APICustomization.DAC
         [PXUIField(DisplayName = "Tstamp")]
         public virtual byte[] Tstamp { get; set; }
         public abstract class tstamp : PX.Data.BQL.BqlByteArray.Field<tstamp> { }
+        #endregion
+
+        #region AccountID
+        [PXDBInt()]
+        [PXDefault(PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Account ID")]
+        [PXSelector(typeof(Search<Account.accountID>),
+                    typeof(Account.accountCD),
+                    typeof(Account.description),
+                    SubstituteKey = typeof(Account.accountCD))]
+        public virtual int? AccountID { get; set; }
+        public abstract class accountID : PX.Data.BQL.BqlInt.Field<accountID> { }
+        #endregion
+
+        #region SubAccountID
+        [PXDBInt()]
+        [PXDefault(PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Sub Account ID")]
+        [PXSelector(typeof(Search<Sub.subID>),
+                    typeof(Sub.subCD),
+                    typeof(Sub.description),
+                    SubstituteKey = typeof(Sub.subCD))]
+        public virtual int? SubAccountID { get; set; }
+        public abstract class subAccountID : PX.Data.BQL.BqlInt.Field<subAccountID> { }
+        #endregion
+
+        #region RemitRefNbr
+        [PXDBString(15)]
+        [PXUIField(DisplayName = "Remit Ref Nbr.")]
+        public virtual string RemitRefNbr { get; set; }
+        public abstract class remitRefNbr : PX.Data.BQL.BqlString.Field<remitRefNbr> { }
         #endregion
     }
 }

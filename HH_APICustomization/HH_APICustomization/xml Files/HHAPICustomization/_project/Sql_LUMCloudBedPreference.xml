@@ -18,6 +18,8 @@
   <col name="LastModifiedDateTime" type="DateTime" />
   <col name="tstamp" type="Timestamp" />
   <col name="Active" type="Bit" nullable="true" />
+  <col name="SubscriptionID" type="NVarChar(200)" nullable="true" />
+  <col name="SubscriptionError" type="NVarChar(300)" nullable="true" />
   <index name="LUMCloudBedPreference_NoteID" unique="true">
     <col name="NoteID" />
     <col name="CompanyID" />

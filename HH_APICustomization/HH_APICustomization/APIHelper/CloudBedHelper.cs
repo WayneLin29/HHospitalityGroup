@@ -4,6 +4,7 @@ using HH_APICustomization.Graph;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PX.Data;
+using PX.Data.BQL;
 using PX.Data.BQL.Fluent;
 using System;
 using System.Collections.Generic;
@@ -235,6 +236,77 @@ namespace HH_APICustomization.APIHelper
                 {"client_secret", preference.ClientSecret},
                 {"refresh_token",preference.RefreshToken},
             };
+        }
+
+        /// <summary> Subscribe Cloudbed Webhook </summary>
+        public static CloudBed_SubscribeWebhookEntity SubscribeClodbedWebhook(string accessToken, Dictionary<string, string> parm)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://hotels.cloudbeds.com/api/v1.1/postWebhook") { Content = new FormUrlEncodedContent(parm) };
+                HttpResponseMessage response = client.SendAsync(request).GetAwaiter().GetResult();
+                return JsonConvert.DeserializeObject<CloudBed_SubscribeWebhookEntity>(response.Content.ReadAsStringAsync().Result);
+            }
+        }
+
+        /// <summary> Get Cloudbed Transaction data mapping AccountID/Sub-AccountID (RuleA) </summary>
+        public static (int? AccountID, int? SubAccountID) GetCloudbedTransactionMappingAccount(PXGraph baseGraph, LUMCloudBedTransactions selectedData)
+        {
+            var AcctMapAData = SelectFrom<LUMCloudBedAccountMapping>.View.Select(baseGraph).RowCast<LUMCloudBedAccountMapping>();
+            var mapReservation = SelectFrom<LUMCloudBedReservations>
+                                .Where<LUMCloudBedReservations.propertyID.IsEqual<P.AsString>
+                                  .And<LUMCloudBedReservations.reservationID.IsEqual<P.AsString>>>
+                                .View.Select(baseGraph, selectedData?.PropertyID, selectedData?.ReservationID).TopFirst;
+
+            #region RuleA
+            int maxScore = 0;                                 // 最高分
+            var sameScoureList = new List<int>();             // 相同分數清單
+            var target = new LUMCloudBedAccountMapping()
+            {
+                CloudBedPropertyID = selectedData?.PropertyID,
+                TransCategory = selectedData?.Category,
+                HouseAccount = selectedData?.HouseAccountID?.ToString(),
+                TransactionCode = selectedData?.TransactionCode,
+                Description = selectedData?.Description,
+                Source = mapReservation?.Source
+            };  // 比對目標
+            LUMCloudBedAccountMapping winnerAcctMapInfo = null;
+            // Compare Account Mapping
+            foreach (var acctMapRow in AcctMapAData)
+            {
+                // 只比對相同PropertyID
+                if (acctMapRow.CloudBedPropertyID != target.CloudBedPropertyID)
+                    continue;
+                var matchScore = CompareProps(target, acctMapRow);
+                if (matchScore > maxScore)
+                {
+                    sameScoureList.Clear();
+                    winnerAcctMapInfo = acctMapRow;
+                    maxScore = matchScore;
+                    sameScoureList.Add(acctMapRow.SequenceID.Value);
+                }
+                else if (matchScore == maxScore)
+                    sameScoureList.Add(acctMapRow.SequenceID.Value);
+            }
+            if (winnerAcctMapInfo == null)
+                return (null, null);
+            if (sameScoureList.Count > 1)
+                return (null, null);
+
+            return (winnerAcctMapInfo?.AccountID, winnerAcctMapInfo?.SubAccountID);
+            #endregion
+        }
+
+        public static int CompareProps(LUMCloudBedAccountMapping target, LUMCloudBedAccountMapping source)
+        {
+            var match = 0;
+            var availableName = new string[] { "CloudBedPropertyID", "TransCategory", "HouseAccount", "TransactionCode", "Description", "Source" };
+            var aValues = target.GetType().GetProperties().Where(x => availableName.Contains(x.Name)).Select(x => string.IsNullOrEmpty((string)x.GetValue(target, null)) ? "" : x.GetValue(target, null));
+            var bValues = source.GetType().GetProperties().Where(x => availableName.Contains(x.Name)).Select(x => string.IsNullOrEmpty((string)x.GetValue(source, null)) ? "" : x.GetValue(source, null));
+            for (int i = 0; i < aValues.Count(); i++)
+                match = aValues.ElementAt(i)?.ToString()?.Trim()?.ToUpper() == bValues.ElementAt(i)?.ToString()?.Trim()?.ToUpper() ? match + 1 : match;
+            return match;
         }
 
         private static LUMCloudBedAPIPreference GetCloudBedAPIPreference()
