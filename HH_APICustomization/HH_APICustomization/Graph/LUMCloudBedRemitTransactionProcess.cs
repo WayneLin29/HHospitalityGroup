@@ -76,6 +76,7 @@ namespace HH_APICustomization.Graph
         [PXCacheName("ReservationDetails")]
         public SelectFrom<LUMCloudBedTransactions2>
               .Where<LUMCloudBedTransactions2.reservationID.IsEqual<LUMRemitReservation.reservationID.FromCurrent>>
+              .OrderBy<LUMCloudBedTransactionsExt.toRemit.Desc, LUMCloudBedTransactions2.createdDateTime.Asc, LUMCloudBedTransactions2.transactionID.Asc>
               .View ReservationDetails;
 
         [PXCacheName("Remit Block")]
@@ -514,6 +515,9 @@ namespace HH_APICustomization.Graph
                         isValid = false;
                     }
                 }
+
+                if (!isValid)
+                    throw new PXException("ADRemark/Account/SubAccount is required.");
                 #endregion
                 var selectedData = this.RemitTransactions.View.SelectMulti().RowCast<LUMCloudBedTransactions>();
                 CreateJournalTransaction(this, selectedData.ToList());
@@ -547,6 +551,8 @@ namespace HH_APICustomization.Graph
                             // Reverse Batch
                             glGraph.ReverseBatchProc(glGraph.BatchModule.Current);
                             glGraph.Save.Press();
+                            glGraph.releaseFromHold.Press();
+                            glGraph.release.Press();
                         }
 
                         // Update RemitRefNumber
@@ -723,6 +729,23 @@ namespace HH_APICustomization.Graph
                     }
                     e.Cache.SetValue<EPApproval.docDate>(e.Row, this.Document.Current?.Date);
                 }
+            }
+        }
+
+        public virtual void _(Events.RowDeleting<LUMRemittance> e)
+        {
+            if (e.Row != null && e.Row is LUMRemittance row)
+            {
+                if (row.Status == LUMRemitStatus.Released || row.Status == LUMRemitStatus.Voided)
+                    throw new Exception("Documents that are released or void cannot be deleted.");
+            }
+        }
+
+        public virtual void _(Events.RowDeleted<LUMRemittance> e)
+        {
+            if (e.Row != null && e.Row is LUMRemittance row)
+            {
+                CleanupAllData(row?.RefNbr);
             }
         }
 
@@ -1132,6 +1155,8 @@ namespace HH_APICustomization.Graph
                 case LUMRemitStatus.PendingApproval:
                     if (this.Setup.Current?.RemitRequestApproval ?? false)
                     {
+                        this.Hold.SetVisible(true);
+
                         this.Approve.SetVisible(true);
                         this.Reject.SetVisible(true);
 
@@ -1215,6 +1240,24 @@ namespace HH_APICustomization.Graph
                     PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions2.subAccountID>(this.ReservationDetails.Cache, null, false);
                     break;
             }
+
+            if (this.PaymentTransactions.View.SelectMulti().Count > 0 || this.ReservationTransactions.View.SelectMulti().Count > 0)
+            {
+                PXUIFieldAttribute.SetEnabled<LUMRemittance.date>(this.Document.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<LUMRemittance.shift>(this.Document.Cache, null, false);
+                PXUIFieldAttribute.SetEnabled<LUMRemittance.branch>(this.Document.Cache, null, false);
+            }
+        }
+
+        /// <summary> 刪除與此Remit 有關的所有資料 </summary>
+        private void CleanupAllData(string _RefNbr)
+        {
+            PXDatabase.Delete<LUMRemitPayment>(new PXDataFieldRestrict<LUMRemitPayment.refNbr>(_RefNbr));
+            PXDatabase.Delete<LUMRemitReservation>(new PXDataFieldRestrict<LUMRemitReservation.refNbr>(_RefNbr));
+            PXDatabase.Delete<LUMRemitExcludeTransactions>(new PXDataFieldRestrict<LUMRemitExcludeTransactions.refNbr>(_RefNbr));
+            PXDatabase.Update<LUMCloudBedTransactions>(
+                new PXDataFieldAssign<LUMCloudBedTransactions.remitRefNbr>(null),
+                new PXDataFieldRestrict<LUMCloudBedTransactions.remitRefNbr>(_RefNbr));
         }
 
         public Contact GetContactObject()
