@@ -407,6 +407,7 @@ namespace HH_APICustomization.Graph
                         reservation.Source = row.sourceName;
                         reservation.ThirdPartyIdentifier = row.thirdPartyIdentifier;
                         reservation.Status = row.status;
+                        reservation.GuestName = row.guestName;
                         var tempDate = new DateTime();
                         if (DateTime.TryParse(row.startDate, out tempDate))
                             reservation.StartDate = DateTime.Parse(row.startDate).AddHours(8);

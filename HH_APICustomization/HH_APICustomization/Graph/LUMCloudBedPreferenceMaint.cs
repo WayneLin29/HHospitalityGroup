@@ -64,7 +64,7 @@ namespace HH_APICustomization.Graph
                     param.Add("object", "roomblock");
                     param.Add("action", "created,details_changed,removed");
                     param.Add("propertyID", item?.CloudBedPropertyID);
-                    var subscribeResult = CloudBedHelper.SubscribeClodbedWebhook(preference?.AccessToken, param);
+                    var subscribeResult = CloudBedHelper.SubscribeClodbedWebhook(CloudBedHelper.UpdateAccessToken(), param);
 
                     item.SubscriptionID = subscribeResult?.data?.subscriptionID;
                     item.SubscriptionError = subscribeResult?.message;

@@ -89,6 +89,9 @@
                                     <px:PXGridColumn DataField="SubAccountID" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="ToggleByID" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="ToggleDateTime" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="IsImported" Width="100px" Type="CheckBox"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="BatchNbr" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="LineNbr" Width="100px"></px:PXGridColumn>
                                 </Columns>
                                 <RowTemplate>
                                     <px:PXTextEdit runat="server" ID="edPmtTransactionID" DataField="TransactionID" Enabled="false"></px:PXTextEdit>
@@ -183,6 +186,9 @@
                                     <px:PXGridColumn DataField="ToggleDateTime" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="AccountID" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="SubAccountID" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="IsImported" Width="100px" Type="CheckBox"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="BatchNbr" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="LineNbr" Width="100px"></px:PXGridColumn>
                                 </Columns>
                                 <RowTemplate>
                                     <px:PXTextEdit runat="server" ID="edResTransactionID" DataField="TransactionID" Enabled="false"></px:PXTextEdit>
