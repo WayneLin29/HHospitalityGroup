@@ -57,17 +57,21 @@ namespace HH_APICustomization.Graph
             PXLongOperation.StartOperation(this, () =>
             {
                 var preference = this.APIPreference.Current;
+                var actionArry = new string[] { "created", "details_changed", "removed" };
                 foreach (var item in CloudBedSetup.View.SelectMulti().RowCast<LUMCloudBedPreference>().Where(x => x.Selected ?? false))
                 {
-                    Dictionary<string, string> param = new Dictionary<string, string>();
-                    param.Add("endpointUrl", preference?.WebHookUrl);
-                    param.Add("object", "roomblock");
-                    param.Add("action", "created,details_changed,removed");
-                    param.Add("propertyID", item?.CloudBedPropertyID);
-                    var subscribeResult = CloudBedHelper.SubscribeClodbedWebhook(CloudBedHelper.UpdateAccessToken(), param);
-
-                    item.SubscriptionID = subscribeResult?.data?.subscriptionID;
-                    item.SubscriptionError = subscribeResult?.message;
+                    // Subscribe 3 actions
+                    for (int i = 0; i < actionArry.Length; i++)
+                    {
+                        Dictionary<string, string> param = new Dictionary<string, string>();
+                        param.Add("endpointUrl", preference?.WebHookUrl);
+                        param.Add("object", "roomblock");
+                        param.Add("action", actionArry[i]);
+                        param.Add("propertyID", item?.CloudBedPropertyID);
+                        var subscribeResult = CloudBedHelper.SubscribeClodbedWebhook(CloudBedHelper.UpdateAccessToken(), param);
+                        item.SubscriptionID += subscribeResult?.data?.subscriptionID + ";";
+                        item.SubscriptionError += subscribeResult?.message + ";";
+                    }
                     this.CloudBedSetup.Cache.Update(item);
                 }
                 this.Save.Press();
