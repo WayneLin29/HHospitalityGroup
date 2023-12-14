@@ -66,6 +66,7 @@ namespace HH_APICustomization.DAC
 
         #region Balance
         [PXDBDecimal()]
+        [PXDefault(TypeCode.Decimal, "0.0",PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Balance", Enabled = false)]
         public virtual Decimal? Balance { get; set; }
         public abstract class balance : PX.Data.BQL.BqlDecimal.Field<balance> { }
@@ -73,6 +74,7 @@ namespace HH_APICustomization.DAC
 
         #region Total
         [PXDBDecimal()]
+        [PXDefault(TypeCode.Decimal, "0.0", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Total", Enabled = false)]
         public virtual Decimal? Total { get; set; }
         public abstract class total : PX.Data.BQL.BqlDecimal.Field<total> { }
@@ -80,6 +82,7 @@ namespace HH_APICustomization.DAC
 
         #region PendingCount
         [PXDBInt()]
+        [PXDefault(TypeCode.Int32, "0", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Pending Count", Enabled = false)]
         public virtual int? PendingCount { get; set; }
         public abstract class pendingCount : PX.Data.BQL.BqlInt.Field<pendingCount> { }
@@ -94,6 +97,7 @@ namespace HH_APICustomization.DAC
 
         #region Taxes
         [PXDBDecimal()]
+        [PXDefault(TypeCode.Decimal, "0.0", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Taxes", Enabled = false)]
         public virtual Decimal? Taxes { get; set; }
         public abstract class taxes : PX.Data.BQL.BqlDecimal.Field<taxes> { }
@@ -101,6 +105,7 @@ namespace HH_APICustomization.DAC
 
         #region Fees
         [PXDBDecimal()]
+        [PXDefault(TypeCode.Decimal, "0.0", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Fees", Enabled = false)]
         public virtual Decimal? Fees { get; set; }
         public abstract class fees : PX.Data.BQL.BqlDecimal.Field<fees> { }
@@ -108,6 +113,7 @@ namespace HH_APICustomization.DAC
 
         #region Others
         [PXDBDecimal()]
+        [PXDefault(TypeCode.Decimal, "0.0", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Others", Enabled = false)]
         public virtual Decimal? Others { get; set; }
         public abstract class others : PX.Data.BQL.BqlDecimal.Field<others> { }
@@ -115,6 +121,7 @@ namespace HH_APICustomization.DAC
 
         #region Payment
         [PXDBDecimal()]
+        [PXDefault(TypeCode.Decimal, "0.0", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Payment", Enabled = false)]
         public virtual Decimal? Payment { get; set; }
         public abstract class payment : PX.Data.BQL.BqlDecimal.Field<payment> { }

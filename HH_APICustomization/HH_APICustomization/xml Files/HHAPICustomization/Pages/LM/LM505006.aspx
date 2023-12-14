@@ -114,7 +114,7 @@
             </px:PXTabItem>
             <px:PXTabItem Text="RESERVATION CHECK">
                 <Template>
-                    <px:PXGrid ID="gridReservationCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true">
+                    <px:PXGrid ID="gridReservationCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" Height="300px" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="OUT OF SCOPE">
@@ -152,7 +152,7 @@
                         <AutoCallBack Target="gridReservationDetails" ActiveBehavior="True" Command="Refresh" Enabled="True" />
                         <Mode AllowAddNew="False" InitNewRow="False" AllowDelete="False" />
                     </px:PXGrid>
-                    <px:PXGrid ID="gridReservationDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 380px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True">
+                    <px:PXGrid ID="gridReservationDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="400px" SkinID="Details" BorderWidth="0px" SyncPosition="True">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="TOGGLE OUT">
