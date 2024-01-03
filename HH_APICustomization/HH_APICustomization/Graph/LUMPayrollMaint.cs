@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PX.Objects.GL;
 using PX.Objects.CS;
+using PX.Data.BQL;
 
 namespace HH_APICustomization.Graph
 {
@@ -29,10 +30,10 @@ namespace HH_APICustomization.Graph
 
         [PXImport(typeof(LUMPayrollAdjustment))]
         public SelectFrom<LUMPayrollAdjustment>
-               .Where<LUMPayrollAdjustment.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>.Or<PayrollFilter.branchID.FromCurrent.IsNull>
-                 .And<LUMPayrollAdjustment.adjustmentDate.IsGreaterEqual<PayrollFilter.dateFrom.FromCurrent>.Or<PayrollFilter.dateFrom.FromCurrent.IsNull>>
-                 .And<LUMPayrollAdjustment.adjustmentDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>
-                 .And<LUMPayrollAdjustment.approved.IsEqual<False>.Or<LUMPayrollAdjustment.approved.IsNull>>>
+               .Where<Brackets<LUMPayrollAdjustment.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>.Or<PayrollFilter.branchID.FromCurrent.IsNull>>
+                 .And<Brackets<LUMPayrollAdjustment.adjustmentDate.IsGreaterEqual<PayrollFilter.dateFrom.FromCurrent>.Or<PayrollFilter.dateFrom.FromCurrent.IsNull>>>
+                 .And<Brackets<LUMPayrollAdjustment.adjustmentDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>>
+                 .And<Brackets<LUMPayrollAdjustment.approved.IsEqual<False>.Or<LUMPayrollAdjustment.approved.IsNull>>>>
                .View payrollAdjustment;
 
         #region Events

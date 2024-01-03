@@ -120,8 +120,11 @@ namespace HH_APICustomization.Graph
                                    .View.Select(this, _remitRefNbr, this.PaymentTransactions.Current?.Description).RowCast<LUMCloudBedTransactions>();
             var newResult = result.RowCast<LUMCloudBedTransactions>().Where(x => x.PropertyID == _propertyID).ToList();
             newResult = newResult.Union(toggleOutTrans).ToList();
-            foreach (LUMCloudBedTransactions item in newResult)
-                yield return item;
+
+            PXCache cache = this.Caches[typeof(LUMCloudBedTransactions)];
+            foreach (var item in newResult)
+                cache.SetStatus(item, PXEntryStatus.Notchanged);
+            return cache.Cached;
         }
 
         public IEnumerable reservationDetails()
@@ -540,51 +543,51 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "RELEASE", Visible = false, MapEnableRights = PXCacheRights.Select)]
         public virtual IEnumerable release(PXAdapter adapter)
         {
+            bool isValid = true;
+            #region Valid
+            // Valid Payment ADRemark
+            foreach (var item in this.PaymentTransactions.View.SelectMulti().RowCast<LUMRemitPayment>())
+            {
+                if (string.IsNullOrEmpty(item.ADRemark))
+                {
+                    this.PaymentTransactions.Cache.RaiseExceptionHandling<LUMRemitPayment.aDRemark>(item, item.ADRemark,
+                        new PXSetPropertyException<LUMRemitPayment.aDRemark>("ADRemark is required.", PXErrorLevel.Error));
+                    isValid = false;
+                }
+            }
+            // Valid Reservation ADRemark
+            foreach (var item in this.ReservationTransactions.View.SelectMulti().RowCast<LUMRemitReservation>())
+            {
+                if (string.IsNullOrEmpty(item.ADRemark))
+                {
+                    this.ReservationTransactions.Cache.RaiseExceptionHandling<LUMRemitReservation.aDRemark>(item, item.ADRemark,
+                        new PXSetPropertyException<LUMRemitReservation.aDRemark>("ADRemark is required.", PXErrorLevel.Error));
+                    isValid = false;
+                }
+            }
+            // Valid Cloudbed Transaction Account/Sub-Account
+            foreach (var item in this.PaymentDetails.View.SelectMulti().RowCast<LUMCloudBedTransactions>().Where(x => x.RemitRefNbr == this.Document.Current.RefNbr))
+            {
+                if (!item.AccountID.HasValue)
+                {
+                    this.PaymentDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions.accountID>(item, item.AccountID,
+                        new PXSetPropertyException<LUMCloudBedTransactions.accountID>("AccountID is required.", PXErrorLevel.Error));
+                    isValid = false;
+                }
+
+                if (!item.SubAccountID.HasValue)
+                {
+                    this.PaymentDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions.subAccountID>(item, item.SubAccountID,
+                       new PXSetPropertyException<LUMCloudBedTransactions.subAccountID>("SubAccountID is required.", PXErrorLevel.Error));
+                    isValid = false;
+                }
+            }
+
+            if (!isValid)
+                throw new PXException("Audit Remark and Account/Sub Account is mandatory, please complete necessary entry.");
+            #endregion
             PXLongOperation.StartOperation(this, () =>
             {
-                bool isValid = true;
-                #region Valid
-                // Valid Payment OPRemark
-                foreach (var item in this.PaymentTransactions.View.SelectMulti().RowCast<LUMRemitPayment>())
-                {
-                    if (string.IsNullOrEmpty(item.ADRemark))
-                    {
-                        this.PaymentTransactions.Cache.RaiseExceptionHandling<LUMRemitPayment.aDRemark>(item, item.ADRemark,
-                            new PXSetPropertyException<LUMRemitPayment.aDRemark>("ADRemark is required.", PXErrorLevel.Error));
-                        isValid = false;
-                    }
-                }
-                // Valid Reservation OPRemark
-                foreach (var item in this.ReservationTransactions.View.SelectMulti().RowCast<LUMRemitReservation>())
-                {
-                    if (string.IsNullOrEmpty(item.ADRemark))
-                    {
-                        this.ReservationTransactions.Cache.RaiseExceptionHandling<LUMRemitReservation.aDRemark>(item, item.ADRemark,
-                            new PXSetPropertyException<LUMRemitReservation.aDRemark>("ADRemark is required.", PXErrorLevel.Error));
-                        isValid = false;
-                    }
-                }
-
-                foreach (var item in this.PaymentDetails.View.SelectMulti().RowCast<LUMCloudBedTransactions>())
-                {
-                    if (!item.AccountID.HasValue)
-                    {
-                        this.PaymentDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions.accountID>(item, item.AccountID,
-                            new PXSetPropertyException<LUMCloudBedTransactions.accountID>("AccountID is required.", PXErrorLevel.Error));
-                        isValid = false;
-                    }
-
-                    if (!item.SubAccountID.HasValue)
-                    {
-                        this.PaymentDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions.subAccountID>(item, item.SubAccountID,
-                           new PXSetPropertyException<LUMCloudBedTransactions.subAccountID>("SubAccountID is required.", PXErrorLevel.Error));
-                        isValid = false;
-                    }
-                }
-
-                if (!isValid)
-                    throw new PXException("Audit Remark and Account/Sub Account is mandatory, please complete necessary entry.");
-                #endregion
                 var selectedData = this.RemitTransactions.View.SelectMulti().RowCast<LUMCloudBedTransactions>();
                 CreateJournalTransaction(this, selectedData.ToList());
                 this.Save.Press();
@@ -725,7 +728,7 @@ namespace HH_APICustomization.Graph
             if (row != null)
             {
                 var excludeTrans = this.ExculdeTransactions.Select().RowCast<LUMRemitExcludeTransactions>();
-                row.GetExtension<LUMCloudBedTransactionsExt>().ToRemit = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr) == null && row?.RemitRefNbr == this.Document.Current?.RefNbr;
+                //row.GetExtension<LUMCloudBedTransactionsExt>().ToRemit = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr) == null && row?.RemitRefNbr == this.Document.Current?.RefNbr;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleByID = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedByID;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleDateTime = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedDateTime;
             }
@@ -741,7 +744,7 @@ namespace HH_APICustomization.Graph
                     PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions2.selected>(e.Cache, row, false);
 
                 var excludeTrans = this.ExculdeTransactions.Select().RowCast<LUMRemitExcludeTransactions>();
-                row.GetExtension<LUMCloudBedTransactionsExt>().ToRemit = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr) == null && row?.RemitRefNbr == this.Document.Current?.RefNbr;
+                //row.GetExtension<LUMCloudBedTransactionsExt>().ToRemit = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr) == null && row?.RemitRefNbr == this.Document.Current?.RefNbr;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleByID = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedByID;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleDateTime = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedDateTime;
                 row.GetExtension<LUMCloudBedTransactionsExt>().CreditAmount = row?.TransactionType?.ToUpper() == "CREDIT" ? row?.Amount : 0;
@@ -1357,6 +1360,7 @@ namespace HH_APICustomization.Graph
     {
         #region ToRemit
         [PXBool]
+        [PXFormula(typeof(Switch<Case<Where<LUMCloudBedTransactions.remitRefNbr, Equal<Current<LUMRemittance.refNbr>>>, True>, False>))]
         [PXUIField(DisplayName = "To Remit", Enabled = false)]
         public virtual bool? ToRemit { get; set; }
         public abstract class toRemit : PX.Data.BQL.BqlBool.Field<toRemit> { }
