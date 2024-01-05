@@ -32,6 +32,12 @@ namespace HH_APICustomization.Graph
         public SelectFrom<LUMCloudBedTransactions>.View CloudbedTransactions;
 
         [PXHidden]
+        public SelectFrom<LUMCloudBedTransactions>
+              .Where<LUMCloudBedTransactions.remitRefNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>
+                 .And<Brackets<LUMCloudBedTransactions.accountID.IsNull.Or<LUMCloudBedTransactions.subAccountID.IsNull>>>>
+              .View NonValidCloudbedTransactions;
+
+        [PXHidden]
         public SelectFrom<LUMRemitExcludeTransactions>
               .Where<LUMRemitExcludeTransactions.refNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>
               .View ExculdeTransactions;
@@ -159,9 +165,11 @@ namespace HH_APICustomization.Graph
                 houseTreans = houseTreans.Union(toggleOutTrans).ToList();
             }
             result = result.Union(houseTreans).ToList();
+            PXCache cache = this.Caches[typeof(LUMCloudBedTransactions2)];
             foreach (LUMCloudBedTransactions2 item in result)
                 if (item?.PropertyID == _propertyID)
-                    yield return item;
+                    cache.SetStatus(item, PXEntryStatus.Notchanged);
+            return cache.Cached;
         }
 
         public IEnumerable remitBlock()
@@ -545,6 +553,11 @@ namespace HH_APICustomization.Graph
         {
             bool isValid = true;
             #region Valid
+
+            var errorReservations = this.NonValidCloudbedTransactions.View.SelectMulti()
+                                        .RowCast<LUMCloudBedTransactions>()
+                                        .Select(x => x.ReservationID).Distinct();
+
             // Valid Payment ADRemark
             foreach (var item in this.PaymentTransactions.View.SelectMulti().RowCast<LUMRemitPayment>())
             {
@@ -564,21 +577,27 @@ namespace HH_APICustomization.Graph
                         new PXSetPropertyException<LUMRemitReservation.aDRemark>("ADRemark is required.", PXErrorLevel.Error));
                     isValid = false;
                 }
+                if (errorReservations.Any(x => x == item.ReservationID))
+                {
+                    this.ReservationTransactions.Cache.RaiseExceptionHandling<LUMRemitReservation.reservationID>(item, item.ReservationID,
+                        new PXSetPropertyException<LUMRemitReservation.reservationID>("Account/Sub Account is mandatory, please complete necessary entry.", PXErrorLevel.Error));
+                    isValid = false;
+                }
             }
-            // Valid Cloudbed Transaction Account/Sub-Account
-            foreach (var item in this.PaymentDetails.View.SelectMulti().RowCast<LUMCloudBedTransactions>().Where(x => x.RemitRefNbr == this.Document.Current.RefNbr))
+            // Valid Cloudbed Transaction Account/Sub-Account (Screen)
+            foreach (var item in this.ReservationDetails.View.SelectMulti().RowCast<LUMCloudBedTransactions2>().Where(x => x.RemitRefNbr == this.Document.Current.RefNbr))
             {
                 if (!item.AccountID.HasValue)
                 {
-                    this.PaymentDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions.accountID>(item, item.AccountID,
-                        new PXSetPropertyException<LUMCloudBedTransactions.accountID>("AccountID is required.", PXErrorLevel.Error));
+                    this.ReservationDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions2.accountID>(item, item.AccountID,
+                        new PXSetPropertyException<LUMCloudBedTransactions2.accountID>("AccountID is required.", PXErrorLevel.Error));
                     isValid = false;
                 }
 
                 if (!item.SubAccountID.HasValue)
                 {
-                    this.PaymentDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions.subAccountID>(item, item.SubAccountID,
-                       new PXSetPropertyException<LUMCloudBedTransactions.subAccountID>("SubAccountID is required.", PXErrorLevel.Error));
+                    this.ReservationDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions2.subAccountID>(item, item.SubAccountID,
+                       new PXSetPropertyException<LUMCloudBedTransactions2.subAccountID>("SubAccountID is required.", PXErrorLevel.Error));
                     isValid = false;
                 }
             }
