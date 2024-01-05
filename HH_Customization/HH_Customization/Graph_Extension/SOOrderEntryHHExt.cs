@@ -25,6 +25,8 @@ namespace PX.Objects.SO
 
         #region Const
         public const string DATE_FORMAT = "MMddyyyy";
+        /**User Defined */
+        public const string UD_BILLTYPE = "AttributeBILLTYPE";
         #endregion
 
         #region View
@@ -313,6 +315,7 @@ namespace PX.Objects.SO
                     //entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, header.CuryID);
                     entry.Document.Cache.SetValueExt<APInvoice.curyID>(doc, "PHP");
                     entry.Document.Cache.SetValueExt<APInvoice.docDate>(doc, header.OrderDate);
+                    entry.Document.Cache.SetValueExt(doc, UD_BILLTYPE, "ENL");
                     doc = entry.Document.Update(doc);
                     #endregion
                     entry.Save.Press();
