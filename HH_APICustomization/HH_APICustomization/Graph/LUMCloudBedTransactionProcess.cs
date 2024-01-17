@@ -356,7 +356,7 @@ namespace HH_APICustomization.Graph
                     trans.Description = row.description;
                     trans.Category = row.category;
                     trans.TransactionCode = row.transactionCode;
-                    trans.TransactionNotes = row.notes;
+                    trans.TransactionNotes = row.notes.Length > 1024 ? row?.notes?.Substring(0, 1024) : row?.notes;
                     trans.Quantity = int.Parse(row.quantity);
                     trans.Amount = (decimal?)row.amount;
                     trans.Currency = row.currency;

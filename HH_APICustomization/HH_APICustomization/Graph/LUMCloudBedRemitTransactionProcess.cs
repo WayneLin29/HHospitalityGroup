@@ -15,6 +15,7 @@ using PX.Objects.CR;
 using PX.Objects.EP;
 using HH_APICustomization.Descriptor;
 using PX.SM;
+using System.Diagnostics;
 
 namespace HH_APICustomization.Graph
 {
@@ -30,6 +31,11 @@ namespace HH_APICustomization.Graph
 
         [PXHidden]
         public SelectFrom<LUMCloudBedTransactions>.View CloudbedTransactions;
+
+        [PXHidden]
+        public SelectFrom<LUMCloudBedTransactions>
+              .Where<LUMCloudBedTransactions.transactionID.IsIn<LUMCloudBedTransactions.transactionID.AsOptional>>
+              .View CloudbedTransactionWithFilter;
 
         [PXHidden]
         public SelectFrom<LUMCloudBedTransactions>
@@ -67,6 +73,10 @@ namespace HH_APICustomization.Graph
 
         [PXViewName("Remit Document")]
         public SelectFrom<LUMRemittance>.View Document;
+
+        [PXViewName("Remit Current Document")]
+        public SelectFrom<LUMRemittance>
+              .Where<LUMRemittance.refNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>.View CurrentDocument;
 
         public SelectFrom<LUMRemitPayment>
               .Where<LUMRemitPayment.refNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>
@@ -109,7 +119,7 @@ namespace HH_APICustomization.Graph
 
         public IEnumerable paymentDetails()
         {
-            PXView select = new PXView(this, true, this.PaymentDetails.View.BqlSelect);
+            PXView select = new PXView(this, false, this.PaymentDetails.View.BqlSelect);
             Int32 totalrow = 0;
             Int32 startrow = PXView.StartRow;
             var result = select.Select(PXView.Currents, PXView.Parameters,
@@ -120,22 +130,31 @@ namespace HH_APICustomization.Graph
             var _propertyID = this.ClodBedPreference.Select().TopFirst?.CloudBedPropertyID;
             var _remitRefNbr = this.Document.Current?.RefNbr;
             var toggleOutTrans = SelectFrom<LUMCloudBedTransactions>
-                                   .InnerJoin<LUMRemitExcludeTransactions>.On<LUMCloudBedTransactions.transactionID.IsEqual<LUMRemitExcludeTransactions.transactionID>
-                                         .And<LUMRemitExcludeTransactions.refNbr.IsEqual<P.AsString>>>
-                                   .Where<LUMCloudBedTransactions.description.IsEqual<P.AsString>>
-                                   .View.Select(this, _remitRefNbr, this.PaymentTransactions.Current?.Description).RowCast<LUMCloudBedTransactions>();
-            var newResult = result.RowCast<LUMCloudBedTransactions>().Where(x => x.PropertyID == _propertyID).ToList();
-            newResult = newResult.Union(toggleOutTrans).ToList();
-
-            PXCache cache = this.Caches[typeof(LUMCloudBedTransactions)];
-            foreach (var item in newResult)
-                cache.SetStatus(item, PXEntryStatus.Notchanged);
-            return cache.Cached;
+                                .InnerJoin<LUMRemitExcludeTransactions>.On<LUMCloudBedTransactions.transactionID.IsEqual<LUMRemitExcludeTransactions.transactionID>
+                                      .And<LUMRemitExcludeTransactions.refNbr.IsEqual<P.AsString>>>
+                                .LeftJoin<LUMCloudBedReservations>.On<LUMCloudBedTransactions.propertyID.IsEqual<LUMCloudBedReservations.propertyID>
+                                     .And<LUMCloudBedTransactions.reservationID.IsEqual<LUMCloudBedReservations.reservationID>>>
+                                .Where<LUMCloudBedTransactions.description.IsEqual<P.AsString>>
+                                .View.Select(this, _remitRefNbr, this.PaymentTransactions.Current?.Description);
+            PXResultset<LUMCloudBedTransactions, LUMCloudBedReservations> _toggleOutTrans = new PXResultset<LUMCloudBedTransactions, LUMCloudBedReservations>();
+            foreach (PXResult<LUMCloudBedTransactions, LUMRemitExcludeTransactions, LUMCloudBedReservations> item in toggleOutTrans)
+            {
+                _toggleOutTrans.Add(new PXResult<LUMCloudBedTransactions, LUMCloudBedReservations>((LUMCloudBedTransactions)item, (LUMCloudBedReservations)item));
+            }
+            //var newResult = result.RowCast<LUMCloudBedTransactions>().Where(x => x.PropertyID == _propertyID).ToList();
+            var newResult = result.Union(_toggleOutTrans).ToList();
+            foreach (PXResult<LUMCloudBedTransactions, LUMCloudBedReservations> item in newResult)
+            {
+                LUMCloudBedTransactions trans = (LUMCloudBedTransactions)item;
+                LUMCloudBedReservations res = (LUMCloudBedReservations)item;
+                if (trans.PropertyID == _propertyID)
+                    yield return new PXResult<LUMCloudBedTransactions, LUMCloudBedReservations>(trans, res);
+            }
         }
 
         public IEnumerable reservationDetails()
         {
-            PXView select = new PXView(this, true, this.ReservationDetails.View.BqlSelect);
+            PXView select = new PXView(this, false, this.ReservationDetails.View.BqlSelect);
             Int32 totalrow = 0;
             Int32 startrow = PXView.StartRow;
             var result = select.Select(PXView.Currents, PXView.Parameters,
@@ -165,16 +184,12 @@ namespace HH_APICustomization.Graph
                 houseTreans = houseTreans.Union(toggleOutTrans).ToList();
             }
             result = result.Union(houseTreans).ToList();
-            PXCache cache = this.Caches[typeof(LUMCloudBedTransactions2)];
-            foreach (LUMCloudBedTransactions2 item in result)
-                if (item?.PropertyID == _propertyID)
-                    cache.SetStatus(item, PXEntryStatus.Notchanged);
-            return cache.Cached;
+            return result;
         }
 
         public IEnumerable remitBlock()
         {
-            PXView select = new PXView(this, true, this.RemitBlock.View.BqlSelect);
+            PXView select = new PXView(this, false, this.RemitBlock.View.BqlSelect);
             Int32 totalrow = 0;
             Int32 startrow = PXView.StartRow;
             var result = select.Select(PXView.Currents, PXView.Parameters,
@@ -287,10 +302,10 @@ namespace HH_APICustomization.Graph
                     if (resLine?.IsOutOfScope ?? false)
                         continue;
 
-                    // Delete
-                    if (isExists && checkObj.Type == "RS")
+                    // 刪除Type != 'RS' 而且該Reservatioin下Transaction 不等於Current RemitRef
+                    if (checkObj.Type != "RS" && this.TransactionByReservation.Select(_refNbr, propertyID, checkObj.ReservationID).Count == 0)
                     {
-                        if (this.TransactionByReservation.Select(_refNbr, propertyID, checkObj.ReservationID).Count == 0)
+                        if (isExists)
                             this.ReservationTransactions.Delete(resLine);
                         continue;
                     }
@@ -596,6 +611,7 @@ namespace HH_APICustomization.Graph
 
                 if (!item.SubAccountID.HasValue)
                 {
+                    this.ReservationDetails.Cache.SetStatus(item, PXEntryStatus.Notchanged);
                     this.ReservationDetails.Cache.RaiseExceptionHandling<LUMCloudBedTransactions2.subAccountID>(item, item.SubAccountID,
                        new PXSetPropertyException<LUMCloudBedTransactions2.subAccountID>("SubAccountID is required.", PXErrorLevel.Error));
                     isValid = false;
@@ -620,9 +636,9 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "VOID", Visible = false, MapEnableRights = PXCacheRights.Select)]
         public virtual IEnumerable goVoid(PXAdapter adapter)
         {
-            if (Document.AskExt(true) != WebDialogResult.OK)
+            if (CurrentDocument.AskExt(true) != WebDialogResult.OK)
                 return adapter.Get();
-            var reason = this.Document.Cache.Updated.RowCast<LUMRemittance>().FirstOrDefault()?.VoidReason;
+            var reason = this.CurrentDocument.Cache.Updated.RowCast<LUMRemittance>().FirstOrDefault()?.VoidReason;
             if (string.IsNullOrEmpty(reason))
                 throw new PXException("Please specify void reason");
             PXLongOperation.StartOperation(this, () =>
@@ -848,23 +864,43 @@ namespace HH_APICustomization.Graph
         public virtual void ReloadCloudBedData()
         {
             var cloudbedGraph = PXGraph.CreateInstance<LUMCloudBedTransactionProcess>();
+            var watch = Stopwatch.StartNew();
+            watch.Start();
             // Load Cloudbed transaction data
             cloudbedGraph.TransacionFilter.Current = cloudbedGraph.TransacionFilter.Cache.CreateInstance() as TransactionFilter;
             cloudbedGraph.TransacionFilter.Current.FromDate = Accessinfo.BusinessDate.Value.Date;
             cloudbedGraph.TransacionFilter.Current.ToDate = PX.Common.PXTimeZoneInfo.Now.AddDays(1).Date;
             cloudbedGraph.importTransactionData.Press();
+            watch.Stop();
+            PXTrace.WriteInformation($"Finfish Get ClodbedTransaction via API :{watch.ElapsedMilliseconds}");
+
+            watch.Restart();
             // Load Cloudbed reservation data
             cloudbedGraph.ReservationFilter.Current = cloudbedGraph.ReservationFilter.Cache.CreateInstance() as ReservationFilter;
             cloudbedGraph.ReservationFilter.Current.ReservationFromDate = Accessinfo.BusinessDate.Value.Date;
             cloudbedGraph.ReservationFilter.Current.ReservationToDate = PX.Common.PXTimeZoneInfo.Now.AddDays(1).Date;
             cloudbedGraph.importReservationData.Press();
+            watch.Stop();
+            PXTrace.WriteInformation($"Finfish Get Reservation via API :{watch.ElapsedMilliseconds}");
         }
 
         /// <summary> TOGGLE OUT Cloudbed Transactions Data </summary>
         public virtual void ToggleOutTransactions(IEnumerable<LUMCloudBedTransactions> selectedItems, bool? _isScopeOut = null)
         {
-            this.CloudbedTransactions.View.SelectMulti();
+            if(selectedItems.Count() == 0)
+                return;
+
+            var watch = Stopwatch.StartNew(); //啟動Stopwatch
+            //this.CloudbedTransactions.View.SelectMulti();
+            this.CloudbedTransactionWithFilter.View.SelectMulti(selectedItems.Select(x => x.TransactionID).ToArray());
+            watch.Stop();
+            PXTrace.WriteInformation($"Get CloudbedTransaction Time:{watch.ElapsedMilliseconds}");
+            watch.Restart();
+
             this.ReservationTransactions.View.SelectMulti();
+            watch.Stop();
+            PXTrace.WriteInformation($"Get Reservation Time:{watch.ElapsedMilliseconds}");
+            watch.Restart();
             foreach (var item in selectedItems)
             {
                 if (item?.RemitRefNbr != this.Document.Current?.RefNbr)
@@ -885,14 +921,29 @@ namespace HH_APICustomization.Graph
                 this.ReservationTransactions.Current.IsOutOfScope = true;
                 this.ReservationTransactions.UpdateCurrent();
             }
+            watch.Stop();
+            PXTrace.WriteInformation($"Finish Toggle Out:{watch.ElapsedMilliseconds}");
+
             InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
         }
 
         /// <summary> TOGGLE IN Cloudbed Transactions Data </summary>
         public virtual void ToggleInTransactions(IEnumerable<LUMCloudBedTransactions> selectedItems, bool? _isScopeOut = null)
         {
-            this.CloudbedTransactions.View.SelectMulti();
+            if (selectedItems.Count() == 0)
+                return;
+
+            var watch = Stopwatch.StartNew(); //啟動Stopwatch
+            //this.CloudbedTransactions.View.SelectMulti();
+            this.CloudbedTransactionWithFilter.View.SelectMulti(selectedItems.Select(x => x.TransactionID).ToArray());
+            watch.Stop();
+            PXTrace.WriteInformation($"Get CloudbedTransaction Time:{watch.ElapsedMilliseconds}");
+            watch.Restart();
+
             this.ReservationTransactions.View.SelectMulti();
+            watch.Stop();
+            PXTrace.WriteInformation($"Get Reservation Time:{watch.ElapsedMilliseconds}");
+            watch.Restart();
             foreach (var item in selectedItems)
             {
                 var excludeData = new LUMRemitExcludeTransactions();
@@ -910,6 +961,8 @@ namespace HH_APICustomization.Graph
                 /// Houst Account的Resvsertion ID會是NULL,須往回找
                 ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationTransactions.Current?.ReservationID, _isScopeOut, "IN");
             }
+            watch.Stop();
+            PXTrace.WriteInformation($"Finish Toggle In:{watch.ElapsedMilliseconds}");
             InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
         }
 

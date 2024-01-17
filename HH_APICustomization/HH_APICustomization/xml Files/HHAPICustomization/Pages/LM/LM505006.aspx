@@ -80,7 +80,7 @@
                                     <px:PXGridColumn DataField="ReservationID" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="RemitRefNbr" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="HouseAccountName" Width="200px"></px:PXGridColumn>
-                                    <px:PXGridColumn DataField="LUMCloudBedReservations__GuestName" Width="180px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="GuestName" Width="180px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="LUMCloudBedReservations__Source" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Amount" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="UserName" Width="180px"></px:PXGridColumn>
@@ -262,9 +262,9 @@
         </Items>
     </px:PXTab>
     <px:PXSmartPanel ID="pnlVoidRemit" runat="server" CaptionVisible="True" Caption="Void Remittance"
-        Style="position: static" LoadOnDemand="True" Key="Document" AutoCallBack-Target="frmVoidRemit"
+        Style="position: static" LoadOnDemand="True" Key="CurrentDocument" AutoCallBack-Target="frmVoidRemit"
         AutoCallBack-Command="Refresh" DesignView="Content">
-        <px:PXFormView ID="frmVoidRemit" runat="server" SkinID="Transparent" DataMember="Document" DataSourceID="ds" EmailingGraph="">
+        <px:PXFormView ID="frmVoidRemit" runat="server" SkinID="Transparent" DataMember="CurrentDocument" DataSourceID="ds" EmailingGraph="">
             <Template>
                 <px:PXLayoutRule runat="server" ControlSize="M" LabelsWidth="M" StartColumn="True" />
                 <px:PXLabel ID="lblWarning" runat="server" Encode="True">
