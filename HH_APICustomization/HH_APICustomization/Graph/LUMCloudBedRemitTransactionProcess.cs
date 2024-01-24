@@ -34,11 +34,6 @@ namespace HH_APICustomization.Graph
 
         [PXHidden]
         public SelectFrom<LUMCloudBedTransactions>
-              .Where<LUMCloudBedTransactions.transactionID.IsIn<LUMCloudBedTransactions.transactionID.AsOptional>>
-              .View CloudbedTransactionWithFilter;
-
-        [PXHidden]
-        public SelectFrom<LUMCloudBedTransactions>
               .Where<LUMCloudBedTransactions.remitRefNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>
                  .And<Brackets<LUMCloudBedTransactions.accountID.IsNull.Or<LUMCloudBedTransactions.subAccountID.IsNull>>>>
               .View NonValidCloudbedTransactions;
@@ -114,6 +109,8 @@ namespace HH_APICustomization.Graph
 
         [PXViewName("Approval Remit")]
         public EPApprovalAutomation<LUMRemittance, LUMRemittance.approved, LUMRemittance.rejected, LUMRemittance.hold, LUMRemitRequestApproval> Approval;
+
+        IEnumerable<LUMCloudBedTransactions> transWithFilter = new List<LUMCloudBedTransactions>();
 
         #region Delegate Data View
 
@@ -273,6 +270,24 @@ namespace HH_APICustomization.Graph
                 }
                 #endregion
 
+                #region Update Cloudbed Transaction Remit Refnbr / AccountID / Sub-AccountID
+
+                // Update Cloudbed Transaction Remit Refnbr / AccountID / Sub-AccountID
+                foreach (var item in nonProcessTrans)
+                {
+                    // 沒有Account/SubAccount 才重新執行
+                    if (!item.AccountID.HasValue || !item.SubAccountID.HasValue)
+                    {
+                        var mapAccountInfo = CloudBedHelper.GetCloudbedTransactionMappingAccount(this, item);
+                        item.AccountID = mapAccountInfo.AccountID;
+                        item.SubAccountID = mapAccountInfo.SubAccountID;
+                    }
+                    item.RemitRefNbr = _refNbr;
+                    this.CloudbedTransactions.Update(item);
+                }
+
+                #endregion
+
                 #region Delete Remit Reservation and Clean Transaction
                 // 待刪除的Reservation
                 var deleteReservations = existsRemitReservations.Select(x => x.ReservationID).Except(reservationCheckData.Select(y => y.ReservationID));
@@ -341,24 +356,6 @@ namespace HH_APICustomization.Graph
                     blockLine.CheckMessage = checkBlock.FirstOrDefault()?.Message;
                     blockLine = isExists ? this.RemitBlock.Update(blockLine) : this.RemitBlock.Insert(blockLine);
                 }
-                #endregion
-
-                #region Update Cloudbed Transaction Remit Refnbr / AccountID / Sub-AccountID
-
-                // Update Cloudbed Transaction Remit Refnbr / AccountID / Sub-AccountID
-                foreach (var item in nonProcessTrans)
-                {
-                    // 沒有Account/SubAccount 才重新執行
-                    if (!item.AccountID.HasValue || !item.SubAccountID.HasValue)
-                    {
-                        var mapAccountInfo = CloudBedHelper.GetCloudbedTransactionMappingAccount(this, item);
-                        item.AccountID = mapAccountInfo.AccountID;
-                        item.SubAccountID = mapAccountInfo.SubAccountID;
-                    }
-                    item.RemitRefNbr = _refNbr;
-                    this.CloudbedTransactions.Update(item);
-                }
-
                 #endregion
 
                 this.Save.Press();
@@ -503,7 +500,7 @@ namespace HH_APICustomization.Graph
         {
             PXLongOperation.StartOperation(this, () =>
             {
-                var selectedItems = ReservationDetails.Cache.Updated.RowCast<LUMCloudBedTransactions2>().Where(x => x.Selected ?? false && (x.GetExtension<LUMCloudBedTransactionsExt>().ToRemit ?? false));
+                var selectedItems = ReservationDetails.Cache.Updated.RowCast<LUMCloudBedTransactions>().Where(x => x.Selected ?? false && (x.GetExtension<LUMCloudBedTransactionsExt>().ToRemit ?? false));
                 ToggleOutTransactions(selectedItems);
             });
             return adapter.Get();
@@ -517,7 +514,7 @@ namespace HH_APICustomization.Graph
         {
             PXLongOperation.StartOperation(this, () =>
             {
-                var selectedItems = this.ReservationDetails.Cache.Updated.RowCast<LUMCloudBedTransactions2>().Where(x => x.Selected ?? false && !(x.GetExtension<LUMCloudBedTransactionsExt>().ToRemit ?? false));
+                var selectedItems = this.ReservationDetails.Cache.Updated.RowCast<LUMCloudBedTransactions>().Where(x => x.Selected ?? false && !(x.GetExtension<LUMCloudBedTransactionsExt>().ToRemit ?? false));
                 ToggleInTransactions(selectedItems);
             });
             return adapter.Get();
@@ -887,43 +884,34 @@ namespace HH_APICustomization.Graph
         /// <summary> TOGGLE OUT Cloudbed Transactions Data </summary>
         public virtual void ToggleOutTransactions(IEnumerable<LUMCloudBedTransactions> selectedItems, bool? _isScopeOut = null)
         {
-            if(selectedItems.Count() == 0)
+            if (selectedItems.Count() == 0)
                 return;
+            InitialToggleData(selectedItems);
 
-            var watch = Stopwatch.StartNew(); //啟動Stopwatch
-            //this.CloudbedTransactions.View.SelectMulti();
-            this.CloudbedTransactionWithFilter.View.SelectMulti(selectedItems.Select(x => x.TransactionID).ToArray());
-            watch.Stop();
-            PXTrace.WriteInformation($"Get CloudbedTransaction Time:{watch.ElapsedMilliseconds}");
-            watch.Restart();
-
-            this.ReservationTransactions.View.SelectMulti();
-            watch.Stop();
-            PXTrace.WriteInformation($"Get Reservation Time:{watch.ElapsedMilliseconds}");
-            watch.Restart();
-            foreach (var item in selectedItems)
+            using (PXTransactionScope sc = new PXTransactionScope())
             {
-                if (item?.RemitRefNbr != this.Document.Current?.RefNbr)
-                    continue;
-                var excludeData = this.ExculdeTransactions.Cache.CreateInstance() as LUMRemitExcludeTransactions;
-                excludeData.RefNbr = this.Document.Current?.RefNbr;
-                excludeData.TransactionID = item?.TransactionID;
-                excludeData = this.ExculdeTransactions.Insert(excludeData);
-                this.ExculdeTransactions.Cache.PersistInserted(excludeData);
-                // Remove Remit RefNbr.
-                UpdateTransactionRefNbr(item?.TransactionID, null);
-                // Recalcuate Remit Reservation
-                /// Houst Account的Resvsertion ID會是NULL,須往回找
-                ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationTransactions.Current?.ReservationID, _isScopeOut, "OUT");
+                foreach (var item in selectedItems)
+                {
+                    if (item?.RemitRefNbr != this.Document.Current?.RefNbr)
+                        continue;
+                    var excludeData = this.ExculdeTransactions.Cache.CreateInstance() as LUMRemitExcludeTransactions;
+                    excludeData.RefNbr = this.Document.Current?.RefNbr;
+                    excludeData.TransactionID = item?.TransactionID;
+                    excludeData = this.ExculdeTransactions.Insert(excludeData);
+                    this.ExculdeTransactions.Cache.PersistInserted(excludeData);
+                    // Remove Remit RefNbr.
+                    UpdateTransactionRefNbr(item?.TransactionID, null);
+                    // Recalcuate Remit Reservation
+                    /// Houst Account的Resvsertion ID會是NULL,須往回找
+                    ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationTransactions.Current?.ReservationID, _isScopeOut, "OUT");
+                }
+                sc.Complete();
             }
             if (!this.ReservationDetails.View.SelectMulti().RowCast<LUMCloudBedTransactions2>().Any(x => x.RemitRefNbr == this.Document.Current?.RefNbr))
             {
                 this.ReservationTransactions.Current.IsOutOfScope = true;
                 this.ReservationTransactions.UpdateCurrent();
             }
-            watch.Stop();
-            PXTrace.WriteInformation($"Finish Toggle Out:{watch.ElapsedMilliseconds}");
-
             InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
         }
 
@@ -932,37 +920,29 @@ namespace HH_APICustomization.Graph
         {
             if (selectedItems.Count() == 0)
                 return;
+            InitialToggleData(selectedItems);
 
-            var watch = Stopwatch.StartNew(); //啟動Stopwatch
-            //this.CloudbedTransactions.View.SelectMulti();
-            this.CloudbedTransactionWithFilter.View.SelectMulti(selectedItems.Select(x => x.TransactionID).ToArray());
-            watch.Stop();
-            PXTrace.WriteInformation($"Get CloudbedTransaction Time:{watch.ElapsedMilliseconds}");
-            watch.Restart();
-
-            this.ReservationTransactions.View.SelectMulti();
-            watch.Stop();
-            PXTrace.WriteInformation($"Get Reservation Time:{watch.ElapsedMilliseconds}");
-            watch.Restart();
-            foreach (var item in selectedItems)
+            using (PXTransactionScope sc = new PXTransactionScope())
             {
-                var excludeData = new LUMRemitExcludeTransactions();
-                excludeData.RefNbr = this.Document.Current?.RefNbr;
-                excludeData.TransactionID = item?.TransactionID;
-                excludeData = (LUMRemitExcludeTransactions)this.ExculdeTransactions.Cache.Locate(excludeData);
-                if (excludeData != null)
+                foreach (var item in selectedItems)
                 {
-                    this.ExculdeTransactions.Delete(excludeData);
-                    this.ExculdeTransactions.Cache.PersistDeleted(excludeData);
+                    var excludeData = new LUMRemitExcludeTransactions();
+                    excludeData.RefNbr = this.Document.Current?.RefNbr;
+                    excludeData.TransactionID = item?.TransactionID;
+                    excludeData = (LUMRemitExcludeTransactions)this.ExculdeTransactions.Cache.Locate(excludeData);
+                    if (excludeData != null)
+                    {
+                        this.ExculdeTransactions.Delete(excludeData);
+                        this.ExculdeTransactions.Cache.PersistDeleted(excludeData);
+                    }
+                    // Add Remit RefNbr.
+                    UpdateTransactionRefNbr(item?.TransactionID, this.Document.Current?.RefNbr);
+                    // Recalcuate Remit Reservation
+                    /// Houst Account的Resvsertion ID會是NULL,須往回找
+                    ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationTransactions.Current?.ReservationID, _isScopeOut, "IN");
                 }
-                // Add Remit RefNbr.
-                UpdateTransactionRefNbr(item?.TransactionID, this.Document.Current?.RefNbr);
-                // Recalcuate Remit Reservation
-                /// Houst Account的Resvsertion ID會是NULL,須往回找
-                ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationTransactions.Current?.ReservationID, _isScopeOut, "IN");
+                sc.Complete();
             }
-            watch.Stop();
-            PXTrace.WriteInformation($"Finish Toggle In:{watch.ElapsedMilliseconds}");
             InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
         }
 
@@ -970,9 +950,9 @@ namespace HH_APICustomization.Graph
         private void UpdateTransactionRefNbr(string _transactionID, string _refNbr)
         {
             // Update/Remova Remit RefNbr.
-            var trans = new LUMCloudBedTransactions();
-            trans.TransactionID = _transactionID;
-            trans = (LUMCloudBedTransactions)this.CloudbedTransactions.Cache.Locate(trans);
+            var trans = this.transWithFilter.FirstOrDefault(x => x.TransactionID == _transactionID);
+            if (trans == null)
+                throw new PXException($"Can not find Trans With Filter : {_transactionID}");
             trans.RemitRefNbr = _refNbr;
             trans = this.CloudbedTransactions.Update(trans);
             this.CloudbedTransactions.Cache.PersistUpdated(trans);
@@ -1088,6 +1068,29 @@ namespace HH_APICustomization.Graph
                 default:
                     return transByReservation;
             }
+        }
+
+        /// <summary>
+        /// Inital Toggle Process 所需資料
+        /// </summary>
+        /// <param name="selectedItems"></param>
+        public virtual void InitialToggleData(IEnumerable<LUMCloudBedTransactions> selectedItems)
+        {
+            var watch = Stopwatch.StartNew(); //啟動Stopwatch
+
+            // 用畫面所選的資料做過濾
+            this.transWithFilter = SelectFrom<LUMCloudBedTransactions>
+                                  .Where<LUMCloudBedTransactions.transactionID.IsIn<P.AsString>>
+                                  .View.Select(this, new object[] { selectedItems.Select(x => x.TransactionID).ToArray() }).RowCast<LUMCloudBedTransactions>();
+
+            watch.Stop();
+            PXTrace.WriteInformation($"Get CloudbedTransaction Time:{watch.ElapsedMilliseconds}");
+            watch.Restart();
+
+            this.ReservationTransactions.View.SelectMulti();
+            watch.Stop();
+            PXTrace.WriteInformation($"Get Reservation Time:{watch.ElapsedMilliseconds}");
+            watch.Restart();
         }
 
         /// <summary> Create Journal Transaction </summary>
