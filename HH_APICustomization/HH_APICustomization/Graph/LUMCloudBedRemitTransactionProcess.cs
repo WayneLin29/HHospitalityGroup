@@ -84,7 +84,7 @@ namespace HH_APICustomization.Graph
               .Where<LUMCloudBedTransactions.description.IsEqual<LUMRemitPayment.description.FromCurrent>
                 .And<LUMCloudBedTransactions.isImported.IsNotEqual<True>>
                 .And<LUMCloudBedTransactions.remitRefNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>>
-              .OrderBy<Desc<LUMCloudBedTransactions.reservationID, Desc<LUMCloudBedTransactions.remitRefNbr>>>
+              .OrderBy<Desc<LUMCloudBedTransactionsExt.toRemit, Desc<LUMCloudBedTransactions.reservationID, Desc<LUMCloudBedTransactions.remitRefNbr>>>>
               .View PaymentDetails;
 
         [PXCacheName("RemitReservation")]
@@ -217,7 +217,7 @@ namespace HH_APICustomization.Graph
             {
                 this.Save.Press();
                 var _refNbr = this.Document.Current?.RefNbr;
-                ReloadCloudBedData();
+                // ReloadCloudBedData();
                 var propertyID = this.ClodBedPreference.Select().TopFirst?.CloudBedPropertyID;
                 // 符合條件且未被處理的Transactions
                 var allowTransByProperty = SelectFrom<LUMCloudBedTransactions>
@@ -359,6 +359,18 @@ namespace HH_APICustomization.Graph
                 #endregion
 
                 this.Save.Press();
+            });
+            return adapter.Get();
+        }
+
+        public PXAction<LUMRemittance> Sync;
+        [PXButton]
+        [PXUIField(DisplayName = "SYNC", MapEnableRights = PXCacheRights.Select)]
+        public virtual IEnumerable sync(PXAdapter adapter)
+        {
+            PXLongOperation.StartOperation(this, () =>
+            {
+                ReloadCloudBedData();
             });
             return adapter.Get();
         }
@@ -760,7 +772,6 @@ namespace HH_APICustomization.Graph
             if (row != null)
             {
                 var excludeTrans = this.ExculdeTransactions.Select().RowCast<LUMRemitExcludeTransactions>();
-                //row.GetExtension<LUMCloudBedTransactionsExt>().ToRemit = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr) == null && row?.RemitRefNbr == this.Document.Current?.RefNbr;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleByID = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedByID;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleDateTime = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedDateTime;
             }
@@ -1291,6 +1302,8 @@ namespace HH_APICustomization.Graph
             this.Reject.SetVisible(false);
             this.Hold.SetVisible(false);
             #endregion
+
+            this.Sync.SetConnotation(PX.Data.WorkflowAPI.ActionConnotation.Info);
 
             switch (row?.Status)
             {
