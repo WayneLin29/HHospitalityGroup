@@ -544,7 +544,14 @@ namespace HH_APICustomization.Graph
                 foreach (var res in selectedRes)
                 {
                     var selectedItems = GetTransacitonBelongToReservation(res?.ReservationID);
-                    ToggleOutTransactions(selectedItems, true);
+                    // 如果該Reservation 底下有Transaction
+                    if (selectedItems.Count() > 0)
+                        ToggleOutTransactions(selectedItems, true);
+                    else
+                    {
+                        UpdateReservationWithScope(res, true);
+                        this.Save.Press();
+                    }
                 }
             });
             return adapter.Get();
@@ -563,7 +570,14 @@ namespace HH_APICustomization.Graph
                 {
                     var selectedItems = GetTransacitonBelongToReservation(res?.ReservationID);
                     selectedItems = selectedItems.Where(x => string.IsNullOrEmpty(x.RemitRefNbr) && !(x.IsImported ?? false) && !(x.IsDeleted ?? false));
-                    ToggleInTransactions(selectedItems, false);
+                    // 如果該Reservation 底下有Transaction
+                    if (selectedItems.Count() > 0)
+                        ToggleInTransactions(selectedItems, false);
+                    else
+                    {
+                        UpdateReservationWithScope(res, false);
+                        this.Save.Press();
+                    }
                 }
             });
             return adapter.Get();
@@ -1432,6 +1446,17 @@ namespace HH_APICustomization.Graph
             PXDatabase.Update<LUMCloudBedTransactions>(
                 new PXDataFieldAssign<LUMCloudBedTransactions.remitRefNbr>(null),
                 new PXDataFieldRestrict<LUMCloudBedTransactions.remitRefNbr>(_RefNbr));
+        }
+
+        /// <summary>
+        /// 更新Reservation 中的 OutOfScope欄位
+        /// </summary>
+        /// <param name="resLine"></param>
+        /// <param name="_isScopeOut"></param>
+        private void UpdateReservationWithScope(LUMRemitReservation resLine, bool? _isScopeOut)
+        {
+            resLine.IsOutOfScope = _isScopeOut;
+            resLine = this.ReservationTransactions.Update(resLine);
         }
 
         public Contact GetContactObject()
