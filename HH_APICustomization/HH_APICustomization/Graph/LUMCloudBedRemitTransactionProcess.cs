@@ -82,7 +82,6 @@ namespace HH_APICustomization.Graph
               .LeftJoin<LUMCloudBedReservations>.On<LUMCloudBedTransactions.propertyID.IsEqual<LUMCloudBedReservations.propertyID>
                                                .And<LUMCloudBedTransactions.reservationID.IsEqual<LUMCloudBedReservations.reservationID>>>
               .Where<LUMCloudBedTransactions.description.IsEqual<LUMRemitPayment.description.FromCurrent>
-                .And<LUMCloudBedTransactions.isImported.IsNotEqual<True>>
                 .And<LUMCloudBedTransactions.remitRefNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>>
               .OrderBy<Desc<LUMCloudBedTransactionsExt.toRemit, Desc<LUMCloudBedTransactions.reservationID, Desc<LUMCloudBedTransactions.remitRefNbr>>>>
               .View PaymentDetails;
@@ -289,7 +288,8 @@ namespace HH_APICustomization.Graph
                 #endregion
 
                 #region Delete Remit Reservation and Clean Transaction
-                // 待刪除的Reservation
+                /// 待刪除的Reservation(According to SQL View 中不存在的)
+                /// 每次執行如果SQL View中沒有此Reservation就需要刪除
                 var deleteReservations = existsRemitReservations.Select(x => x.ReservationID).Except(reservationCheckData.Select(y => y.ReservationID));
                 foreach (var deleteReservationID in deleteReservations)
                 {
@@ -317,8 +317,22 @@ namespace HH_APICustomization.Graph
                     if (resLine?.IsOutOfScope ?? false)
                         continue;
 
+                    /// 如果Type是H, 要用House Acoount 去找Transaction;
+                    /// 對應的Reservation是否有Current RemitRefNbr的 Transaction
+                    var availableReservation = checkObj.Type == "H" ?
+                                               SelectFrom<LUMCloudBedTransactions>
+                                              .Where<LUMCloudBedTransactions.remitRefNbr.IsEqual<P.AsString>
+                                                .And<LUMCloudBedTransactions.propertyID.IsEqual<P.AsString>>
+                                                .And<LUMCloudBedTransactions.houseAccountID.IsEqual<P.AsInt>>>
+                                              .View.Select(this, _refNbr, propertyID, int.Parse(GetHouseAccountByReservationID(checkObj.ReservationID))).Count > 0 :
+                                              SelectFrom<LUMCloudBedTransactions>
+                                              .Where<LUMCloudBedTransactions.remitRefNbr.IsEqual<P.AsString>
+                                                .And<LUMCloudBedTransactions.propertyID.IsEqual<P.AsString>>
+                                                .And<LUMCloudBedTransactions.reservationID.IsEqual<P.AsString>>>
+                                              .View.Select(this, _refNbr, propertyID, checkObj.ReservationID).Count > 0;
+
                     // 刪除Type != 'RS' 而且該Reservatioin下Transaction 不等於Current RemitRef
-                    if (checkObj.Type != "RS" && this.TransactionByReservation.Select(_refNbr, propertyID, checkObj.ReservationID).Count == 0)
+                    if (checkObj.Type != "RS" && !availableReservation)
                     {
                         if (isExists)
                             this.ReservationTransactions.Delete(resLine);
@@ -540,19 +554,21 @@ namespace HH_APICustomization.Graph
         {
             PXLongOperation.StartOperation(this, () =>
             {
-                var selectedRes = this.ReservationTransactions.Cache.Updated.RowCast<LUMRemitReservation>().Where(x => x.Selected ?? false && !(x?.IsOutOfScope ?? false));
-                foreach (var res in selectedRes)
+                var tempRes = this.ReservationTransactions.Cache.Updated.RowCast<LUMRemitReservation>().Where(x => x.Selected ?? false && !(x?.IsOutOfScope ?? false));
+                var selectedItems = new List<LUMCloudBedTransactions>();
+                foreach (var res in tempRes)
                 {
-                    var selectedItems = GetTransacitonBelongToReservation(res?.ReservationID);
+                    var temp = GetTransacitonBelongToReservation(res?.ReservationID);
                     // 如果該Reservation 底下有Transaction
-                    if (selectedItems.Count() > 0)
-                        ToggleOutTransactions(selectedItems, true);
+                    if (temp.Count() > 0)
+                        selectedItems.AddRange(temp);
                     else
                     {
                         UpdateReservationWithScope(res, true);
                         this.Save.Press();
                     }
                 }
+                ToggleOutTransactions(selectedItems, true);
             });
             return adapter.Get();
         }
@@ -566,19 +582,21 @@ namespace HH_APICustomization.Graph
             PXLongOperation.StartOperation(this, () =>
             {
                 var selectedRes = this.ReservationTransactions.Cache.Updated.RowCast<LUMRemitReservation>().Where(x => x.Selected ?? false && (x?.IsOutOfScope ?? false));
+                var selectedItems = new List<LUMCloudBedTransactions>();
                 foreach (var res in selectedRes)
                 {
-                    var selectedItems = GetTransacitonBelongToReservation(res?.ReservationID);
-                    selectedItems = selectedItems.Where(x => string.IsNullOrEmpty(x.RemitRefNbr) && !(x.IsImported ?? false) && !(x.IsDeleted ?? false));
+                    var temp = GetTransacitonBelongToReservation(res?.ReservationID);
+                    temp = temp.Where(x => string.IsNullOrEmpty(x.RemitRefNbr) && !(x.IsImported ?? false) && !(x.IsDeleted ?? false));
                     // 如果該Reservation 底下有Transaction
-                    if (selectedItems.Count() > 0)
-                        ToggleInTransactions(selectedItems, false);
+                    if (temp.Count() > 0)
+                        selectedItems.AddRange(temp);
                     else
                     {
                         UpdateReservationWithScope(res, false);
                         this.Save.Press();
                     }
                 }
+                ToggleInTransactions(selectedItems, false);
             });
             return adapter.Get();
         }
@@ -906,16 +924,21 @@ namespace HH_APICustomization.Graph
             PXTrace.WriteInformation($"Finfish Get Reservation via API :{watch.ElapsedMilliseconds}");
         }
 
-        /// <summary> TOGGLE OUT Cloudbed Transactions Data </summary>
-        public virtual void ToggleOutTransactions(IEnumerable<LUMCloudBedTransactions> selectedItems, bool? _isScopeOut = null)
+        /// <summary>
+        /// Toggle Out Transactions
+        /// </summary>
+        /// <param name="selectedTransItems">所勾選的Transactions</param>
+        /// <param name="_isScopeOut">是否OutOfScope</param>
+        public virtual void ToggleOutTransactions(IEnumerable<LUMCloudBedTransactions> selectedTransItems, bool? _isScopeOut = null)
         {
-            if (selectedItems.Count() == 0)
+            if (selectedTransItems.Count() == 0)
                 return;
-            InitialToggleData(selectedItems);
+            InitialToggleData(selectedTransItems);
 
             using (PXTransactionScope sc = new PXTransactionScope())
             {
-                foreach (var item in selectedItems)
+                /// 只執行RemitRefNbr = Current的交易
+                foreach (var item in selectedTransItems)
                 {
                     if (item?.RemitRefNbr != this.Document.Current?.RefNbr)
                         continue;
@@ -924,33 +947,46 @@ namespace HH_APICustomization.Graph
                     excludeData.TransactionID = item?.TransactionID;
                     excludeData = this.ExculdeTransactions.Insert(excludeData);
                     this.ExculdeTransactions.Cache.PersistInserted(excludeData);
-                    // Remove Remit RefNbr.
+                    // Remove Remit RefNbr(Payment Amount).
                     UpdateTransactionRefNbr(item?.TransactionID, null);
                     // Recalcuate Remit Reservation
                     /// Houst Account的Resvsertion ID會是NULL,須往回找
                     ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationTransactions.Current?.ReservationID, _isScopeOut, "OUT");
+                    item.ReservationID = string.IsNullOrEmpty(item.ReservationID) ? CombineReservationByHouseAccount(item) : item.ReservationID;
                 }
+
+                //if (!this.ReservationDetails.View.SelectMulti().RowCast<LUMCloudBedTransactions2>().Any(x => x.RemitRefNbr == this.Document.Current?.RefNbr))
+                //{
+                //    if (this.ReservationTransactions.Current != null)
+                //    {
+                //        this.ReservationTransactions.Current.IsOutOfScope = true;
+                //        this.ReservationTransactions.UpdateCurrent();
+                //    }
+                //}
+                FinallyCheckScope(selectedTransItems.Select(x => x.ReservationID).Distinct().ToList(), true);
+
+                InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
+                InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
+
                 sc.Complete();
             }
-            if (!this.ReservationDetails.View.SelectMulti().RowCast<LUMCloudBedTransactions2>().Any(x => x.RemitRefNbr == this.Document.Current?.RefNbr))
-            {
-                this.ReservationTransactions.Current.IsOutOfScope = true;
-                this.ReservationTransactions.UpdateCurrent();
-            }
-            InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
         }
 
         /// <summary> TOGGLE IN Cloudbed Transactions Data </summary>
-        public virtual void ToggleInTransactions(IEnumerable<LUMCloudBedTransactions> selectedItems, bool? _isScopeOut = null)
+        public virtual void ToggleInTransactions(IEnumerable<LUMCloudBedTransactions> selectedTransItems, bool? _isScopeOut = null)
         {
-            if (selectedItems.Count() == 0)
+            if (selectedTransItems.Count() == 0)
                 return;
-            InitialToggleData(selectedItems);
+            InitialToggleData(selectedTransItems);
 
+            var tempTrans = new List<LUMCloudBedTransactions>();
             using (PXTransactionScope sc = new PXTransactionScope())
             {
-                foreach (var item in selectedItems)
+                /// 只執行 RemitRefNbr = null的交易
+                foreach (var item in selectedTransItems)
                 {
+                    if (!string.IsNullOrEmpty(item.RemitRefNbr))
+                        continue;
                     var excludeData = new LUMRemitExcludeTransactions();
                     excludeData.RefNbr = this.Document.Current?.RefNbr;
                     excludeData.TransactionID = item?.TransactionID;
@@ -965,10 +1001,15 @@ namespace HH_APICustomization.Graph
                     // Recalcuate Remit Reservation
                     /// Houst Account的Resvsertion ID會是NULL,須往回找
                     ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationTransactions.Current?.ReservationID, _isScopeOut, "IN");
+                    item.ReservationID = string.IsNullOrEmpty(item.ReservationID) ? CombineReservationByHouseAccount(item) : item.ReservationID;
+                    tempTrans.Add(item);
                 }
+
+                FinallyCheckScope(tempTrans.Select(x => x.ReservationID).Distinct().ToList(), false);
+                InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
+                InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
                 sc.Complete();
             }
-            InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
         }
 
         /// <summary> Add/Remote Cloudbed Transaction Remit RefNbr. & Recorded Amount </summary>
@@ -989,7 +1030,8 @@ namespace HH_APICustomization.Graph
             {
                 currentPayment.RecordedAmt += string.IsNullOrEmpty(_refNbr) ? ((trans?.Amount ?? 0) * -1) : (trans?.Amount ?? 0);
                 currentPayment = this.PaymentTransactions.Update(currentPayment);
-                this.PaymentTransactions.Cache.PersistUpdated(currentPayment);
+                //InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
+                //this.PaymentTransactions.Cache.PersistUpdated(currentPayment);
             }
         }
 
@@ -1000,16 +1042,15 @@ namespace HH_APICustomization.Graph
             {
                 ReservationID = _reservationID,
                 PropertyID = GetCurrentPropertyID(),
-                Type = _reservationID.Contains("-") ? "H" : "R"
+                Type = string.IsNullOrEmpty(_reservationID) ? "H" : "R"
             };
             var resLine = new LUMRemitReservation();
             resLine.RefNbr = _refNbr;
-            resLine.ReservationID = _reservationID;
+            resLine.ReservationID = checkObj.Type == "H" ? $"{selectedTrans?.HouseAccountID}-{selectedTrans?.HouseAccountName}" : _reservationID;
             resLine = this.ReservationTransactions.Cache.Locate(resLine) as LUMRemitReservation;
-            if (_isScopeOut != null)
-                resLine.IsOutOfScope = _isScopeOut;
             CalculateReservationAmount(selectedTrans, resLine, _actionType == "OUT" ? -1 : 1);
             resLine.PendingCount = (resLine.PendingCount ?? 0) + (_actionType == "OUT" ? 1 : -1);
+            //resLine.IsOutOfScope = _actionType == "OUT" ? true : false;
             resLine = this.ReservationTransactions.Update(resLine);
         }
 
@@ -1464,6 +1505,34 @@ namespace HH_APICustomization.Graph
 
         public EPEmployee GetRequestEmployeeObject()
             => this.Document.Current != null ? SelectFrom<EPEmployee>.Where<EPEmployee.bAccountID.IsEqual<P.AsInt>>.View.Select(this, GetContactObject()?.BAccountID) : null;
+
+        public string GetHouseAccountByReservationID(string reservationID)
+            => reservationID.Substring(0, reservationID.IndexOf('-'));
+
+        public string CombineReservationByHouseAccount(LUMCloudBedTransactions trans)
+            => $"{trans.HouseAccountID}-{trans.HouseAccountName}";
+
+        /// <summary>
+        /// 檢查Reservation下的"交易"是否還在Scope內
+        /// </summary>
+        /// <param name="reservationIDs"></param>
+        /// <param name="Scope"></param>
+        public void FinallyCheckScope(List<string> reservationIDs, bool Scope)
+        {
+            foreach (var resvID in reservationIDs)
+            {
+                var trans = SelectFrom<LUMCloudBedTransactions>
+                           .Where<LUMCloudBedTransactions.remitRefNbr.IsEqual<P.AsString>
+                            .And<LUMCloudBedTransactions.reservationID.IsEqual<P.AsString>>>
+                            .View.Select(this, this.Document.Current?.RefNbr, resvID);
+                var resLine = this.ReservationTransactions.View.SelectMulti().RowCast<LUMRemitReservation>().FirstOrDefault(x => x.ReservationID == resvID);
+                if (resLine != null)
+                {
+                    resLine.IsOutOfScope = trans.Count == 0 ? true : false;
+                    this.ReservationTransactions.Update(resLine);
+                }
+            }
+        }
 
         #endregion
 

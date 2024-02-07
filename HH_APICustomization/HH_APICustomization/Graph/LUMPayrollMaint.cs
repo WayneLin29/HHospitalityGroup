@@ -22,10 +22,10 @@ namespace HH_APICustomization.Graph
 
         [PXImport(typeof(LUMPayrollHour))]
         public SelectFrom<LUMPayrollHour>
-               .Where<LUMPayrollHour.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>.Or<PayrollFilter.branchID.FromCurrent.IsNull>
-                 .And<LUMPayrollHour.workingDate.IsGreaterEqual<PayrollFilter.dateFrom.FromCurrent>.Or<PayrollFilter.dateFrom.FromCurrent.IsNull>>
-                 .And<LUMPayrollHour.workingDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>
-                 .And<LUMPayrollHour.approved.IsEqual<False>.Or<LUMPayrollHour.approved.IsNull>>>
+               .Where<Brackets<LUMPayrollHour.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>.Or<PayrollFilter.branchID.FromCurrent.IsNull>>
+                 .And<Brackets<LUMPayrollHour.workingDate.IsGreaterEqual<PayrollFilter.dateFrom.FromCurrent>.Or<PayrollFilter.dateFrom.FromCurrent.IsNull>>>
+                 .And<Brackets<LUMPayrollHour.workingDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>>
+                 .And<Brackets<LUMPayrollHour.approved.IsEqual<False>.Or<LUMPayrollHour.approved.IsNull>>>>
                .View payrollHour;
 
         [PXImport(typeof(LUMPayrollAdjustment))]
