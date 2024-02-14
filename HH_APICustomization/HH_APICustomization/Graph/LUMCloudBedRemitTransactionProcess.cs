@@ -143,7 +143,7 @@ namespace HH_APICustomization.Graph
             {
                 LUMCloudBedTransactions trans = (LUMCloudBedTransactions)item;
                 LUMCloudBedReservations res = (LUMCloudBedReservations)item;
-                if (trans.PropertyID == _propertyID)
+                if (trans.PropertyID == _propertyID && trans?.UserName != "SYSTEM")
                     yield return new PXResult<LUMCloudBedTransactions, LUMCloudBedReservations>(trans, res);
             }
         }
@@ -209,7 +209,7 @@ namespace HH_APICustomization.Graph
         #region Action
         public PXAction<LUMRemittance> Refresh;
         [PXButton]
-        [PXUIField(DisplayName = "REFRESH", MapEnableRights = PXCacheRights.Select)]
+        [PXUIField(DisplayName = "PREPARE", MapEnableRights = PXCacheRights.Select)]
         public virtual IEnumerable refresh(PXAdapter adapter)
         {
             PXLongOperation.StartOperation(this, () =>
@@ -418,7 +418,7 @@ namespace HH_APICustomization.Graph
             {
                 bool isValid = true;
                 #region Valid
-                // Valid Payment OPRemark
+                // Valid Payment OPRemark/Open Amount
                 foreach (var item in this.PaymentTransactions.View.SelectMulti().RowCast<LUMRemitPayment>())
                 {
                     if (string.IsNullOrEmpty(item.OPRemark))
@@ -427,6 +427,14 @@ namespace HH_APICustomization.Graph
                             new PXSetPropertyException<LUMRemitPayment.oPRemark>("OPRemark is required.", PXErrorLevel.Error));
                         isValid = false;
                     }
+
+                    if ((item?.OpenAmt ?? 0) != 0)
+                    {
+                        this.PaymentTransactions.Cache.RaiseExceptionHandling<LUMRemitPayment.openAmt>(item, item.OpenAmt,
+                           new PXSetPropertyException<LUMRemitPayment.openAmt>("Open Amount is not 0, Please confirm your Remit Amount in Payment Check.", PXErrorLevel.Error));
+                        isValid = false;
+                    }
+
                 }
                 // Valid Reservation OPRemark
                 foreach (var item in this.ReservationTransactions.View.SelectMulti().RowCast<LUMRemitReservation>())
@@ -756,7 +764,7 @@ namespace HH_APICustomization.Graph
 
         public PXAction<LUMRemittance> AuditRefresh;
         [PXButton]
-        [PXUIField(DisplayName = "AUDIT REFRESH", Visible = false, MapEnableRights = PXCacheRights.Select)]
+        [PXUIField(DisplayName = "AUDIT PREPARE", Visible = false, MapEnableRights = PXCacheRights.Select)]
         public virtual IEnumerable auditRefresh(PXAdapter adapter)
             => this.refresh(adapter);
 

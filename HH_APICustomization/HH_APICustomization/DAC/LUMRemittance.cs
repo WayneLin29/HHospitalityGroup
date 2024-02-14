@@ -49,14 +49,15 @@ namespace HH_APICustomization.DAC
         [PXDBString(20, IsUnicode = true, InputMask = "")]
         [PXDefault]
         [PXUIField(DisplayName = "Shift")]
-        [PXStringList(new string[] { "AM", "PM", "GY", "RESA" },
-                      new string[] { "AM", "PM", "GY", "RESA" })]
+        [PXStringList(new string[] { "AM", "PM", "GY", "RESA", "RESA GY" },
+                      new string[] { "AM", "PM", "GY", "RESA", "RESA GY" })]
         public virtual string Shift { get; set; }
         public abstract class shift : PX.Data.BQL.BqlString.Field<shift> { }
         #endregion
 
         #region Branch
         [Branch(typeof(APRegister.branchID))]
+        [PXDefault(typeof(AccessInfo.branchID))]
         [PXUIField(DisplayName = "Branch")]
         public virtual int? Branch { get; set; }
         public abstract class branch : PX.Data.BQL.BqlInt.Field<branch> { }
