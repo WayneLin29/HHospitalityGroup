@@ -29,6 +29,8 @@
             <px:PXSelector runat="server" ID="edVoidedBy" DataField="VoidedBy" Enabled="False"></px:PXSelector>
             <px:PXTextEdit runat="server" ID="edVoidReason" DataField="VoidReason" Enabled="False"></px:PXTextEdit>
             <px:PXTextEdit runat="server" ID="edVoidBatchNbr" DataField="VoidBatchNbr" Enabled="False"></px:PXTextEdit>
+            <px:PXLayoutRule runat="server" ControlSize="SM" LabelsWidth="S" StartColumn="True" />
+            <px:PXDateTimeEdit runat="server" ID="edPostingDate" DataField="PostingDate"></px:PXDateTimeEdit>
         </Template>
     </px:PXFormView>
 </asp:Content>
@@ -54,7 +56,7 @@
                         <AutoCallBack ActiveBehavior="True" Command="Refresh" Target="gridPaymentDetails" Enabled="True" />
                         <Mode AllowAddNew="False" InitNewRow="False" AllowDelete="False" />
                     </px:PXGrid>
-                    <px:PXGrid ID="gridPaymentDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 380px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True">
+                    <px:PXGrid ID="gridPaymentDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 380px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="PaymentDetail_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="TOGGLE OUT">
@@ -94,6 +96,7 @@
                                     <px:PXGridColumn DataField="LineNbr" Width="100px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="TransactionDateTime" Width="150px" DisplayFormat="g"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="HouseAccountID" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="CurrentRefNbr" Width="150px"></px:PXGridColumn>
                                 </Columns>
                                 <RowTemplate>
                                     <px:PXTextEdit runat="server" ID="edPmtTransactionID" DataField="TransactionID" Enabled="false"></px:PXTextEdit>
@@ -116,7 +119,7 @@
             </px:PXTabItem>
             <px:PXTabItem Text="RESERVATION CHECK">
                 <Template>
-                    <px:PXGrid ID="gridReservationCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" Height="300px" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true">
+                    <px:PXGrid ID="gridReservationCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" Height="300px" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true" OnRowDataBound="ReservationTrans_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="OUT OF SCOPE">
@@ -124,6 +127,9 @@
                                 </px:PXToolBarButton>
                                 <px:PXToolBarButton Text="IN SCOPE">
                                     <AutoCallBack Command="InScope" Target="ds" />
+                                </px:PXToolBarButton>
+                                <px:PXToolBarButton Text="AD Remark">
+                                    <AutoCallBack Command="FillInADRemark" Target="ds" />
                                 </px:PXToolBarButton>
                             </CustomItems>
                         </ActionBar>
@@ -143,6 +149,7 @@
                                     <px:PXGridColumn DataField="Balance" Width="150px" TextAlign="Right"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Total" Width="150px" TextAlign="Right"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="PendingCount" Width="150px" TextAlign="Right"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="ToRemitCount" Width="150px" TextAlign="Right"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="RoomRevenue" Width="150px" TextAlign="Right"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Taxes" Width="150px" TextAlign="Right"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Fees" Width="150px" TextAlign="Right"></px:PXGridColumn>
@@ -154,7 +161,13 @@
                         <AutoCallBack Target="gridReservationDetails" ActiveBehavior="True" Command="Refresh" Enabled="True" />
                         <Mode AllowAddNew="False" InitNewRow="False" AllowDelete="False" />
                     </px:PXGrid>
-                    <px:PXGrid ID="gridReservationDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="400px" SkinID="Details" BorderWidth="0px" SyncPosition="True">
+                    <px:PXFormView ID="FrmTransactionFilter" runat="server" DataMember="TransactionFilter" RenderStyle="Normal" Width="100%">
+                        <Template>
+                            <px:PXLayoutRule ID="PXLayoutRule11" runat="server" ControlSize="XM" LabelsWidth="SM" StartColumn="True" />
+                            <px:PXCheckBox ID="edFilterShowPost" runat="server" DataField="ShowPost" CommitChanges="True"></px:PXCheckBox>
+                        </Template>
+                    </px:PXFormView>
+                    <px:PXGrid ID="gridReservationDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="400px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="ReservationDetail_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="TOGGLE OUT">
@@ -192,6 +205,7 @@
                                     <px:PXGridColumn DataField="BatchNbr" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="LineNbr" Width="100px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="TransactionDateTime" Width="150px" DisplayFormat="g"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="CurrentRefNbr" Width="150px"></px:PXGridColumn>
                                 </Columns>
                                 <RowTemplate>
                                     <px:PXTextEdit runat="server" ID="edResTransactionID" DataField="TransactionID" Enabled="false"></px:PXTextEdit>
@@ -284,5 +298,37 @@
             </Template>
         </px:PXFormView>
     </px:PXSmartPanel>
+    <px:PXSmartPanel ID="PnlReservationADRemark" runat="server" CaptionVisible="True" Caption="Reservation AD Remark"
+        Style="position: static" LoadOnDemand="True" Key="CurrentDocument2" AutoCallBack-Target="frmReservationADRemark"
+        AutoCallBack-Command="Refresh" DesignView="Content">
+        <px:PXFormView ID="frmReservationADRemark" runat="server" SkinID="Transparent" DataMember="CurrentDocument2" DataSourceID="ds" EmailingGraph="">
+            <Template>
+                <px:PXLayoutRule runat="server" ControlSize="M" LabelsWidth="M" StartColumn="True" />
+                <px:PXLabel ID="lblWarning" runat="server" Encode="True">
+					Please specify Reservation AD Remark
+                </px:PXLabel>
+                <px:PXTextEdit ID="edReserADRemark" runat="server" AutoRefresh="True" DataField="ADRemark" DataSourceID="ds" />
+
+                <px:PXPanel ID="PXPanel1" runat="server" SkinID="Buttons">
+                    <px:PXButton ID="btnADRemarkCommandOK" runat="server" DialogResult="OK" Text="OK">
+                        <AutoCallBack Command="Save" Target="frmReservationADRemark" />
+                    </px:PXButton>
+                    <px:PXButton ID="btnADRemarkCommandCancel" runat="server" DialogResult="Cancel" Text="Cancel" />
+                </px:PXPanel>
+            </Template>
+        </px:PXFormView>
+    </px:PXSmartPanel>
+
+    <style type="text/css">
+        .GridAquamarine {
+            background-color: aquamarine !important;
+        }
+
+        .Gridlightgoldenrodyellow {
+            background-color: lightgoldenrodyellow !important;
+        }
+    </style>
+
+
 </asp:Content>
 

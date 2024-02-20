@@ -25,6 +25,7 @@
   <col name="Approved" type="Bit" nullable="true" />
   <col name="Rejected" type="Bit" nullable="true" />
   <col name="Release" type="Bit" nullable="true" />
+  <col name="PostingDate" type="DateTime" nullable="true" />
   <index name="LUMRemittance_NoteID" unique="true">
     <col name="NoteID" />
     <col name="CompanyID" />

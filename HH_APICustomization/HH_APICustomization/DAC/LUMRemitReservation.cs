@@ -66,7 +66,7 @@ namespace HH_APICustomization.DAC
 
         #region Balance
         [PXDBDecimal()]
-        [PXDefault(TypeCode.Decimal, "0.0",PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXDefault(TypeCode.Decimal, "0.0", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Balance", Enabled = false)]
         public virtual Decimal? Balance { get; set; }
         public abstract class balance : PX.Data.BQL.BqlDecimal.Field<balance> { }
@@ -83,7 +83,7 @@ namespace HH_APICustomization.DAC
         #region PendingCount
         [PXDBInt()]
         [PXDefault(TypeCode.Int32, "0", PersistingCheck = PXPersistingCheck.Nothing)]
-        [PXUIField(DisplayName = "Pending Count", Enabled = false)]
+        [PXUIField(DisplayName = "Toggle Out", Enabled = false)]
         public virtual int? PendingCount { get; set; }
         public abstract class pendingCount : PX.Data.BQL.BqlInt.Field<pendingCount> { }
         #endregion
@@ -147,6 +147,14 @@ namespace HH_APICustomization.DAC
         [PXUIField(DisplayName = "ADRemark")]
         public virtual string ADRemark { get; set; }
         public abstract class aDRemark : PX.Data.BQL.BqlString.Field<aDRemark> { }
+        #endregion
+
+        #region ToRemitCount
+        [PXDBInt()]
+        [PXDefault(TypeCode.Int32, "0", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "To Remit", Enabled = false)]
+        public virtual int? ToRemitCount { get; set; }
+        public abstract class toRemitCount : PX.Data.BQL.BqlInt.Field<toRemitCount> { }
         #endregion
 
         #region Noteid

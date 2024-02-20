@@ -213,5 +213,20 @@ namespace HH_APICustomization.DAC
         public abstract class isApprover : PX.Data.BQL.BqlBool.Field<isApprover> { }
         #endregion
 
+        #region PostingDate
+        [PXDBDate]
+        [PXDefault(typeof(AccessInfo.businessDate))]
+        [PXUIField(DisplayName = "Posting Date")]
+        public virtual DateTime? PostingDate { get; set; }
+        public abstract class postingDate : PX.Data.BQL.BqlDateTime.Field<postingDate> { }
+        #endregion
+
+        #region ADRemark
+        [PXString(1024, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "ADRemark")]
+        public virtual string ADRemark { get; set; }
+        public abstract class aDRemark : PX.Data.BQL.BqlString.Field<aDRemark> { }
+        #endregion
+
     }
 }

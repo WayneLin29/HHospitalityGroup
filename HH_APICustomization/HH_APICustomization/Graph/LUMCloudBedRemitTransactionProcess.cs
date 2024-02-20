@@ -73,6 +73,10 @@ namespace HH_APICustomization.Graph
         public SelectFrom<LUMRemittance>
               .Where<LUMRemittance.refNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>.View CurrentDocument;
 
+        [PXViewName("Remit Current Document")]
+        public SelectFrom<LUMRemittance>
+            .Where<LUMRemittance.refNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>.View CurrentDocument2;
+
         public SelectFrom<LUMRemitPayment>
               .Where<LUMRemitPayment.refNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>
               .View PaymentTransactions;
@@ -89,7 +93,7 @@ namespace HH_APICustomization.Graph
         [PXCacheName("RemitReservation")]
         public SelectFrom<LUMRemitReservation>
               .Where<LUMRemitReservation.refNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>
-              .OrderBy<LUMRemitReservation.checkMessage.Asc, LUMRemitReservation.checkIn.Asc, LUMRemitReservation.reservationID.Asc>
+              .OrderBy<LUMRemitReservation.toRemitCount.Desc, LUMRemitReservation.checkMessage.Asc, LUMRemitReservation.checkIn.Asc, LUMRemitReservation.reservationID.Asc>
               .View ReservationTransactions;
 
         [PXCacheName("ReservationDetails")]
@@ -105,6 +109,8 @@ namespace HH_APICustomization.Graph
                                                    .And<LUMCloudBedRoomBlockDetails.propertyID.IsEqual<LUMCloudBedRoomBlock.propertyID>>>
               .Where<LUMRemitBlock.refNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>>
               .View RemitBlock;
+
+        public PXFilter<LUMShowSystemPostFilter> TransactionFilter;
 
         [PXViewName("Approval Remit")]
         public EPApprovalAutomation<LUMRemittance, LUMRemittance.approved, LUMRemittance.rejected, LUMRemittance.hold, LUMRemitRequestApproval> Approval;
@@ -165,6 +171,7 @@ namespace HH_APICustomization.Graph
             List<LUMCloudBedTransactions2> houseTreans = new List<LUMCloudBedTransactions2>();
             if (currentResverationID != null && currentResverationID?.IndexOf('-') != -1)
             {
+                // 找HouseAccount
                 var _houstAccountID = currentResverationID.Substring(0, currentResverationID.IndexOf('-'));
                 houseTreans = SelectFrom<LUMCloudBedTransactions2>
                              .Where<LUMCloudBedTransactions2.propertyID.IsEqual<P.AsString>
@@ -180,7 +187,22 @@ namespace HH_APICustomization.Graph
                 houseTreans = houseTreans.Union(toggleOutTrans).ToList();
             }
             result = result.Union(houseTreans).ToList();
-            return result;
+
+            var isShowPost = this.TransactionFilter.Current?.ShowPost;
+            if (isShowPost ?? false)
+            {
+                foreach (var item in result)
+                {
+                    yield return item;
+                }
+            }
+            else
+            {
+                foreach (var item in result.Where(x => ((LUMCloudBedTransactions2)x)?.UserName != "SYSTEM"))
+                {
+                    yield return item;
+                }
+            }
         }
 
         public IEnumerable remitBlock()
@@ -283,6 +305,7 @@ namespace HH_APICustomization.Graph
                     }
                     item.RemitRefNbr = _refNbr;
                     this.CloudbedTransactions.Update(item);
+                    InvokeCachePersist<LUMCloudBedTransactions>(PXDBOperation.Update);
                 }
 
                 #endregion
@@ -352,6 +375,7 @@ namespace HH_APICustomization.Graph
                     resLine.Others = 0;
                     resLine.Payment = 0;
                     resLine.PendingCount = 0;
+                    resLine.ToRemitCount = 0;
                     CalculateReservationAmount(_refNbr, checkObj, resLine);
                     resLine = isExists ? this.ReservationTransactions.Update(resLine) : this.ReservationTransactions.Insert(resLine);
                 }
@@ -732,6 +756,22 @@ namespace HH_APICustomization.Graph
             return adapter.Get();
         }
 
+        public PXAction<LUMRemittance> FillInADRemark;
+        [PXButton]
+        [PXUIField(DisplayName = "AD REMARK", Enabled = false, MapEnableRights = PXCacheRights.Select)]
+        public virtual IEnumerable fillInADRemark(PXAdapter adapter)
+        {
+            if (this.CurrentDocument2.AskExt(true) != WebDialogResult.OK)
+                return adapter.Get();
+            var remark = this.CurrentDocument2.Cache.Updated.RowCast<LUMRemittance>().FirstOrDefault()?.ADRemark;
+            foreach (var item in this.ReservationTransactions.View.SelectMulti().RowCast<LUMRemitReservation>())
+            {
+                item.ADRemark = remark;
+                this.ReservationTransactions.Cache.Update(item);
+            }
+            return adapter.Get();
+        }
+
         #region Audit Action
 
         /// <summary> AUDIT TOGGLE OUT transaction </summary>
@@ -803,6 +843,9 @@ namespace HH_APICustomization.Graph
                 ButtonControl(row);
 
                 FieldControl(row);
+
+                if (!row.PostingDate.HasValue)
+                    row.PostingDate = Accessinfo.BusinessDate;
             }
         }
 
@@ -812,6 +855,7 @@ namespace HH_APICustomization.Graph
             if (row != null)
             {
                 var excludeTrans = this.ExculdeTransactions.Select().RowCast<LUMRemitExcludeTransactions>();
+                row.GetExtension<LUMCloudBedTransactionsExt>().CurrentRefNbr = this.Document.Current?.RefNbr;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleByID = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedByID;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleDateTime = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedDateTime;
             }
@@ -827,7 +871,7 @@ namespace HH_APICustomization.Graph
                     PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions2.selected>(e.Cache, row, false);
 
                 var excludeTrans = this.ExculdeTransactions.Select().RowCast<LUMRemitExcludeTransactions>();
-                //row.GetExtension<LUMCloudBedTransactionsExt>().ToRemit = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr) == null && row?.RemitRefNbr == this.Document.Current?.RefNbr;
+                row.GetExtension<LUMCloudBedTransactionsExt>().CurrentRefNbr = this.Document.Current?.RefNbr;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleByID = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedByID;
                 row.GetExtension<LUMCloudBedTransactionsExt>().ToggleDateTime = excludeTrans.FirstOrDefault(x => row?.TransactionID == x?.TransactionID && x.RefNbr == this.Document.Current?.RefNbr)?.CreatedDateTime;
                 row.GetExtension<LUMCloudBedTransactionsExt>().CreditAmount = row?.TransactionType?.ToUpper() == "CREDIT" ? row?.Amount : 0;
@@ -971,7 +1015,7 @@ namespace HH_APICustomization.Graph
                 //        this.ReservationTransactions.UpdateCurrent();
                 //    }
                 //}
-                FinallyCheckScope(selectedTransItems.Select(x => x.ReservationID).Distinct().ToList(), true);
+                FinalCheckScope(selectedTransItems.Select(x => x.ReservationID).Distinct().ToList(), true);
 
                 InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
@@ -1013,7 +1057,7 @@ namespace HH_APICustomization.Graph
                     tempTrans.Add(item);
                 }
 
-                FinallyCheckScope(tempTrans.Select(x => x.ReservationID).Distinct().ToList(), false);
+                FinalCheckScope(tempTrans.Select(x => x.ReservationID).Distinct().ToList(), false);
                 InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
                 sc.Complete();
@@ -1058,6 +1102,7 @@ namespace HH_APICustomization.Graph
             resLine = this.ReservationTransactions.Cache.Locate(resLine) as LUMRemitReservation;
             CalculateReservationAmount(selectedTrans, resLine, _actionType == "OUT" ? -1 : 1);
             resLine.PendingCount = (resLine.PendingCount ?? 0) + (_actionType == "OUT" ? 1 : -1);
+            resLine.ToRemitCount = (resLine.ToRemitCount ?? 0) + (_actionType == "OUT" ? -1 : 1);
             //resLine.IsOutOfScope = _actionType == "OUT" ? true : false;
             resLine = this.ReservationTransactions.Update(resLine);
         }
@@ -1084,6 +1129,10 @@ namespace HH_APICustomization.Graph
                                                        .And<LUMCloudBedTransactions.reservationID.IsEqual<P.AsString>>>
                                                  .Where<LUMRemitExcludeTransactions.refNbr.IsEqual<P.AsString>>
                                                  .View.Select(this, checkObj.ReservationID, _refNbr).Count;
+                    reservationobj.ToRemitCount = SelectFrom<LUMCloudBedTransactions>
+                                                 .Where<LUMCloudBedTransactions.reservationID.IsEqual<P.AsString>
+                                                   .And<LUMCloudBedTransactions.remitRefNbr.IsEqual<P.AsString>>>
+                                                 .View.Select(new PXGraph(), checkObj.ReservationID, _refNbr).Count;
                     break;
                 // House Account
                 case "H":
@@ -1094,6 +1143,10 @@ namespace HH_APICustomization.Graph
                                                        .And<LUMCloudBedTransactions.houseAccountID.IsEqual<P.AsInt>>>
                                                  .Where<LUMRemitExcludeTransactions.refNbr.IsEqual<P.AsString>>
                                                  .View.Select(this, _houstAccountID, _refNbr).Count;
+                    reservationobj.ToRemitCount = SelectFrom<LUMCloudBedTransactions>
+                                                 .Where<LUMCloudBedTransactions.houseAccountID.IsEqual<P.AsInt>
+                                                   .And<LUMCloudBedTransactions.remitRefNbr.IsEqual<P.AsString>>>
+                                                 .View.Select(new PXGraph(), _houstAccountID, _refNbr).Count;
                     break;
             }
             foreach (var trans in transByReservation)
@@ -1190,7 +1243,7 @@ namespace HH_APICustomization.Graph
                     var doc = glGraph.BatchModule.Cache.CreateInstance() as Batch;
                     doc.Module = "GL";
                     doc = glGraph.BatchModule.Cache.Insert(doc) as Batch;
-                    doc.DateEntered = baseGraph.Document.Current?.Date;
+                    doc.DateEntered = baseGraph.Document.Current?.PostingDate;
                     doc.LedgerID = ledgerInfo?.LedgerID;
                     doc.BranchID = baseGraph.Document.Current?.Branch;
                     doc.Description = $"CloudBed Transaction {baseGraph.Document.Current?.Date?.ToString("yyyy-MM-dd")}";
@@ -1354,6 +1407,7 @@ namespace HH_APICustomization.Graph
             this.AuditPaymentToggleOut.SetEnabled(false);
             this.AuditReservationToggleIn.SetEnabled(false);
             this.AuditReservationToggleOut.SetEnabled(false);
+            this.FillInADRemark.SetEnabled(false);
             this.AuditRefresh.SetVisible(false);
             this.ReleaseFromHold.SetVisible(false);
             this.Refresh.SetVisible(false);
@@ -1387,6 +1441,8 @@ namespace HH_APICustomization.Graph
 
                         this.InScope.SetEnabled(true);
                         this.OutOfScope.SetEnabled(true);
+
+                        this.FillInADRemark.SetEnabled(true);
                     }
                     break;
                 case LUMRemitStatus.PendingApproval:
@@ -1413,12 +1469,16 @@ namespace HH_APICustomization.Graph
 
                     this.Hold.SetVisible(true);
 
+                    this.FillInADRemark.SetEnabled(true);
+
                     this.Release.SetVisible(true);
                     this.Release.SetConnotation(PX.Data.WorkflowAPI.ActionConnotation.Success);
                     break;
                 case LUMRemitStatus.Released:
                     this.GoVoid.SetVisible(true);
                     this.GoVoid.SetConnotation(PX.Data.WorkflowAPI.ActionConnotation.Warning);
+                    break;
+                case LUMRemitStatus.Voided:
                     break;
                 case LUMRemitStatus.Rejected:
                     this.Hold.SetVisible(true);
@@ -1469,6 +1529,7 @@ namespace HH_APICustomization.Graph
                     break;
                 case LUMRemitStatus.Released:
                 case LUMRemitStatus.Voided:
+                    PXUIFieldAttribute.SetEnabled<LUMRemittance.postingDate>(this.Document.Cache, null, false);
                     PXUIFieldAttribute.SetEnabled<LUMRemitPayment.oPRemark>(this.PaymentTransactions.Cache, null, false);
                     PXUIFieldAttribute.SetEnabled<LUMRemitReservation.oPRemark>(this.PaymentTransactions.Cache, null, false);
                     PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions.accountID>(this.PaymentDetails.Cache, null, false);
@@ -1525,14 +1586,19 @@ namespace HH_APICustomization.Graph
         /// </summary>
         /// <param name="reservationIDs"></param>
         /// <param name="Scope"></param>
-        public void FinallyCheckScope(List<string> reservationIDs, bool Scope)
+        public void FinalCheckScope(List<string> reservationIDs, bool Scope)
         {
             foreach (var resvID in reservationIDs)
             {
-                var trans = SelectFrom<LUMCloudBedTransactions>
+                var trans = !resvID.Contains("-") ?
+                            SelectFrom<LUMCloudBedTransactions>
                            .Where<LUMCloudBedTransactions.remitRefNbr.IsEqual<P.AsString>
                             .And<LUMCloudBedTransactions.reservationID.IsEqual<P.AsString>>>
-                            .View.Select(this, this.Document.Current?.RefNbr, resvID);
+                            .View.Select(this, this.Document.Current?.RefNbr, resvID) :
+                            SelectFrom<LUMCloudBedTransactions>
+                           .Where<LUMCloudBedTransactions.remitRefNbr.IsEqual<P.AsString>
+                            .And<LUMCloudBedTransactions.houseAccountID.IsEqual<P.AsInt>>>
+                            .View.Select(this, this.Document.Current?.RefNbr, GetHouseAccountByReservationID(resvID));
                 var resLine = this.ReservationTransactions.View.SelectMulti().RowCast<LUMRemitReservation>().FirstOrDefault(x => x.ReservationID == resvID);
                 if (resLine != null)
                 {
@@ -1559,7 +1625,7 @@ namespace HH_APICustomization.Graph
         #region ToggleByID
         [PXGuid]
         [PXSelector(typeof(Search<Users.pKID>),
-                    SubstituteKey = typeof(Users.username))]
+                    SubstituteKey = typeof(Users.fullName))]
         [PXUIField(DisplayName = "Toggled Out User", Enabled = false)]
         public virtual Guid? ToggleByID { get; set; }
         public abstract class toggleByID : PX.Data.BQL.BqlGuid.Field<toggleByID> { }
@@ -1584,6 +1650,14 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "Credit Amount", Enabled = false)]
         public virtual decimal? CreditAmount { get; set; }
         public abstract class creditAmount : PX.Data.BQL.BqlDecimal.Field<creditAmount> { }
+        #endregion
+
+        #region CurrentRefNbr
+        [PXString]
+        [PXDefault(typeof(LUMRemittance.refNbr))]
+        [PXUIField(DisplayName = "Current Document RefNbr", Enabled = false, Visible = false)]
+        public virtual string CurrentRefNbr { get; set; }
+        public abstract class currentRefNbr : PX.Data.BQL.BqlString.Field<currentRefNbr> { }
         #endregion
 
     }
@@ -1651,6 +1725,17 @@ namespace HH_APICustomization.Graph
 
         #region TransactionID
         public new abstract class transactionID : PX.Data.BQL.BqlString.Field<transactionID> { }
+        #endregion
+    }
+
+    [Serializable]
+    public class LUMShowSystemPostFilter : IBqlTable
+    {
+        #region ShowPost
+        [PXBool]
+        [PXUIField(DisplayName = "SHOW SYSTEM TRANS")]
+        public virtual bool? ShowPost { get; set; }
+        public abstract class showPost : PX.Data.BQL.BqlBool.Field<showPost> { }
         #endregion
     }
 

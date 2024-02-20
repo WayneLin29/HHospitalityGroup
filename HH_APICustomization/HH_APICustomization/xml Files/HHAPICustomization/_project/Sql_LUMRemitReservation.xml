@@ -27,6 +27,7 @@
   <col name="LastModifiedByScreenID" type="Char(8)" />
   <col name="LastModifiedDateTime" type="DateTime" />
   <col name="tstamp" type="Timestamp" />
+  <col name="ToRemitCount" type="Int" nullable="true" />
   <index name="LUMRemitReservation_NoteID" unique="true">
     <col name="NoteID" />
     <col name="CompanyID" />
