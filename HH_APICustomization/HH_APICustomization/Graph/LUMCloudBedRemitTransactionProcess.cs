@@ -1225,9 +1225,16 @@ namespace HH_APICustomization.Graph
         {
             var groupData = selectedData.Where(x => !(x.IsImported ?? false)).GroupBy(x => new { x.RemitRefNbr, x.Currency });
             var cloudbedProperty = SelectFrom<LUMCloudBedPreference>.View.Select(baseGraph).RowCast<LUMCloudBedPreference>();
-            //var reservationData = baseGraph.Reservations.Select().RowCast<LUMCloudBedReservations>();
-            //var AcctMapAData = SelectFrom<LUMCloudBedAccountMapping>.View.Select(baseGraph).RowCast<LUMCloudBedAccountMapping>();
             var ledgerInfo = SelectFrom<Ledger>.Where<Ledger.ledgerCD.IsEqual<P.AsString>>.View.Select(baseGraph, "ACTUAL").TopFirst;
+            // 如果沒有任何Transaction 可以產生傳票
+            if (groupData.Count() == 0)
+            {
+                // 回寫 Remit Document
+                var remitDoc = baseGraph.Document.Current;
+                remitDoc.Status = LUMRemitStatus.Released;
+                baseGraph.Document.UpdateCurrent();
+                baseGraph.Actions.PressSave();
+            }
             foreach (var cloudBedGroupRow in groupData)
             {
                 var glBatchNbr = string.Empty;
@@ -1654,7 +1661,7 @@ namespace HH_APICustomization.Graph
 
         #region CurrentRefNbr
         [PXString]
-        [PXDefault(typeof(LUMRemittance.refNbr))]
+        [PXDefault(typeof(LUMRemittance.refNbr), PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Current Document RefNbr", Enabled = false, Visible = false)]
         public virtual string CurrentRefNbr { get; set; }
         public abstract class currentRefNbr : PX.Data.BQL.BqlString.Field<currentRefNbr> { }
