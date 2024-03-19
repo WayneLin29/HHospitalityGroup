@@ -1,0 +1,25 @@
+﻿<Sql TableName="LUMAllowCombination" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMAllowCombination">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="BranchID" type="Int" />
+  <col name="LedgerID" type="Int" />
+  <col name="AccountID" type="Int" />
+  <col name="SubID" type="Int" />
+  <col name="Remark" type="NVarChar(256)" nullable="true" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="PK_LUMAllowCombination" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="BranchID" />
+    <col name="LedgerID" />
+    <col name="AccountID" />
+    <col name="SubID" />
+  </index>
+</table>]]></CDATA>
+</Sql>

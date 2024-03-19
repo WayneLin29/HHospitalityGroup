@@ -1,0 +1,34 @@
+﻿<Sql TableName="LUMHRPayrollBaseDetails" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMHRPayrollBaseDetails">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="DocRefNbr" type="NVarChar(15)" />
+  <col name="LineNbr" type="Int" />
+  <col name="OriginBranchID" type="Int" nullable="true" />
+  <col name="OriginBatchNbr" type="NVarChar(15)" nullable="true" />
+  <col name="OriginLineNbr" type="Int" nullable="true" />
+  <col name="TransactionDate" type="DateTime" nullable="true" />
+  <col name="Description" type="NVarChar(256)" nullable="true" />
+  <col name="PostingBranchID" type="Int" nullable="true" />
+  <col name="AccountID" type="Int" nullable="true" />
+  <col name="SubID" type="Int" nullable="true" />
+  <col name="TranDesc" type="NVarChar(256)" nullable="true" />
+  <col name="DebitAmount" type="Decimal(18,6)" nullable="true" />
+  <col name="CreditAmount" type="Decimal(18,6)" nullable="true" />
+  <col name="RefNbr" type="NVarChar(15)" nullable="true" />
+  <col name="UsrTaxZone" type="NVarChar(10)" nullable="true" />
+  <col name="UsrTaxCategory" type="NVarChar(10)" nullable="true" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="PK_LUMHRPayrollBaseDetails" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="DocRefNbr" />
+    <col name="LineNbr" />
+  </index>
+</table>]]></CDATA>
+</Sql>

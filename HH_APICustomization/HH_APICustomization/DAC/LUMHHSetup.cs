@@ -29,6 +29,14 @@ namespace HH_APICustomization.DAC
         public abstract class remitRequestApproval : PX.Data.BQL.BqlBool.Field<remitRequestApproval> { }
         #endregion
 
+        #region PostingSequenceID
+        [PXDBString(10, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "Posting SequenceID")]
+        [PXSelector(typeof(Numbering.numberingID))]
+        public virtual string PostingSequenceID { get; set; }
+        public abstract class postingSequenceID : PX.Data.BQL.BqlString.Field<postingSequenceID> { }
+        #endregion
+
         #region CreatedByID
         [PXDBCreatedByID()]
         public virtual Guid? CreatedByID { get; set; }

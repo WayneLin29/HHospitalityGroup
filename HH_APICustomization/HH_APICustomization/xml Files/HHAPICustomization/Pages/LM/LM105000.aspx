@@ -103,6 +103,7 @@
                             <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
                             <px:PXLayoutRule ControlSize="L" runat="server" ID="CstPXLayoutRule4" StartGroup="True" GroupCaption="SETUP"></px:PXLayoutRule>
                             <px:PXSelector runat="server" ID="edRemitSequenceID" DataField="RemitSequenceID"></px:PXSelector>
+                            <px:PXSelector runat="server" ID="edPostingSequenceID" DataField="PostingSequenceID"></px:PXSelector>
                             <px:PXCheckBox runat="server" ID="edRemitRequestApproval" DataField="RemitRequestApproval"></px:PXCheckBox>
                         </Template>
                     </px:PXFormView>

@@ -1,0 +1,4 @@
+﻿<Fields ScreenID="GL301000">
+    <Field IsActive="True" DisplayName="Module" FieldName="Module" ObjectName="PX.Objects.GL.Batch" ComboBoxValues="Set|GL|GL;Set|AP|AP;Set|AR|AR;Set|CM|CM;Set|CA|CA;Set|IN|IN;Set|DR|DR;Set|FA|FA;Set|PM|PM;Set|PR|PR;SetFromUI|FI|FI" IsFromSchema="False" />
+    <Field IsActive="True" DisplayName="Module" FieldName="Module" ObjectName="PX.Objects.GL.GLTran" ComboBoxValues="Set|GL|GL;Set|AP|AP;Set|AR|AR;Set|CM|CM;Set|CA|CA;Set|IN|IN;Set|DR|DR;Set|FA|FA;Set|PM|PM;Set|PR|PR;SetFromUI|FI|FI" IsFromSchema="False" />
+</Fields>

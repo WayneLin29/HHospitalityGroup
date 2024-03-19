@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="APIHelper\CloudBedHelper.cs" />
+    <Compile Include="DAC\LUMAllowCombination.cs" />
     <Compile Include="DAC\LUMCloudBedRoomBlock.cs" />
     <Compile Include="DAC\LUMCloudBedRoomBlockDetails.cs" />
     <Compile Include="DAC\LUMConactReview.cs" />
@@ -73,6 +74,8 @@
     <Compile Include="DAC\LUMHHSetup.cs" />
     <Compile Include="DAC\LUMHRContributionTable.cs" />
     <Compile Include="DAC\LUMHRPayrollAccountMapping.cs" />
+    <Compile Include="DAC\LUMHRPayrollBaseDetails.cs" />
+    <Compile Include="DAC\LUMHRPayrollBaseDocument.cs" />
     <Compile Include="DAC\LUMPayrollAdjustment.cs" />
     <Compile Include="DAC\LUMPayrollHour.cs" />
     <Compile Include="DAC\LUMRemitBlock.cs" />
@@ -99,9 +102,11 @@
     <Compile Include="Entity\TouchBistro_DataReceivedEntity.cs" />
     <Compile Include="Examples.cs" />
     <Compile Include="DAC\LUMCloudBedAPIPreference.cs" />
+    <Compile Include="Graph\LUMAllowedCombinationMaint.cs" />
     <Compile Include="Graph\LUMCloudBedPreferenceMaint.cs" />
     <Compile Include="Graph\LUMCloudBedRemitTransactionProcess.cs" />
     <Compile Include="Graph\LUMCloudBedTransactionProcess.cs" />
+    <Compile Include="Graph\LUMHRPayrollPostingProcess.cs" />
     <Compile Include="Graph\LUMHRPayrollPreferenceMaint.cs" />
     <Compile Include="Graph\LUMORMaintenanceProcess.cs" />
     <Compile Include="Graph\LUMPayrollMaint.cs" />
@@ -120,6 +125,7 @@
     <Compile Include="Graph\LUMTouchBistroTransactionProcess.cs" />
     <Compile Include="Graph_Extension\ContactMaintExtension.cs" />
     <Compile Include="Graph_Extension\EPApprovalMapMaintExtension.cs" />
+    <Compile Include="Graph_Extension\JournalEntryExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\GraphUtil.cs" />
     <Compile Include="WebHook\CloudBedWebHook.cs" />
