@@ -1,0 +1,4 @@
+﻿<Sql TableName="DefaultExtensionColumn" SqlScriptPriority="1" CustomScript="#CDATA">
+    <CDATA name="CustomScript"><![CDATA[--EPEmployee 
+Update EPEmployee Set UsrLineCntr = 0 Where UsrLineCntr is null;]]></CDATA>
+</Sql>

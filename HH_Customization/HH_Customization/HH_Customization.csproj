@@ -62,6 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DAC_Extension\EPEmployeeHHExt.cs" />
     <Compile Include="DAC_Extension\INPIClassHHExt.cs" />
     <Compile Include="DAC_Extension\RQRequestLineOwnedHHExt.cs" />
     <Compile Include="Descriptor\DACFieldDefaultAttribute.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Graph_Extension\APInvoiceEntryHHExt.cs" />
     <Compile Include="Graph_Extension\ARInvoiceEntryHHExt.cs" />
     <Compile Include="Graph_Extension\ARPaymentEntryHHExt.cs" />
+    <Compile Include="Graph_Extension\EmployeeMaintSHExt.cs" />
     <Compile Include="Graph_Extension\EPApprovalProcessHHExt.cs" />
     <Compile Include="Graph_Extension\POOrderEntryHHExt.cs" />
     <Compile Include="Graph_Extension\POReceiptEntryHHExt.cs" />
@@ -96,6 +98,7 @@
     <Compile Include="Graph\LUMAPApplicationMaint.cs" />
     <Compile Include="DAC\LUMHRApprovalV.cs" />
     <Compile Include="Graph\LUMHRApprovalProcess.cs" />
+    <Compile Include="DAC\LUMAccountability.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
