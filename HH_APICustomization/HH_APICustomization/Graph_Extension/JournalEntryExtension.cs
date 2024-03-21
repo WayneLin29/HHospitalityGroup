@@ -23,8 +23,9 @@ namespace PX.Objects.GL
         {
             // Valid combination if Module != GL and IsReleased
             var doc = Base.BatchModule.Current;
-            if (doc != null && doc?.Module != "GL" && doc?.Status == BatchStatus.Unposted)
+            if (doc != null && doc?.Module != "GL")
             {
+                PXTrace.WriteVerbose($"DEBUG_Combination: {doc?.Module}_{doc?.BatchNbr}_{doc.Status}");
                 var allowTable = GetAllowTable();
                 // 除了GL以外，其他都是直接先做好release資料在產生傳票
 
@@ -130,10 +131,13 @@ namespace PX.Objects.GL
                     var acctInfo = Account.PK.Find(Base, line?.AccountID);
                     var subInfo = Sub.PK.Find(Base, line?.SubID);
                     var ledgerInfo = Ledger.PK.Find(Base, line?.LedgerID);
-                    Base.GLTranModuleBatNbr.Cache.RaiseExceptionHandling<GLTran.branchID>(line, line?.BranchID,
-                         new PXSetPropertyException<GLTran.branchID>($"[{branchInfo?.BranchCD?.Trim()}] + [{ledgerInfo?.LedgerCD?.Trim()}] +  [{acctInfo?.AccountCD?.Trim()}] + [{subInfo?.SubCD?.Trim()}]  is not allowed, please confirm your entry or maintain it in allowed combination.", PXErrorLevel.Error));
                     valid = false;
-                    //throw new PXException($"[{branchInfo?.BranchCD?.Trim()}] + [{ledgerInfo?.LedgerCD?.Trim()}] +  [{acctInfo?.AccountCD?.Trim()}] + [{subInfo?.SubCD?.Trim()}]  is not allowed, please confirm your entry or maintain it in allowed combination.");
+                    // 非GL 就直接SHOW一筆錯誤的組合
+                    if (line?.Module == "GL")
+                        Base.GLTranModuleBatNbr.Cache.RaiseExceptionHandling<GLTran.branchID>(line, line?.BranchID,
+                             new PXSetPropertyException<GLTran.branchID>($"[{branchInfo?.BranchCD?.Trim()}] + [{ledgerInfo?.LedgerCD?.Trim()}] +  [{acctInfo?.AccountCD?.Trim()}] + [{subInfo?.SubCD?.Trim()}]  is not allowed, please confirm your entry or maintain it in allowed combination.", PXErrorLevel.Error));
+                    else
+                        throw new PXException($"[{branchInfo?.BranchCD?.Trim()}] + [{ledgerInfo?.LedgerCD?.Trim()}] +  [{acctInfo?.AccountCD?.Trim()}] + [{subInfo?.SubCD?.Trim()}]  is not allowed, please confirm your entry or maintain it in allowed combination.");
                 }
             }
             return valid;

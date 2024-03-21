@@ -22,7 +22,8 @@ namespace HH_APICustomization.Graph
 
         [PXImport(typeof(LUMPayrollHour))]
         public SelectFrom<LUMPayrollHour>
-               .Where<Brackets<LUMPayrollHour.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>.Or<PayrollFilter.branchID.FromCurrent.IsNull>>
+               .Where<LUMPayrollHour.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>
+                 .And<LUMPayrollHour.cutOffDate.IsEqual<PayrollFilter.cutOffDate.FromCurrent>>
                  .And<Brackets<LUMPayrollHour.workingDate.IsGreaterEqual<PayrollFilter.dateFrom.FromCurrent>.Or<PayrollFilter.dateFrom.FromCurrent.IsNull>>>
                  .And<Brackets<LUMPayrollHour.workingDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>>
                  .And<Brackets<LUMPayrollHour.approved.IsEqual<False>.Or<LUMPayrollHour.approved.IsNull>>>>
@@ -30,7 +31,8 @@ namespace HH_APICustomization.Graph
 
         [PXImport(typeof(LUMPayrollAdjustment))]
         public SelectFrom<LUMPayrollAdjustment>
-               .Where<Brackets<LUMPayrollAdjustment.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>.Or<PayrollFilter.branchID.FromCurrent.IsNull>>
+               .Where<LUMPayrollAdjustment.branchID.IsEqual<PayrollFilter.branchID.FromCurrent>
+                 .And<LUMPayrollAdjustment.cutOffDate.IsEqual<PayrollFilter.cutOffDate.FromCurrent>>
                  .And<Brackets<LUMPayrollAdjustment.adjustmentDate.IsGreaterEqual<PayrollFilter.dateFrom.FromCurrent>.Or<PayrollFilter.dateFrom.FromCurrent.IsNull>>>
                  .And<Brackets<LUMPayrollAdjustment.adjustmentDate.IsLessEqual<PayrollFilter.dateTo.FromCurrent>.Or<PayrollFilter.dateTo.FromCurrent.IsNull>>>
                  .And<Brackets<LUMPayrollAdjustment.approved.IsEqual<False>.Or<LUMPayrollAdjustment.approved.IsNull>>>>
@@ -63,13 +65,19 @@ namespace HH_APICustomization.Graph
         public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
 
         [PXDate]
-        [PXUIField(DisplayName = "DateFrom")]
+        [PXUIField(DisplayName = "Working Date From")]
         public virtual DateTime? DateFrom { get; set; }
         public abstract class dateFrom : PX.Data.BQL.BqlDateTime.Field<dateFrom> { }
 
         [PXDate]
-        [PXUIField(DisplayName = "DateTo")]
+        [PXUIField(DisplayName = "Working Date To")]
         public virtual DateTime? DateTo { get; set; }
         public abstract class dateTo : PX.Data.BQL.BqlDateTime.Field<dateTo> { }
+
+        [PXDate]
+        [PXDefault]
+        [PXUIField(DisplayName = "Cut Off Date")]
+        public virtual DateTime? CutOffDate { get; set; }
+        public abstract class cutOffDate : PX.Data.BQL.BqlDateTime.Field<cutOffDate> { }
     }
 }

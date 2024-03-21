@@ -45,10 +45,13 @@ namespace HH_APICustomization.Graph
                         // 最後更新Jounal Transcation的對應表
                         var mappingTable = new List<FIledgerMapTable>();
                         var glGraph = PXGraph.CreateInstance<JournalEntry>();
+                        var ledgerInfo = SelectFrom<Ledger>
+                                        .Where<Ledger.ledgerCD.IsEqual<P.AsString>>
+                                        .View.Select(this, "FIN").TopFirst;
                         foreach (var groupData in data.GroupBy(x => x.OriginBatchNbr))
                         {
                             var mapData = new FIledgerMapTable();
-                            var _FIBatchNbr = $"FI{groupData.Key.Substring(2)}";
+                            var _FIBatchNbr = $"FI{groupData.Key}";
                             using (new PXReadDeletedScope())
                             {
                                 var FILedger = SelectFrom<Batch>
@@ -62,6 +65,9 @@ namespace HH_APICustomization.Graph
 
                                 if (doc.Module == "FI")
                                     glGraph.BatchModule.SetValueExt<Batch.batchNbr>(doc, _FIBatchNbr);
+                                // 有FIN Ledger
+                                if (!string.IsNullOrEmpty(ledgerInfo?.LedgerCD))
+                                    glGraph.BatchModule.SetValueExt<Batch.ledgerID>(doc, ledgerInfo?.LedgerID);
                                 glGraph.BatchModule.SetValueExt<Batch.branchID>(doc, groupData.FirstOrDefault()?.OriginBranchID);
                                 glGraph.BatchModule.SetValueExt<Batch.dateEntered>(doc, DateTime.Now);
                                 glGraph.Save.Press();
@@ -82,7 +88,8 @@ namespace HH_APICustomization.Graph
                                     line.GetExtension<GLTranExtension>().UsrTaxCategory = item?.UsrTaxCategory;
                                     line.GetExtension<GLTranExtension>().UsrPostOrigBatchNbr = item?.OriginBatchNbr;
                                     line.GetExtension<GLTranExtension>().UsrPostOrigLineNbr = item?.OriginLineNbr;
-                                    line.Module = doc.Module != "GL" ? "GL" : doc.Module;
+                                    line.Module = doc.Module;
+                                    line.LedgerID = doc.LedgerID;
                                     line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
                                     glGraph.GLTranModuleBatNbr.SetValueExt<GLTran.module>(line, doc.Module);
 
@@ -171,7 +178,7 @@ namespace HH_APICustomization.Graph
                         groupBatch.ToList().ForEach(x =>
                         {
                             this.Transactions.Cache.RaiseExceptionHandling<LUMHRPayrollBaseDetails.originBatchNbr>(x, x.OriginBatchNbr,
-                               new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"Error Msg: Please confirm [{x.OriginBatchNbr}] cannot have any UsrIsReviewed = 1", PXErrorLevel.Error));
+                               new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"Error Msg: [{groupBatch.Key}] has been partially processed, cannot performed as full anymore. Please review your entry.", PXErrorLevel.Error));
                         });
                         valid = false;
                     }
@@ -193,7 +200,7 @@ namespace HH_APICustomization.Graph
                     if (item?.OriginLineNbr != 0 && _glTran == null)
                     {
                         this.Transactions.Cache.RaiseExceptionHandling<LUMHRPayrollBaseDetails.originBatchNbr>(item, item.OriginBatchNbr,
-                            new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>("The BatchNbr and LineNbr combination does not exist.", PXErrorLevel.Error));
+                            new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"[{item?.OriginBatchNbr}] + [{item?.OriginLineNbr}] cannot be found, please confirm your entry.", PXErrorLevel.Error));
                         valid = false;
                     }
                     #endregion

@@ -113,14 +113,16 @@ namespace HHAPICustomization.DAC
 
         #region UsrTaxZone
         [PXDBString(10, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Usr Tax Zone")]
+        [PXUIField(DisplayName = "Tax Zone")]
+        [PXSelector(typeof(PX.Objects.TX.TaxZone.taxZoneID), DescriptionField = typeof(PX.Objects.TX.TaxZone.descr), Filterable = true)]
         public virtual string UsrTaxZone { get; set; }
         public abstract class usrTaxZone : PX.Data.BQL.BqlString.Field<usrTaxZone> { }
         #endregion
 
         #region UsrTaxCategory
         [PXDBString(10, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Usr Tax Category")]
+        [PXUIField(DisplayName = "Tax Category")]
+        [PXSelector(typeof(PX.Objects.TX.TaxCategory.taxCategoryID), DescriptionField = typeof(PX.Objects.TX.TaxCategory.descr))]
         public virtual string UsrTaxCategory { get; set; }
         public abstract class usrTaxCategory : PX.Data.BQL.BqlString.Field<usrTaxCategory> { }
         #endregion

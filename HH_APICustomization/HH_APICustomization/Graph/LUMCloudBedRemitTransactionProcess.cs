@@ -245,7 +245,10 @@ namespace HH_APICustomization.Graph
                                           .Where<LUMCloudBedTransactions.propertyID.IsEqual<P.AsString>>
                                           .View.Select(this, propertyID)
                                           .RowCast<LUMCloudBedTransactions>()
-                                          .Where(x => (string.IsNullOrEmpty(x.RemitRefNbr) || x.RemitRefNbr == _refNbr) && !(x.IsImported ?? false) && !(x.IsDeleted ?? false));
+                                          .Where(x => (string.IsNullOrEmpty(x.RemitRefNbr) || x.RemitRefNbr == _refNbr) && 
+                                                     !(x.IsImported ?? false) && 
+                                                     !(x.IsDeleted ?? false) &&
+                                                     (x.HouseAccountID.HasValue || !string.IsNullOrEmpty(x.ReservationID)));
                 // 被Toggle out 的Transactions
                 var excludeTrans = this.ExculdeTransactions.View.SelectMulti().RowCast<LUMRemitExcludeTransactions>();
                 // expected ExcludeTransaction

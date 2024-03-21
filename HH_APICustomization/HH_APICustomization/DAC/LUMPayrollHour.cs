@@ -97,7 +97,7 @@ namespace HHAPICustomization.DAC
         [PXDBDate]
         [PXUIField(DisplayName = "Cut-Off Date")]
         public virtual DateTime? CutOffDate { get; set; }
-        public abstract class cutOffDate : PX.Data.BQL.BqlBool.Field<cutOffDate> { }
+        public abstract class cutOffDate : PX.Data.BQL.BqlDateTime.Field<cutOffDate> { }
         #endregion
 
         #region ApprovedAmount
