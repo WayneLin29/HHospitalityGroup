@@ -59,7 +59,7 @@ namespace HH_APICustomization.Graph
     public class PayrollFilter : IBqlTable
     {
         [PXInt]
-        [PXUIField(DisplayName = "Branch")]
+        [PXUIField(DisplayName = "Branch", Required = true)]
         [Branch(useDefaulting: false)]
         public virtual int? BranchID { get; set; }
         public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
@@ -76,7 +76,7 @@ namespace HH_APICustomization.Graph
 
         [PXDate]
         [PXDefault]
-        [PXUIField(DisplayName = "Cut Off Date")]
+        [PXUIField(DisplayName = "Cut Off Date", Required = true)]
         public virtual DateTime? CutOffDate { get; set; }
         public abstract class cutOffDate : PX.Data.BQL.BqlDateTime.Field<cutOffDate> { }
     }

@@ -98,13 +98,14 @@
             </px:PXTabItem>
             <px:PXTabItem Text="SETUP">
                 <Template>
-                    <px:PXFormView ID="SetupFrom" runat="server" DataSourceID="ds" DataMember="Setup" Width="100%" Height="120px" AllowAutoHide="false">
+                    <px:PXFormView ID="SetupFrom" runat="server" DataSourceID="ds" DataMember="Setup" Width="100%" Height="150px" AllowAutoHide="false">
                         <Template>
                             <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
                             <px:PXLayoutRule ControlSize="L" runat="server" ID="CstPXLayoutRule4" StartGroup="True" GroupCaption="SETUP"></px:PXLayoutRule>
                             <px:PXSelector runat="server" ID="edRemitSequenceID" DataField="RemitSequenceID"></px:PXSelector>
                             <px:PXSelector runat="server" ID="edPostingSequenceID" DataField="PostingSequenceID"></px:PXSelector>
                             <px:PXCheckBox runat="server" ID="edRemitRequestApproval" DataField="RemitRequestApproval"></px:PXCheckBox>
+                            <px:PXCheckBox ID="edEnableCheckAllowedAccountCombination" runat="server" DataField="EnableCheckAllowedAccountCombination"></px:PXCheckBox>
                         </Template>
                     </px:PXFormView>
                     <px:PXGrid ID="gridApproval" runat="server" DataSourceID="ds" SkinID="Details" Width="100%">

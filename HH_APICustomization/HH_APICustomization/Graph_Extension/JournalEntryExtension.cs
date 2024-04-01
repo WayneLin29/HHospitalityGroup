@@ -1,7 +1,10 @@
-﻿using HHAPICustomization.DAC;
+﻿using HH_APICustomization.DAC;
+using HH_APICustomization.Descriptor;
+using HHAPICustomization.DAC;
 using PX.Data;
 using PX.Data.BQL;
 using PX.Data.BQL.Fluent;
+using PX.Objects.AP;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +16,7 @@ namespace PX.Objects.GL
 {
     public class JournalEntryExtension : PXGraphExtension<JournalEntry>
     {
+        public SelectFrom<LUMHHSetup>.View HHSetup;
 
         public const string combinationErrorMsg = "please confirm your entry or maintain it in allowed combination.";
 
@@ -33,6 +37,22 @@ namespace PX.Objects.GL
                 if (!valid)
                     throw new PXException(combinationErrorMsg);
             }
+
+            // When AP release, need to fill some column value
+            if (doc != null && doc.Module == "AP")
+            {
+                foreach (var line in Base.GLTranModuleBatNbr.View.SelectMulti().RowCast<GLTran>())
+                {
+                    // 有跟AP關聯
+                    var apTran = APTran.PK.Find(Base, line?.TranType, line?.RefNbr, line?.TranLineNbr);
+                    if (apTran != null)
+                    {
+                        Base.GLTranModuleBatNbr.SetValueExt<GLTranExtension.usrTaxCategory>(line,apTran?.TaxCategoryID);
+                        Base.GLTranModuleBatNbr.SetValueExt<GLTranExtension.usrTaxZone>(line, apTran?.GetExtension<APTranExtension>()?.UsrORTaxZone);
+                        Base.GLTranModuleBatNbr.SetValueExt<GLTran.referenceID>(line, apTran?.GetExtension<APTranExtension>()?.UsrORVendor);
+                    }
+                }
+            }
             baseMethod();
         }
         #endregion
@@ -43,6 +63,8 @@ namespace PX.Objects.GL
         [PXOverride]
         public virtual IEnumerable Release(PXAdapter adapter, ReleaseDelegate baseMethod)
         {
+            HHHelper helper = new HHHelper();
+            var ledgerInfo_Actual = helper.GetLedgerInfo("ACTUAL");
             List<Batch> list = new List<Batch>();
 
             foreach (object obj in adapter.Get())
@@ -82,22 +104,26 @@ namespace PX.Objects.GL
                 foreach (var line in SelectFrom<GLTran>
                                      .Where<GLTran.module.IsEqual<P.AsString>
                                        .And<GLTran.batchNbr.IsEqual<P.AsString>>>
-                                     .View.Select(Base, batchItem?.Module, batchItem?.OrigBatchNbr).RowCast<GLTran>())
+                                     .View.Select(Base, batchItem?.OrigModule, batchItem?.OrigBatchNbr).RowCast<GLTran>())
                 {
                     // 找對應的 Origin LineNbr -> 更新IsReviewed = false
                     var lineExt = line.GetExtension<GLTranExtension>();
                     if (lineExt?.UsrPostOrigLineNbr != 0)
                     {
-                        PXDatabase.Update<GLTran>(
-                            new PXDataFieldAssign<GLTranExtension.usrIsReviewed>(false),
-                            new PXDataFieldRestrict<GLTran.batchNbr>(lineExt?.UsrPostOrigBatchNbr),
-                            new PXDataFieldRestrict<GLTran.lineNbr>(lineExt?.UsrPostOrigLineNbr));
+                        PXUpdate<Set<GLTranExtension.usrIsReviewed, Required<GLTranExtension.usrIsReviewed>>,
+                                GLTran,
+                                Where<GLTran.batchNbr, Equal<Required<GLTran.batchNbr>>,
+                                  And<GLTran.lineNbr, Equal<Required<GLTran.lineNbr>>,
+                                  And<GLTran.ledgerID, Equal<Required<GLTran.ledgerID>>>>>>
+                       .Update(Base, false, lineExt?.UsrPostOrigBatchNbr, lineExt?.UsrPostOrigLineNbr, ledgerInfo_Actual?.LedgerID);
                     }
                     else
                     {
-                        PXDatabase.Update<GLTran>(
-                           new PXDataFieldAssign<GLTranExtension.usrIsReviewed>(false),
-                           new PXDataFieldRestrict<GLTran.batchNbr>(lineExt?.UsrPostOrigBatchNbr));
+                        PXUpdate<Set<GLTranExtension.usrIsReviewed, Required<GLTranExtension.usrIsReviewed>>,
+                                GLTran,
+                                Where<GLTran.batchNbr, Equal<Required<GLTran.batchNbr>>,
+                                  And<GLTran.ledgerID, Equal<Required<GLTran.ledgerID>>>>>
+                       .Update(Base, false, lineExt?.UsrPostOrigBatchNbr, ledgerInfo_Actual?.LedgerID);
                     }
                 }
             }
@@ -115,7 +141,10 @@ namespace PX.Objects.GL
         /// <param name="batchItem"></param>
         public virtual bool ValidCombination(IEnumerable<LUMAllowCombination> allowTable, IEnumerable<GLTran> list, bool checkOnlyReleased = false)
         {
+            var setup = this.HHSetup.Select().TopFirst;
             var valid = true;
+            if (!(setup?.EnableCheckAllowedAccountCombination ?? false))
+                return valid;
             // GLTran
             foreach (var line in list)
             {

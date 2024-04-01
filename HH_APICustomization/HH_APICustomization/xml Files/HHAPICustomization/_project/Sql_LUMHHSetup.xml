@@ -12,6 +12,7 @@
   <col name="tstamp" type="Timestamp" />
   <col name="RemitRequestApproval" type="Bit" nullable="true" />
   <col name="PostingSequenceID" type="NVarChar(10)" nullable="true" />
+  <col name="EnableCheckAllowedAccountCombination" type="Bit" nullable="true" />
   <index name="LUMHHSetup_NoteID" unique="true">
     <col name="NoteID" />
     <col name="CompanyID" />

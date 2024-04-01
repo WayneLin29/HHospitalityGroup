@@ -14,6 +14,7 @@
             <px:PXSelector runat="server" ID="edBranchFilter" DataField="BranchID" Width="180" CommitChanges="true"></px:PXSelector>
             <px:PXDateTimeEdit runat="server" ID="edDateFrom" DataField="DateFrom" Width="180px" CommitChanges="true"></px:PXDateTimeEdit>
             <px:PXDateTimeEdit runat="server" ID="edDateTo" DataField="DateTo" Width="180px" CommitChanges="true"></px:PXDateTimeEdit>
+            <px:PXDateTimeEdit runat="server" ID="edCutOffDate" DataField="CutOffDate" Width="180px" CommitChanges="true"></px:PXDateTimeEdit>
         </Template>
     </px:PXFormView>
 </asp:Content>

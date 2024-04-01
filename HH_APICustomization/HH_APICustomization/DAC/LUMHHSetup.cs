@@ -85,5 +85,12 @@ namespace HH_APICustomization.DAC
         public virtual Guid? Noteid { get; set; }
         public abstract class noteid : PX.Data.BQL.BqlGuid.Field<noteid> { }
         #endregion
+
+        #region EnableCheckAllowedAccountCombination
+        [PXDBBool]
+        [PXUIField(DisplayName = "Check Allowed Account Combination")]
+        public virtual bool? EnableCheckAllowedAccountCombination { get;set;}
+        public abstract class enableCheckAllowedAccountCombination : PX.Data.BQL.BqlBool.Field<enableCheckAllowedAccountCombination> { }
+        #endregion
     }
 }
