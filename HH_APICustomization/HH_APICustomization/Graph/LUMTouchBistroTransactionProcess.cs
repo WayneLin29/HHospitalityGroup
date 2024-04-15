@@ -1,6 +1,8 @@
 using System;
 using HH_APICustomization.DAC;
 using PX.Data;
+using PX.Data.BQL;
+using PX.Data.BQL.Fluent;
 using TSDataType = HH_APICustomization.Descriptor.LUMTBTransactionSummaryType;
 using System.Collections;
 using System.Collections.Generic;
@@ -171,13 +173,15 @@ namespace HH_APICustomization.Grpah
         public void CreateBatch(List<LUMTBTransactionSummary> list)
         {
             var dataType = this.Filter.Current.DataType;
-            Ledger ledger = Ledger.UK.Find(this, "ACTUAL");
+            //2024-04-15改抓透過Branch抓取Type為Actual
+            //Ledger ledger = Ledger.UK.Find(this, "ACTUAL");
             List<LUMTBTransactionSummary> processData = ValidateAccountAndSub(list);
             var groupBy = processData.GroupBy(item => new { item.RestaurantID, item.DateTimestamp });
             foreach (var groupData in groupBy)
             {
                 List<LUMTBTransactionSummary> groupList = groupData.ToList();
                 LUMTouchBistroPreference preference = LUMTouchBistroPreference.PK.Find(this, groupData.Key.RestaurantID);
+                Ledger ledger = GetActualLedger(preference.Branch);
                 string errorMsg = null;
                 string batchNbr = null;
                 try
@@ -404,6 +408,15 @@ namespace HH_APICustomization.Grpah
                 }
             }
             return processData;
+        }
+        #endregion
+
+        #region BQL
+        public Ledger GetActualLedger(int? branchID)
+        {
+            return SelectFrom<Ledger>
+                .Where<Ledger.balanceType.IsEqual<LedgerBalanceType.actual>
+                .And<Ledger.defBranchID.IsEqual<P.AsInt>>>.View.Select(this, branchID);
         }
         #endregion
 
