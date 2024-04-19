@@ -47,7 +47,7 @@ namespace HH_APICustomization.Graph
                         // 最後更新Jounal Transcation的對應表
                         var mappingTable = new List<FIledgerMapTable>();
                         var glGraph = PXGraph.CreateInstance<JournalEntry>();
-                        var ledgerInfo_Actual = helper.GetLedgerInfo("ACTUAL");
+                        var ledgerInfo_Actual = helper.GetActualLedgerInfo();
                         var ledgerInfo_FIN = helper.GetLedgerInfo("FIN");
                         foreach (var groupData in data.GroupBy(x => x.OriginBatchNbr))
                         {
@@ -101,13 +101,13 @@ namespace HH_APICustomization.Graph
                                     if (item?.OriginLineNbr != 0)
                                     {
                                         PXUpdate<Set<GLTranExtension.usrIsReviewed, Required<GLTranExtension.usrIsReviewed>,
-                                                 Set<GLTranExtension.usrRvBatch,Required<GLTranExtension.usrRvBatch>,
-                                                 Set<GLTranExtension.usrRvLineNbr,Required<GLTranExtension.usrRvLineNbr>>>>,
+                                                 Set<GLTranExtension.usrRvBatch, Required<GLTranExtension.usrRvBatch>,
+                                                 Set<GLTranExtension.usrRvLineNbr, Required<GLTranExtension.usrRvLineNbr>>>>,
                                                  GLTran,
                                                  Where<GLTran.batchNbr, Equal<Required<GLTran.batchNbr>>,
                                                    And<GLTran.lineNbr, Equal<Required<GLTran.lineNbr>>,
                                                    And<GLTran.ledgerID, Equal<Required<GLTran.ledgerID>>>>>>
-                                        .Update(this,true,doc.BatchNbr,line.LineNbr, item?.OriginBatchNbr, item?.OriginLineNbr,ledgerInfo_Actual?.LedgerID);
+                                        .Update(this, true, doc.BatchNbr, line.LineNbr, item?.OriginBatchNbr, item?.OriginLineNbr, ledgerInfo_Actual?.LedgerID);
                                     }
                                     else
                                     {
@@ -140,6 +140,27 @@ namespace HH_APICustomization.Graph
             });
             return adapter.Get();
         }
+
+        public PXAction<LUMHRPayrollBaseDocument> MarkAsReviewed;
+        [PXButton(Connotation = PX.Data.WorkflowAPI.ActionConnotation.None)]
+        [PXUIField(DisplayName = "MARK AS REVIEWED", MapEnableRights = PXCacheRights.Select)]
+        public IEnumerable markAsReviewed(PXAdapter adapter)
+        {
+            var data = this.Transactions.Select().RowCast<LUMHRPayrollBaseDetails>();
+            MarkReview(data, true);
+            return adapter.Get();
+        }
+
+        public PXAction<LUMHRPayrollBaseDocument> MarkAsUnReviewed;
+        [PXButton(Connotation = PX.Data.WorkflowAPI.ActionConnotation.Warning)]
+        [PXUIField(DisplayName = "MARK AS UNREVIEWED", MapEnableRights = PXCacheRights.Select)]
+        public IEnumerable markAsUnReviewed(PXAdapter adapter)
+        {
+            var data = this.Transactions.Select().RowCast<LUMHRPayrollBaseDetails>();
+            MarkReview(data, false);
+            return adapter.Get();
+        }
+
         #endregion
 
         #region Event
@@ -162,7 +183,7 @@ namespace HH_APICustomization.Graph
         {
             var valid = true;
             HHHelper helper = new HHHelper();
-            var ledgerInfo_Actual = helper.GetLedgerInfo("ACTUAL");
+            var ledgerInfo_Actual = helper.GetActualLedgerInfo();
 
             foreach (var groupBatch in data.GroupBy(x => x.OriginBatchNbr))
             {
@@ -229,6 +250,56 @@ namespace HH_APICustomization.Graph
                 }
             }
             return valid;
+        }
+
+        public virtual void MarkReview(IEnumerable<LUMHRPayrollBaseDetails> data, bool? IsReviewed)
+        {
+            HHHelper helper = new HHHelper();
+            var ledgerInfo_Actual = helper.GetActualLedgerInfo();
+            foreach (var item in data)
+            {
+                if (item.OriginLineNbr != 0)
+                {
+                    var glTrans = SelectFrom<GLTran>
+                                 .Where<GLTran.batchNbr.IsEqual<P.AsString>
+                                   .And<GLTran.ledgerID.IsEqual<P.AsInt>>
+                                   .And<GLTran.lineNbr.IsEqual<P.AsInt>>>
+                                 .View.Select(this, item.OriginBatchNbr, ledgerInfo_Actual?.LedgerID, item?.OriginLineNbr).TopFirst;
+                    // UsrRvBatch, UsrRvLineNbr 對應 FIN Ledger 欄位為NULL
+                    if (!string.IsNullOrEmpty(glTrans.GetExtension<GLTranExtension>()?.UsrRvBatch) || !(glTrans.GetExtension<GLTranExtension>()?.UsrRvLineNbr.HasValue ?? false))
+                        this.Transactions.Cache.RaiseExceptionHandling<LUMHRPayrollBaseDetails.originBatchNbr>(item, item.OriginBatchNbr,
+                           new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"Error Msg: Please confirm [{item.OriginBatchNbr}] whether RvBatch/RvLineNbr is must empty.", PXErrorLevel.Error));
+                    else
+                        UpdateGLTans(glTrans, IsReviewed);
+                }
+                else
+                {
+
+                    var glTrans = SelectFrom<GLTran>
+                                 .Where<GLTran.batchNbr.IsEqual<P.AsString>
+                                   .And<GLTran.ledgerID.IsEqual<P.AsInt>>>
+                                 .View.Select(this, item.OriginBatchNbr, ledgerInfo_Actual?.LedgerID).RowCast<GLTran>();
+                    foreach (var glItem in glTrans)
+                    {
+                        // UsrRvBatch, UsrRvLineNbr 對應 FIN Ledger 欄位為NULL
+                        if (!string.IsNullOrEmpty(glItem.GetExtension<GLTranExtension>()?.UsrRvBatch) || !(glItem.GetExtension<GLTranExtension>()?.UsrRvLineNbr.HasValue ?? false))
+                            this.Transactions.Cache.RaiseExceptionHandling<LUMHRPayrollBaseDetails.originBatchNbr>(item, item.OriginBatchNbr,
+                               new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"Error Msg: Please confirm [{item.OriginBatchNbr}] whether RvBatch/RvLineNbr is must empty.", PXErrorLevel.Error));
+                        else
+                            UpdateGLTans(glItem, IsReviewed);
+                    }
+                }
+            }
+        }
+
+        public void UpdateGLTans(GLTran tran, bool? IsReviewed)
+        {
+            PXUpdate<Set<GLTranExtension.usrIsReviewed, Required<GLTranExtension.usrIsReviewed>>,
+                         GLTran,
+                         Where<GLTran.batchNbr, Equal<Required<GLTran.batchNbr>>,
+                           And<GLTran.lineNbr, Equal<Required<GLTran.lineNbr>>,
+                           And<GLTran.ledgerID, Equal<Required<GLTran.ledgerID>>>>>>
+                      .Update(this, IsReviewed, tran.BatchNbr, tran.LineNbr, tran.LedgerID);
         }
 
         #endregion

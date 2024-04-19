@@ -54,14 +54,16 @@ namespace PX.Objects.GL
 
         #region UsrTaxZone
         [PXDBString(10, IsUnicode = true)]
-        [PXUIField(DisplayName = "Tax Zone", Enabled = false)]
+        [PXUIField(DisplayName = "Tax Zone", Enabled = true)]
+        [PXSelector(typeof(PX.Objects.TX.TaxZone.taxZoneID), DescriptionField = typeof(PX.Objects.TX.TaxZone.descr), Filterable = true)]
         public virtual string UsrTaxZone { get; set; }
         public abstract class usrTaxZone : PX.Data.BQL.BqlString.Field<usrTaxZone> { }
         #endregion
 
         #region UsrTaxCategory
         [PXDBString(15, IsUnicode = true)]
-        [PXUIField(DisplayName = "Tax Category", Enabled = false)]
+        [PXUIField(DisplayName = "Tax Category", Enabled = true)]
+        [PXSelector(typeof(PX.Objects.TX.TaxCategory.taxCategoryID), DescriptionField = typeof(PX.Objects.TX.TaxCategory.descr))]
         public virtual string UsrTaxCategory { get; set; }
         public abstract class usrTaxCategory : PX.Data.BQL.BqlString.Field<usrTaxCategory> { }
         #endregion

@@ -47,7 +47,7 @@ namespace PX.Objects.GL
                     var apTran = APTran.PK.Find(Base, line?.TranType, line?.RefNbr, line?.TranLineNbr);
                     if (apTran != null)
                     {
-                        Base.GLTranModuleBatNbr.SetValueExt<GLTranExtension.usrTaxCategory>(line,apTran?.TaxCategoryID);
+                        Base.GLTranModuleBatNbr.SetValueExt<GLTranExtension.usrTaxCategory>(line, apTran?.TaxCategoryID);
                         Base.GLTranModuleBatNbr.SetValueExt<GLTranExtension.usrTaxZone>(line, apTran?.GetExtension<APTranExtension>()?.UsrORTaxZone);
                         Base.GLTranModuleBatNbr.SetValueExt<GLTran.referenceID>(line, apTran?.GetExtension<APTranExtension>()?.UsrORVendor);
                     }
@@ -64,7 +64,7 @@ namespace PX.Objects.GL
         public virtual IEnumerable Release(PXAdapter adapter, ReleaseDelegate baseMethod)
         {
             HHHelper helper = new HHHelper();
-            var ledgerInfo_Actual = helper.GetLedgerInfo("ACTUAL");
+            var ledgerInfo_Actual = helper.GetActualLedgerInfo();
             List<Batch> list = new List<Batch>();
 
             foreach (object obj in adapter.Get())
@@ -110,20 +110,24 @@ namespace PX.Objects.GL
                     var lineExt = line.GetExtension<GLTranExtension>();
                     if (lineExt?.UsrPostOrigLineNbr != 0)
                     {
-                        PXUpdate<Set<GLTranExtension.usrIsReviewed, Required<GLTranExtension.usrIsReviewed>>,
+                        PXUpdate<Set<GLTranExtension.usrIsReviewed, Required<GLTranExtension.usrIsReviewed>,
+                                 Set<GLTranExtension.usrRvBatch, Required<GLTranExtension.usrRvBatch>,
+                                 Set<GLTranExtension.usrRvLineNbr, Required<GLTranExtension.usrRvLineNbr>>>>,
                                 GLTran,
                                 Where<GLTran.batchNbr, Equal<Required<GLTran.batchNbr>>,
                                   And<GLTran.lineNbr, Equal<Required<GLTran.lineNbr>>,
                                   And<GLTran.ledgerID, Equal<Required<GLTran.ledgerID>>>>>>
-                       .Update(Base, false, lineExt?.UsrPostOrigBatchNbr, lineExt?.UsrPostOrigLineNbr, ledgerInfo_Actual?.LedgerID);
+                       .Update(Base, false, null, null, lineExt?.UsrPostOrigBatchNbr, lineExt?.UsrPostOrigLineNbr, ledgerInfo_Actual?.LedgerID);
                     }
                     else
                     {
-                        PXUpdate<Set<GLTranExtension.usrIsReviewed, Required<GLTranExtension.usrIsReviewed>>,
+                        PXUpdate<Set<GLTranExtension.usrIsReviewed, Required<GLTranExtension.usrIsReviewed>,
+                                 Set<GLTranExtension.usrRvBatch, Required<GLTranExtension.usrRvBatch>,
+                                 Set<GLTranExtension.usrRvLineNbr, Required<GLTranExtension.usrRvLineNbr>>>>,
                                 GLTran,
                                 Where<GLTran.batchNbr, Equal<Required<GLTran.batchNbr>>,
                                   And<GLTran.ledgerID, Equal<Required<GLTran.ledgerID>>>>>
-                       .Update(Base, false, lineExt?.UsrPostOrigBatchNbr, ledgerInfo_Actual?.LedgerID);
+                       .Update(Base, false, null, null, lineExt?.UsrPostOrigBatchNbr, ledgerInfo_Actual?.LedgerID);
                     }
                 }
             }

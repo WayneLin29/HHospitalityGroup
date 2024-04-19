@@ -112,6 +112,8 @@ namespace HH_APICustomization.Graph
 
         public PXFilter<LUMShowSystemPostFilter> TransactionFilter;
 
+        public PXFilter<LUMBatchUpdateAcctFilter> QuickAccountDetermine;
+
         [PXViewName("Approval Remit")]
         public EPApprovalAutomation<LUMRemittance, LUMRemittance.approved, LUMRemittance.rejected, LUMRemittance.hold, LUMRemitRequestApproval> Approval;
 
@@ -179,6 +181,10 @@ namespace HH_APICustomization.Graph
                                .And<LUMCloudBedTransactions2.remitRefNbr.IsEqual<P.AsString>>>
                              .View.Select(this, _propertyID, _houstAccountID, _remitRefNbr).RowCast<LUMCloudBedTransactions2>().ToList();
 
+                // 使用Account Determine,因HouseTran資料已經在Update Cache導致畫面不會呈現
+                //if (houseTreans.Count == 0 && this.ReservationDetails.Cache.Updated.RowCast<LUMCloudBedTransactions2>().Count() > 0)
+                houseTreans = houseTreans.Union(this.ReservationDetails.Cache.Updated.RowCast<LUMCloudBedTransactions2>()).ToList();
+
                 var toggleOutTrans = SelectFrom<LUMCloudBedTransactions2>
                                     .InnerJoin<LUMRemitExcludeTransactions>.On<LUMCloudBedTransactions2.transactionID.IsEqual<LUMRemitExcludeTransactions.transactionID>
                                           .And<LUMRemitExcludeTransactions.refNbr.IsEqual<P.AsString>>>
@@ -245,8 +251,8 @@ namespace HH_APICustomization.Graph
                                           .Where<LUMCloudBedTransactions.propertyID.IsEqual<P.AsString>>
                                           .View.Select(this, propertyID)
                                           .RowCast<LUMCloudBedTransactions>()
-                                          .Where(x => (string.IsNullOrEmpty(x.RemitRefNbr) || x.RemitRefNbr == _refNbr) && 
-                                                     !(x.IsImported ?? false) && 
+                                          .Where(x => (string.IsNullOrEmpty(x.RemitRefNbr) || x.RemitRefNbr == _refNbr) &&
+                                                     !(x.IsImported ?? false) &&
                                                      !(x.IsDeleted ?? false) &&
                                                      (x.HouseAccountID.HasValue || !string.IsNullOrEmpty(x.ReservationID)));
                 // 被Toggle out 的Transactions
@@ -772,6 +778,25 @@ namespace HH_APICustomization.Graph
                 item.ADRemark = remark;
                 this.ReservationTransactions.Cache.Update(item);
             }
+            return adapter.Get();
+        }
+
+        public PXAction<LUMRemittance> AccountDetermine;
+        [PXButton]
+        [PXUIField(DisplayName = "ACCOUNT DETERMINE", Enabled = false, MapEnableRights = PXCacheRights.Select)]
+        public virtual IEnumerable accountDetermine(PXAdapter adapter)
+        {
+            if (this.QuickAccountDetermine.AskExt(true) != WebDialogResult.OK)
+                return adapter.Get();
+
+            var selectedItem = this.ReservationDetails.Cache.Updated.RowCast<LUMCloudBedTransactions2>().Where(x => x.Selected ?? false && x.RemitRefNbr == this.Document.Current?.RefNbr);
+            foreach (var item in selectedItem)
+            {
+                item.AccountID = this.QuickAccountDetermine.Current?.AccountID;
+                item.SubAccountID = this.QuickAccountDetermine.Current?.SubAccountID;
+                this.ReservationDetails.Update(item);
+            }
+            //this.Save.Press();
             return adapter.Get();
         }
 
@@ -1418,6 +1443,7 @@ namespace HH_APICustomization.Graph
             this.AuditReservationToggleIn.SetEnabled(false);
             this.AuditReservationToggleOut.SetEnabled(false);
             this.FillInADRemark.SetEnabled(false);
+            this.AccountDetermine.SetEnabled(false);
             this.AuditRefresh.SetVisible(false);
             this.ReleaseFromHold.SetVisible(false);
             this.Refresh.SetVisible(false);
@@ -1453,6 +1479,7 @@ namespace HH_APICustomization.Graph
                         this.OutOfScope.SetEnabled(true);
 
                         this.FillInADRemark.SetEnabled(true);
+                        this.AccountDetermine.SetEnabled(true);
                     }
                     break;
                 case LUMRemitStatus.PendingApproval:
@@ -1480,6 +1507,7 @@ namespace HH_APICustomization.Graph
                     this.Hold.SetVisible(true);
 
                     this.FillInADRemark.SetEnabled(true);
+                    this.AccountDetermine.SetEnabled(true);
 
                     this.Release.SetVisible(true);
                     this.Release.SetConnotation(PX.Data.WorkflowAPI.ActionConnotation.Success);
@@ -1746,6 +1774,34 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "SHOW SYSTEM TRANS")]
         public virtual bool? ShowPost { get; set; }
         public abstract class showPost : PX.Data.BQL.BqlBool.Field<showPost> { }
+        #endregion
+    }
+
+    [Serializable]
+    public class LUMBatchUpdateAcctFilter : IBqlTable
+    {
+        #region AccountID
+        [PXInt()]
+        [PXDefault()]
+        [PXUIField(DisplayName = "Account ID")]
+        [PXSelector(typeof(Search<Account.accountID>),
+                    typeof(Account.accountCD),
+                    typeof(Account.description),
+                    SubstituteKey = typeof(Account.accountCD))]
+        public virtual int? AccountID { get; set; }
+        public abstract class accountID : PX.Data.BQL.BqlInt.Field<accountID> { }
+        #endregion
+
+        #region SubAccountID
+        [PXInt()]
+        [PXDefault()]
+        [PXUIField(DisplayName = "Sub Account ID")]
+        [PXSelector(typeof(Search<Sub.subID>),
+                    typeof(Sub.subCD),
+                    typeof(Sub.description),
+                    SubstituteKey = typeof(Sub.subCD))]
+        public virtual int? SubAccountID { get; set; }
+        public abstract class subAccountID : PX.Data.BQL.BqlInt.Field<subAccountID> { }
         #endregion
     }
 

@@ -11,6 +11,11 @@ namespace HH_APICustomization.Descriptor
 {
     public class HHHelper
     {
+        public Ledger GetActualLedgerInfo()
+            => SelectFrom<Ledger>
+              .Where<Ledger.balanceType.IsEqual<P.AsString>>
+              .View.Select(new PX.Data.PXGraph(), "A").TopFirst;
+
         public Ledger GetLedgerInfo(string cd)
             => SelectFrom<Ledger>
               .Where<Ledger.ledgerCD.IsEqual<P.AsString>>
