@@ -1251,9 +1251,10 @@ namespace HH_APICustomization.Graph
         /// <summary> Create Journal Transaction </summary>
         public virtual void CreateJournalTransaction(LUMCloudBedRemitTransactionProcess baseGraph, List<LUMCloudBedTransactions> selectedData)
         {
+            HHHelper helper = new HHHelper();
             var groupData = selectedData.Where(x => !(x.IsImported ?? false)).GroupBy(x => new { x.RemitRefNbr, x.Currency });
             var cloudbedProperty = SelectFrom<LUMCloudBedPreference>.View.Select(baseGraph).RowCast<LUMCloudBedPreference>();
-            var ledgerInfo = SelectFrom<Ledger>.Where<Ledger.ledgerCD.IsEqual<P.AsString>>.View.Select(baseGraph, "ACTUAL").TopFirst;
+            var ledgerInfo = helper.GetActualLedgerInfo();
             // 如果沒有任何Transaction 可以產生傳票
             if (groupData.Count() == 0)
             {

@@ -265,8 +265,16 @@ namespace HH_APICustomization.Graph
                                    .And<GLTran.ledgerID.IsEqual<P.AsInt>>
                                    .And<GLTran.lineNbr.IsEqual<P.AsInt>>>
                                  .View.Select(this, item.OriginBatchNbr, ledgerInfo_Actual?.LedgerID, item?.OriginLineNbr).TopFirst;
+
+                    if (glTrans == null)
+                    {
+                        this.Transactions.Cache.RaiseExceptionHandling<LUMHRPayrollBaseDetails.originBatchNbr>(item, item.OriginBatchNbr,
+                           new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"[{item?.OriginBatchNbr}] + [{item?.OriginLineNbr}] cannot be found, please confirm your entry.", PXErrorLevel.Error));
+                        continue;
+                    }
+
                     // UsrRvBatch, UsrRvLineNbr 對應 FIN Ledger 欄位為NULL
-                    if (!string.IsNullOrEmpty(glTrans.GetExtension<GLTranExtension>()?.UsrRvBatch) || !(glTrans.GetExtension<GLTranExtension>()?.UsrRvLineNbr.HasValue ?? false))
+                    if (!string.IsNullOrEmpty(glTrans.GetExtension<GLTranExtension>()?.UsrRvBatch) || (glTrans.GetExtension<GLTranExtension>()?.UsrRvLineNbr.HasValue ?? false))
                         this.Transactions.Cache.RaiseExceptionHandling<LUMHRPayrollBaseDetails.originBatchNbr>(item, item.OriginBatchNbr,
                            new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"Error Msg: Please confirm [{item.OriginBatchNbr}] whether RvBatch/RvLineNbr is must empty.", PXErrorLevel.Error));
                     else
@@ -279,10 +287,18 @@ namespace HH_APICustomization.Graph
                                  .Where<GLTran.batchNbr.IsEqual<P.AsString>
                                    .And<GLTran.ledgerID.IsEqual<P.AsInt>>>
                                  .View.Select(this, item.OriginBatchNbr, ledgerInfo_Actual?.LedgerID).RowCast<GLTran>();
+
+                    if (glTrans.Count() == 0)
+                    {
+                        this.Transactions.Cache.RaiseExceptionHandling<LUMHRPayrollBaseDetails.originBatchNbr>(item, item.OriginBatchNbr,
+                           new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"[{item?.OriginBatchNbr}] + [{item?.OriginLineNbr}] cannot be found, please confirm your entry.", PXErrorLevel.Error));
+                        continue;
+                    }
+
                     foreach (var glItem in glTrans)
                     {
                         // UsrRvBatch, UsrRvLineNbr 對應 FIN Ledger 欄位為NULL
-                        if (!string.IsNullOrEmpty(glItem.GetExtension<GLTranExtension>()?.UsrRvBatch) || !(glItem.GetExtension<GLTranExtension>()?.UsrRvLineNbr.HasValue ?? false))
+                        if (!string.IsNullOrEmpty(glItem.GetExtension<GLTranExtension>()?.UsrRvBatch) || (glItem.GetExtension<GLTranExtension>()?.UsrRvLineNbr.HasValue ?? false))
                             this.Transactions.Cache.RaiseExceptionHandling<LUMHRPayrollBaseDetails.originBatchNbr>(item, item.OriginBatchNbr,
                                new PXSetPropertyException<LUMHRPayrollBaseDetails.originBatchNbr>($"Error Msg: Please confirm [{item.OriginBatchNbr}] whether RvBatch/RvLineNbr is must empty.", PXErrorLevel.Error));
                         else

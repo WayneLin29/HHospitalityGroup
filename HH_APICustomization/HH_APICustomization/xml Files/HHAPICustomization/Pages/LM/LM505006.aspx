@@ -182,6 +182,9 @@
                                 <px:PXToolBarButton Text="AUDITTOGGLE IN">
                                     <AutoCallBack Command="AuditReservationToggleIn" Target="ds" />
                                 </px:PXToolBarButton>
+                                 <px:PXToolBarButton Text="ACCOUNT DETERMINE">
+                                    <AutoCallBack Command="AccountDetermine" Target="ds" />
+                                </px:PXToolBarButton>
                             </CustomItems>
                         </ActionBar>
                         <Levels>
@@ -314,6 +317,23 @@
                         <AutoCallBack Command="Save" Target="frmReservationADRemark" />
                     </px:PXButton>
                     <px:PXButton ID="btnADRemarkCommandCancel" runat="server" DialogResult="Cancel" Text="Cancel" />
+                </px:PXPanel>
+            </Template>
+        </px:PXFormView>
+    </px:PXSmartPanel>
+    <px:PXSmartPanel ID="PnlUpdateAcct" runat="server" CaptionVisible="True" Caption="ACCOUNT DETERMINE"
+        Style="position: static" LoadOnDemand="True" Key="QuickAccountDetermine" AutoCallBack-Target="frmAccountDetermine"
+        AutoCallBack-Command="Refresh" DesignView="Content">
+        <px:PXFormView ID="frmAccountDetermine" runat="server" SkinID="Transparent" DataMember="QuickAccountDetermine" DataSourceID="ds">
+            <Template>
+                <px:PXLayoutRule runat="server" ControlSize="M" LabelsWidth="M" StartColumn="True" />
+                <px:PXSelector ID="edQuickAccountID" runat="server" DataField="AccountID" FilterByAllFields="true" DataSourceID="ds"></px:PXSelector>
+                <px:PXSelector ID="edQuickSubAccountID" runat="server" DataField="SubAccountID" FilterByAllFields="true" DataSourceID="ds"></px:PXSelector>
+                <px:PXPanel ID="PXPanel1" runat="server" SkinID="Buttons">
+                    <px:PXButton ID="btnAccountDetermineCommandOK" runat="server" DialogResult="OK" Text="OK">
+                        <AutoCallBack Command="Save" Target="frmAccountDetermine" />
+                    </px:PXButton>
+                    <px:PXButton ID="btnAccountDetermineCommandCancel" runat="server" DialogResult="Cancel" Text="Cancel" />
                 </px:PXPanel>
             </Template>
         </px:PXFormView>
