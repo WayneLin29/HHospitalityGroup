@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using HH_APICustomization.Graph;
 using PX.Objects.GL;
 using System.Linq;
+using PX.Objects.GL.DAC;
 
 namespace HH_APICustomization.Grpah
 {
@@ -181,7 +182,8 @@ namespace HH_APICustomization.Grpah
             {
                 List<LUMTBTransactionSummary> groupList = groupData.ToList();
                 LUMTouchBistroPreference preference = LUMTouchBistroPreference.PK.Find(this, groupData.Key.RestaurantID);
-                Ledger ledger = GetActualLedger(preference.Branch);
+                Branch branch = Branch.PK.Find(this, preference.Branch);
+                Ledger ledger = GetActualLedger(branch?.OrganizationID);
                 string errorMsg = null;
                 string batchNbr = null;
                 try
@@ -412,11 +414,13 @@ namespace HH_APICustomization.Grpah
         #endregion
 
         #region BQL
-        public Ledger GetActualLedger(int? branchID)
+        public Ledger GetActualLedger(int? organizationID)
         {
             return SelectFrom<Ledger>
+                .InnerJoin<OrganizationLedgerLink>
+                    .On<Ledger.ledgerID.IsEqual<OrganizationLedgerLink.ledgerID>>
                 .Where<Ledger.balanceType.IsEqual<LedgerBalanceType.actual>
-                .And<Ledger.defBranchID.IsEqual<P.AsInt>>>.View.Select(this, branchID);
+                .And<OrganizationLedgerLink.organizationID.IsEqual<P.AsInt>>>.View.Select(this, organizationID);
         }
         #endregion
 
