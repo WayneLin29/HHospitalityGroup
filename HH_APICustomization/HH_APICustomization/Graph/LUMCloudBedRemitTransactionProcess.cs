@@ -280,7 +280,7 @@ namespace HH_APICustomization.Graph
                 // 既有的Remit Payment
                 var existsRemitPayments = this.PaymentTransactions.View.SelectMulti().RowCast<LUMRemitPayment>();
                 // Insert/Update LUMRemitPayment
-                foreach (var item in allowTransByProperty.Where(x => x.TransactionType == "credit" && !(x?.IsImported ?? false) && x.UserName != "SYSTEM").GroupBy(x => x.Description))
+                foreach (var item in nonProcessTrans.Where(x => x.TransactionType == "credit" && !(x?.IsImported ?? false) && x.UserName != "SYSTEM").GroupBy(x => x.Description))
                 {
                     var paymentLine = existsRemitPayments.FirstOrDefault(x => x.Description == item.Key);
                     if (paymentLine != null)
