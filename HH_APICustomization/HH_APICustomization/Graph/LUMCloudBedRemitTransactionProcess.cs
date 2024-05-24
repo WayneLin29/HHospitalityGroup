@@ -599,17 +599,14 @@ namespace HH_APICustomization.Graph
                 var selectedItems = new List<LUMCloudBedTransactions>();
                 foreach (var res in tempRes)
                 {
-                    var temp = GetTransacitonBelongToReservation(res?.ReservationID);
                     // 如果該Reservation 底下有Transaction
-                    if (temp.Count() > 0)
-                        selectedItems.AddRange(temp);
-                    else
-                    {
-                        UpdateReservationWithScope(res, true);
-                        this.Save.Press();
-                    }
+                    selectedItems.AddRange(GetTransacitonBelongToReservation(res?.ReservationID));
+                    UpdateReservationWithScope(res, true);
                 }
-                ToggleOutTransactions(selectedItems, true);
+                if (selectedItems.Count > 0)
+                    ToggleOutTransactions(selectedItems, true);
+                else
+                    this.Save.Press();
             });
             return adapter.Get();
         }
@@ -626,18 +623,18 @@ namespace HH_APICustomization.Graph
                 var selectedItems = new List<LUMCloudBedTransactions>();
                 foreach (var res in selectedRes)
                 {
-                    var temp = GetTransacitonBelongToReservation(res?.ReservationID);
-                    temp = temp.Where(x => string.IsNullOrEmpty(x.RemitRefNbr) && !(x.IsImported ?? false) && !(x.IsDeleted ?? false));
                     // 如果該Reservation 底下有Transaction
-                    if (temp.Count() > 0)
-                        selectedItems.AddRange(temp);
-                    else
-                    {
-                        UpdateReservationWithScope(res, false);
-                        this.Save.Press();
-                    }
+
+                    selectedItems.AddRange(GetTransacitonBelongToReservation(res?.ReservationID)
+                                          .Where(x => string.IsNullOrEmpty(x.RemitRefNbr) &&
+                                                      !(x.IsImported ?? false) &&
+                                                      !(x.IsDeleted ?? false)));
+                    UpdateReservationWithScope(res, false);
                 }
-                ToggleInTransactions(selectedItems, false);
+                if (selectedItems.Count > 0)
+                    ToggleInTransactions(selectedItems, false);
+                else
+                    this.Save.Press();
             });
             return adapter.Get();
         }
@@ -1043,7 +1040,7 @@ namespace HH_APICustomization.Graph
                 //        this.ReservationTransactions.UpdateCurrent();
                 //    }
                 //}
-                FinalCheckScope(selectedTransItems.Select(x => x.ReservationID).Distinct().ToList(), true);
+                //FinalCheckScope(selectedTransItems.Select(x => x.ReservationID).Distinct().ToList(), true);
 
                 InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
@@ -1085,7 +1082,7 @@ namespace HH_APICustomization.Graph
                     tempTrans.Add(item);
                 }
 
-                FinalCheckScope(tempTrans.Select(x => x.ReservationID).Distinct().ToList(), false);
+                //FinalCheckScope(tempTrans.Select(x => x.ReservationID).Distinct().ToList(), false);
                 InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
                 sc.Complete();
