@@ -363,6 +363,15 @@ namespace HH_APICustomization.Graph
                                                 .And<LUMCloudBedTransactions.reservationID.IsEqual<P.AsString>>>
                                               .View.Select(this, _refNbr, propertyID, checkObj.ReservationID).Count > 0;
 
+                    if (availableReservation == false)
+                    {
+                        availableReservation = SelectFrom<LUMCloudBedTransactions>
+                                              .InnerJoin<LUMRemitExcludeTransactions>.On<LUMCloudBedTransactions.transactionID.IsEqual<LUMRemitExcludeTransactions.transactionID>
+                                                                                    .And<LUMRemitExcludeTransactions.refNbr.IsEqual<P.AsString>>>
+                                              .Where<LUMCloudBedTransactions.reservationID.IsEqual<P.AsString>
+                                                 .And<LUMCloudBedTransactions.propertyID.IsEqual<P.AsString>>>
+                                              .View.Select(this, _refNbr, checkObj.ReservationID, propertyID).Count > 0;
+                    }
                     // 刪除Type != 'RS' 而且該Reservatioin下Transaction 不等於Current RemitRef
                     if (checkObj.Type != "RS" && !availableReservation)
                     {
