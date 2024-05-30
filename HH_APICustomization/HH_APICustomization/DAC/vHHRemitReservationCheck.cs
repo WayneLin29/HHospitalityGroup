@@ -34,5 +34,12 @@ namespace HH_APICustomization.DAC
         public virtual string Message { get; set; }
         public abstract class message : PX.Data.BQL.BqlString.Field<message> { }
         #endregion
+
+        #region SortBy
+        [PXDBInt]
+        [PXUIField(DisplayName = "Sort By")]
+        public virtual int? SortBy { get; set; }
+        public abstract class sortBy : PX.Data.BQL.BqlInt.Field<sortBy> { }
+        #endregion
     }
 }

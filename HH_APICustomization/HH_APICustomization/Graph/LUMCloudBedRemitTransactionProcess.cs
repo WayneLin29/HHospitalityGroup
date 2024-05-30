@@ -261,7 +261,8 @@ namespace HH_APICustomization.Graph
                 allowTransByProperty = allowTransByProperty.Where(x => !excludeTrans.Any(y => y.TransactionID == x.TransactionID));
 
                 // Reservation Check Data
-                var reservationCheckData = this.RemiteReservationCheck.View.SelectMulti().RowCast<vHHRemitReservationCheck>().Where(x => x.PropertyID == propertyID);
+                var tempReservationCheckData = this.RemiteReservationCheck.View.SelectMulti().RowCast<vHHRemitReservationCheck>().Where(x => x.PropertyID == propertyID);
+                var reservationCheckData = tempReservationCheckData.OrderBy(x => x.SortBy).GroupBy(x => new { x.PropertyID, x.ReservationID }).Select(y => y.FirstOrDefault());
                 // 現有已存在的Remit Reservation
                 var existsRemitReservations = this.ReservationTransactions.View.SelectMulti().RowCast<LUMRemitReservation>();
                 // 待處理Transactions
