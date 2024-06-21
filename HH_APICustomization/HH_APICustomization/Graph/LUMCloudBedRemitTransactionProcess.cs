@@ -1278,115 +1278,121 @@ namespace HH_APICustomization.Graph
                 var lineErrorDic = new Dictionary<string, string>();    // 每筆資料的錯誤訊息
                 var lineNbrDic = new Dictionary<string, int?>();        // 每筆資料所對應到的GL Line
 
-                // 整筆資料錯誤Handler
-                try
+                using (PXTransactionScope sc = new PXTransactionScope())
                 {
-                    #region Header
-                    var glGraph = PXGraph.CreateInstance<JournalEntry>();
-                    var doc = glGraph.BatchModule.Cache.CreateInstance() as Batch;
-                    doc.Module = "GL";
-                    doc = glGraph.BatchModule.Cache.Insert(doc) as Batch;
-                    doc.DateEntered = baseGraph.Document.Current?.PostingDate;
-                    doc.LedgerID = ledgerInfo?.LedgerID;
-                    doc.BranchID = baseGraph.Document.Current?.Branch;
-                    doc.Description = $"CloudBed Transaction {baseGraph.Document.Current?.Date?.ToString("yyyy-MM-dd")}";
-                    doc.CuryID = cloudBedGroupRow.Key.Currency;
-                    glGraph.BatchModule.Cache.Update(doc);
-                    #endregion
-
-                    #region Details
-                    foreach (var row in cloudBedGroupRow)
+                    // 整筆資料錯誤Handler
+                    try
                     {
-                        var mapReservation = SelectFrom<LUMCloudBedReservations>
-                                            .Where<LUMCloudBedReservations.propertyID.IsEqual<P.AsString>
-                                              .And<LUMCloudBedReservations.reservationID.IsEqual<P.AsString>>>
-                                            .View.Select(baseGraph, row.PropertyID, row.ReservationID).TopFirst;
-                        var mapCloudbedProerty = baseGraph.ClodBedPreference.View.SelectMulti().FirstOrDefault() as LUMCloudBedPreference;
+
+                        #region Header
+                        var glGraph = PXGraph.CreateInstance<JournalEntry>();
+                        var doc = glGraph.BatchModule.Cache.CreateInstance() as Batch;
+                        doc.Module = "GL";
+                        doc = glGraph.BatchModule.Cache.Insert(doc) as Batch;
+                        doc.DateEntered = baseGraph.Document.Current?.PostingDate;
+                        doc.LedgerID = ledgerInfo?.LedgerID;
+                        doc.BranchID = baseGraph.Document.Current?.Branch;
+                        doc.Description = $"CloudBed Transaction {baseGraph.Document.Current?.Date?.ToString("yyyy-MM-dd")}";
+                        doc.CuryID = cloudBedGroupRow.Key.Currency;
+                        glGraph.BatchModule.Cache.Update(doc);
+                        #endregion
+
+                        #region Details
+                        foreach (var row in cloudBedGroupRow)
+                        {
+                            var mapReservation = SelectFrom<LUMCloudBedReservations>
+                                                .Where<LUMCloudBedReservations.propertyID.IsEqual<P.AsString>
+                                                  .And<LUMCloudBedReservations.reservationID.IsEqual<P.AsString>>>
+                                                .View.Select(baseGraph, row.PropertyID, row.ReservationID).TopFirst;
+                            var mapCloudbedProerty = baseGraph.ClodBedPreference.View.SelectMulti().FirstOrDefault() as LUMCloudBedPreference;
+                            errorMsg = string.Empty;
+                            // Set CurrentItem
+                            PXProcessing.SetCurrentItem(row);
+                            try
+                            {
+                                #region RuleA
+                                var line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
+                                line.AccountID = row?.AccountID;
+                                line.SubID = row?.SubAccountID;
+                                line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
+                                if (line.RefNbr.Length > 15)
+                                    line.RefNbr = line?.RefNbr.Substring(0, 15);
+                                line.Qty = row?.Quantity;
+                                line.TranDesc = $"C/O {mapReservation?.EndDate?.ToString("yyyy-MM-dd")} - {mapReservation?.ThirdPartyIdentifier} - {row.HouseAccountID} - {row.ReservationID} - {row.Description} - {row.TransactionDateTime?.ToString("HH:mm:ss")}";
+                                if (line.TranDesc.Length > 512)
+                                    line.TranDesc = line?.TranDesc?.Substring(0, 512);
+                                line.CuryDebitAmt = row.TransactionType?.ToUpper() == "CREDIT" ? row.Amount : 0;
+                                line.CuryCreditAmt = row.TransactionType?.ToUpper() == "DEBIT" ? row.Amount : 0;
+                                line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
+                                lineNbrDic.Add(row.TransactionID, line.LineNbr);
+                                #endregion
+
+                                #region RuleB
+                                line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
+                                line.AccountID = mapCloudbedProerty?.ClearingAcct;
+                                line.SubID = mapCloudbedProerty?.ClearingSub;
+                                line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
+                                if (line.RefNbr.Length > 15)
+                                    line.RefNbr = line?.RefNbr?.Substring(0, 15);
+                                line.Qty = row?.Quantity;
+                                line.TranDesc = $"C/O {mapReservation?.EndDate?.ToString("yyyy-MM-dd")} - {mapReservation?.ThirdPartyIdentifier} - {row.HouseAccountID} - {row.ReservationID} - {row.Description} - {row.TransactionDateTime?.ToString("HH:mm:ss")}";
+                                if (line.TranDesc.Length > 512)
+                                    line.TranDesc = line?.TranDesc?.Substring(0, 512);
+                                line.CuryDebitAmt = row.TransactionType?.ToUpper() == "DEBIT" ? row.Amount : 0;
+                                line.CuryCreditAmt = row.TransactionType?.ToUpper() == "CREDIT" ? row.Amount : 0;
+                                glGraph.GLTranModuleBatNbr.Cache.Insert(line);
+                                #endregion
+                            }
+                            catch (PXOuterException ex)
+                            {
+                                errorMsg = $"Error: {ex.InnerMessages[0]}";
+                            }
+                            catch (Exception ex)
+                            {
+                                errorMsg = $"Error: {ex.Message}";
+                            }
+                            finally
+                            {
+                                row.IsImported = string.IsNullOrEmpty(errorMsg) ? true : false;
+                                row.ErrorMessage = errorMsg;
+                                baseGraph.CloudbedTransactions.Update(row);
+                            }
+                        }
+                        #endregion
+
                         errorMsg = string.Empty;
-                        // Set CurrentItem
-                        PXProcessing.SetCurrentItem(row);
-                        try
-                        {
-                            #region RuleA
-                            var line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
-                            line.AccountID = row?.AccountID;
-                            line.SubID = row?.SubAccountID;
-                            line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
-                            if (line.RefNbr.Length > 15)
-                                line.RefNbr = line?.RefNbr.Substring(0, 15);
-                            line.Qty = row?.Quantity;
-                            line.TranDesc = $"C/O {mapReservation?.EndDate?.ToString("yyyy-MM-dd")} - {mapReservation?.ThirdPartyIdentifier} - {row.HouseAccountID} - {row.ReservationID} - {row.Description} - {row.TransactionDateTime?.ToString("HH:mm:ss")}";
-                            if (line.TranDesc.Length > 512)
-                                line.TranDesc = line?.TranDesc?.Substring(0, 512);
-                            line.CuryDebitAmt = row.TransactionType?.ToUpper() == "CREDIT" ? row.Amount : 0;
-                            line.CuryCreditAmt = row.TransactionType?.ToUpper() == "DEBIT" ? row.Amount : 0;
-                            line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
-                            lineNbrDic.Add(row.TransactionID, line.LineNbr);
-                            #endregion
+                        glGraph.releaseFromHold.Press();
+                        glGraph.Save.Press();
+                        glGraph.release.Press();
+                        glBatchNbr = doc.BatchNbr;
 
-                            #region RuleB
-                            line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
-                            line.AccountID = mapCloudbedProerty?.ClearingAcct;
-                            line.SubID = mapCloudbedProerty?.ClearingSub;
-                            line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
-                            if (line.RefNbr.Length > 15)
-                                line.RefNbr = line?.RefNbr?.Substring(0, 15);
-                            line.Qty = row?.Quantity;
-                            line.TranDesc = $"C/O {mapReservation?.EndDate?.ToString("yyyy-MM-dd")} - {mapReservation?.ThirdPartyIdentifier} - {row.HouseAccountID} - {row.ReservationID} - {row.Description} - {row.TransactionDateTime?.ToString("HH:mm:ss")}";
-                            if (line.TranDesc.Length > 512)
-                                line.TranDesc = line?.TranDesc?.Substring(0, 512);
-                            line.CuryDebitAmt = row.TransactionType?.ToUpper() == "DEBIT" ? row.Amount : 0;
-                            line.CuryCreditAmt = row.TransactionType?.ToUpper() == "CREDIT" ? row.Amount : 0;
-                            glGraph.GLTranModuleBatNbr.Cache.Insert(line);
-                            #endregion
-                        }
-                        catch (PXOuterException ex)
+                        // 回寫Cloudbed Transaciton BatchNbr.
+                        cloudBedGroupRow.ToList().ForEach(x =>
                         {
-                            errorMsg = $"Error: {ex.InnerMessages[0]}";
-                        }
-                        catch (Exception ex)
-                        {
-                            errorMsg = $"Error: {ex.Message}";
-                        }
-                        finally
-                        {
-                            row.IsImported = string.IsNullOrEmpty(errorMsg) ? true : false;
-                            row.ErrorMessage = errorMsg;
-                            baseGraph.CloudbedTransactions.Update(row);
-                        }
+                            x.BatchNbr = (x.IsImported ?? false) ? glBatchNbr : string.Empty;
+                            x.LineNbr = (x?.IsImported ?? false) ? lineNbrDic[x.TransactionID] : null;
+                            baseGraph.CloudbedTransactions.Update(x);
+                        });
+                        // 回寫 Remit Document
+                        var remitDoc = baseGraph.Document.Current;
+                        remitDoc.BatchNbr = glBatchNbr;
+                        remitDoc.Status = LUMRemitStatus.Released;
+                        baseGraph.Document.UpdateCurrent();
+                        // Save Process Result
+                        baseGraph.Actions.PressSave();
+                        sc.Complete();
                     }
-                    #endregion
-
-                    errorMsg = string.Empty;
-                    glGraph.releaseFromHold.Press();
-                    glGraph.Save.Press();
-                    glGraph.release.Press();
-                    glBatchNbr = doc.BatchNbr;
-                    // 回寫Cloudbed Transaciton BatchNbr.
-                    cloudBedGroupRow.ToList().ForEach(x =>
+                    catch (PXOuterException ex)
                     {
-                        x.BatchNbr = (x.IsImported ?? false) ? glBatchNbr : string.Empty;
-                        x.LineNbr = (x?.IsImported ?? false) ? lineNbrDic[x.TransactionID] : null;
-                        baseGraph.CloudbedTransactions.Update(x);
-                    });
-                    // 回寫 Remit Document
-                    var remitDoc = baseGraph.Document.Current;
-                    remitDoc.BatchNbr = glBatchNbr;
-                    remitDoc.Status = LUMRemitStatus.Released;
-                    baseGraph.Document.UpdateCurrent();
-                }
-                catch (PXOuterException ex)
-                {
-                    errorMsg = $"Error: {ex.InnerMessages[0]}";
-                    throw ex;
-                }
-                catch (Exception ex)
-                {
-                    errorMsg = $"Error: {ex.Message}";
-                    throw ex;
-                }
-                // Save Process Result
-                baseGraph.Actions.PressSave();
+                        errorMsg = $"Error: {ex.InnerMessages[0]}";
+                        throw ex;
+                    }
+                    catch (Exception ex)
+                    {
+                        errorMsg = $"Error: {ex.Message}";
+                        throw ex;
+                    }
+                }// end of transaction scrope
             }
 
         }

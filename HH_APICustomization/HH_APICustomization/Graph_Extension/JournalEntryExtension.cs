@@ -33,9 +33,9 @@ namespace PX.Objects.GL
                 var allowTable = GetAllowTable();
                 // 除了GL以外，其他都是直接先做好release資料在產生傳票
 
-                var valid = ValidCombination(allowTable, Base.GLTranModuleBatNbr.View.SelectMulti().RowCast<GLTran>(), true);
-                if (!valid)
-                    throw new PXException(combinationErrorMsg);
+                var validResult = ValidCombination(allowTable, Base.GLTranModuleBatNbr.View.SelectMulti().RowCast<GLTran>(), true);
+                if (!validResult.valid)
+                    throw new PXException(validResult.errorMsg);
             }
 
             // When AP release, need to fill some column value
@@ -83,13 +83,13 @@ namespace PX.Objects.GL
             // Valid allow
             foreach (var batchItem in list)
             {
-                var valid = ValidCombination(GetAllowTable(),
+                var validResult = ValidCombination(GetAllowTable(),
                                 SelectFrom<GLTran>
                                 .Where<GLTran.module.IsEqual<P.AsString>
                                   .And<GLTran.batchNbr.IsEqual<P.AsString>>>
                                 .View.Select(Base, batchItem?.Module, batchItem?.BatchNbr).RowCast<GLTran>());
-                if (!valid)
-                    throw new PXException(combinationErrorMsg);
+                if (!validResult.valid)
+                    throw new PXException(validResult.errorMsg);
             }
 
             var result = baseMethod(adapter);
@@ -143,12 +143,13 @@ namespace PX.Objects.GL
         /// Valid Allowed combination
         /// </summary>
         /// <param name="batchItem"></param>
-        public virtual bool ValidCombination(IEnumerable<LUMAllowCombination> allowTable, IEnumerable<GLTran> list, bool checkOnlyReleased = false)
+        public virtual (bool valid, string errorMsg) ValidCombination(IEnumerable<LUMAllowCombination> allowTable, IEnumerable<GLTran> list, bool checkOnlyReleased = false)
         {
+            string errorMsg = string.Empty;
             var setup = this.HHSetup.Select().TopFirst;
             var valid = true;
             if (!(setup?.EnableCheckAllowedAccountCombination ?? false))
-                return valid;
+                return (valid, errorMsg);
             // GLTran
             foreach (var line in list)
             {
@@ -165,15 +166,16 @@ namespace PX.Objects.GL
                     var subInfo = Sub.PK.Find(Base, line?.SubID);
                     var ledgerInfo = Ledger.PK.Find(Base, line?.LedgerID);
                     valid = false;
+                    errorMsg = $"[{branchInfo?.BranchCD?.Trim()}] + [{ledgerInfo?.LedgerCD?.Trim()}] +  [{acctInfo?.AccountCD?.Trim()}] + [{subInfo?.SubCD?.Trim()}]";
                     // 非GL 就直接SHOW一筆錯誤的組合
                     if (line?.Module == "GL")
                         Base.GLTranModuleBatNbr.Cache.RaiseExceptionHandling<GLTran.branchID>(line, line?.BranchID,
-                             new PXSetPropertyException<GLTran.branchID>($"[{branchInfo?.BranchCD?.Trim()}] + [{ledgerInfo?.LedgerCD?.Trim()}] +  [{acctInfo?.AccountCD?.Trim()}] + [{subInfo?.SubCD?.Trim()}]  is not allowed, please confirm your entry or maintain it in allowed combination.", PXErrorLevel.Error));
+                             new PXSetPropertyException<GLTran.branchID>($"{errorMsg} is not allowed, please confirm your entry or maintain it in allowed combination.", PXErrorLevel.Error));
                     else
-                        throw new PXException($"[{branchInfo?.BranchCD?.Trim()}] + [{ledgerInfo?.LedgerCD?.Trim()}] +  [{acctInfo?.AccountCD?.Trim()}] + [{subInfo?.SubCD?.Trim()}]  is not allowed, please confirm your entry or maintain it in allowed combination.");
+                        throw new PXException($"{errorMsg} is not allowed, please confirm your entry or maintain it in allowed combination.");
                 }
             }
-            return valid;
+            return (valid, errorMsg);
         }
 
         public virtual IEnumerable<LUMAllowCombination> GetAllowTable()
