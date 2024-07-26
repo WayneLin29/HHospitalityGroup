@@ -68,13 +68,18 @@ namespace HH_APICustomization.Graph
 
                                 if (doc.Module == "FI")
                                     glGraph.BatchModule.SetValueExt<Batch.batchNbr>(doc, _FIBatchNbr);
-                                // 有FIN Ledger
-                                if (!string.IsNullOrEmpty(ledgerInfo_FIN?.LedgerCD))
-                                    glGraph.BatchModule.SetValueExt<Batch.ledgerID>(doc, ledgerInfo_FIN?.LedgerID);
+                                
                                 glGraph.BatchModule.SetValueExt<Batch.branchID>(doc, groupData.FirstOrDefault()?.OriginBranchID);
                                 glGraph.BatchModule.SetValueExt<Batch.dateEntered>(doc, DateTime.Now);
                                 glGraph.BatchModule.SetValueExt<Batch.description>(doc, groupData.FirstOrDefault()?.Description);
                                 glGraph.Save.Press();
+
+                                // 有FIN Ledger
+                                if (!string.IsNullOrEmpty(ledgerInfo_FIN?.LedgerCD))
+                                { 
+                                    glGraph.BatchModule.SetValueExt<Batch.ledgerID>(doc, ledgerInfo_FIN?.LedgerID);
+                                    glGraph.BatchModule.UpdateCurrent();
+                                }
                                 #endregion
 
                                 #region Details
