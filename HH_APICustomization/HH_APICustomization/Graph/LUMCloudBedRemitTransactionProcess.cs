@@ -1346,10 +1346,12 @@ namespace HH_APICustomization.Graph
                             catch (PXOuterException ex)
                             {
                                 errorMsg = $"Error: {ex.InnerMessages[0]}";
+                                throw ex;
                             }
                             catch (Exception ex)
                             {
                                 errorMsg = $"Error: {ex.Message}";
+                                throw ex;
                             }
                             finally
                             {
