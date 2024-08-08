@@ -20,17 +20,28 @@
             <px:PXDateTimeEdit runat="server" ID="edDate" DataField="Date" Width="150px" TextMode="DateTime"></px:PXDateTimeEdit>
             <px:PXDropDown runat="server" ID="edShift" DataField="Shift" Width="150px"></px:PXDropDown>
             <px:PXSelector runat="server" ID="edBranch" DataField="Branch" Width="150px"></px:PXSelector>
-            <px:PXLayoutRule runat="server" ControlSize="SM" LabelsWidth="S" StartColumn="True" />
             <px:PXDropDown ID="edStatus" runat="server" DataField="Status" Enabled="False" />
-            <px:PXTextEdit runat="server" ID="edCreatedByID" DataField="CreatedByID"></px:PXTextEdit>
-            <px:PXTextEdit runat="server" ID="edBatchNbr" DataField="BatchNbr" Enabled="False"></px:PXTextEdit>
-            <px:PXSelector runat="server" ID="edOwnerID" DataField="OwnerID" Enabled="false"></px:PXSelector>
+            <px:PXLayoutRule runat="server" ColumnSpan="2"></px:PXLayoutRule>
+            <px:PXTextEdit runat="server" ID="edDescription" DataField="Description"></px:PXTextEdit>
+            <px:PXLayoutRule runat="server" ControlSize="M" LabelsWidth="S" StartColumn="True" />
+            <px:PXLayoutRule runat="server" Merge="true"></px:PXLayoutRule>
+            <px:PXNumberEdit runat="server" ID="edRoomRevenue" DataField="RoomRevenue" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXNumberEdit runat="server" ID="edAdjRoomRevenue" DataField="AdjRoomRevenue" SuppressLabel="true" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXNumberEdit runat="server" ID="edCalcRoomRevenue" DataField="CalcRoomRevenue" SuppressLabel="true" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXLayoutRule runat="server" Merge="true"></px:PXLayoutRule>
+            <px:PXNumberEdit runat="server" ID="edTaxes" DataField="Taxes" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXNumberEdit runat="server" ID="edAdjTaxes" DataField="AdjTaxes" SuppressLabel="true" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXNumberEdit runat="server" ID="edCalcTaxes" DataField="CalcTaxes" SuppressLabel="true" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXLayoutRule runat="server" Merge="true"></px:PXLayoutRule>
+            <px:PXNumberEdit runat="server" ID="edOther" DataField="Other" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXNumberEdit runat="server" ID="edAdjOther" DataField="AdjOther" SuppressLabel="true" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXNumberEdit runat="server" ID="edCalcOther" DataField="CalcOther" SuppressLabel="true" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXLayoutRule runat="server" Merge="false"></px:PXLayoutRule>
+            <px:PXSelector runat="server" ID="edOwnerID" DataField="OwnerID" Enabled="true"></px:PXSelector>
             <px:PXLayoutRule runat="server" ControlSize="SM" LabelsWidth="S" StartColumn="True" />
-            <px:PXSelector runat="server" ID="edVoidedBy" DataField="VoidedBy" Enabled="False"></px:PXSelector>
-            <px:PXTextEdit runat="server" ID="edVoidReason" DataField="VoidReason" Enabled="False"></px:PXTextEdit>
-            <px:PXTextEdit runat="server" ID="edVoidBatchNbr" DataField="VoidBatchNbr" Enabled="False"></px:PXTextEdit>
+            <px:PXNumberEdit runat="server" ID="edPayment" DataField="Payment" TextAlign="Right" Width="100px"></px:PXNumberEdit>
+            <px:PXNumberEdit runat="server" ID="edRefund" DataField="Refund" TextAlign="Right" Width="100px"></px:PXNumberEdit>
             <px:PXLayoutRule runat="server" ControlSize="SM" LabelsWidth="S" StartColumn="True" />
-            <px:PXDateTimeEdit runat="server" ID="edPostingDate" DataField="PostingDate"></px:PXDateTimeEdit>
         </Template>
     </px:PXFormView>
 </asp:Content>
@@ -182,7 +193,7 @@
                                 <px:PXToolBarButton Text="AUDITTOGGLE IN">
                                     <AutoCallBack Command="AuditReservationToggleIn" Target="ds" />
                                 </px:PXToolBarButton>
-                                 <px:PXToolBarButton Text="ACCOUNT DETERMINE">
+                                <px:PXToolBarButton Text="ACCOUNT DETERMINE">
                                     <AutoCallBack Command="AccountDetermine" Target="ds" />
                                 </px:PXToolBarButton>
                             </CustomItems>
@@ -277,6 +288,22 @@
                             </px:PXGridLevel>
                         </Levels>
                     </px:PXGrid>
+                </Template>
+            </px:PXTabItem>
+            <px:PXTabItem Text="FINANCAL" BindingContext="form" RepaintOnDemand="false">
+                <Template>
+                    <px:PXFormView ID="form4" runat="server" DataSourceID="ds" Style="z-index: 100" Width="100%" DataMember="Document" CaptionVisible="False">
+                        <Template>
+                            <px:PXLayoutRule runat="server" ControlSize="SM" LabelsWidth="S" StartColumn="True" />
+                            <px:PXDateTimeEdit runat="server" ID="edPostingDate" DataField="PostingDate"></px:PXDateTimeEdit>
+                            <px:PXTextEdit runat="server" ID="edCreatedByID" DataField="CreatedByID"></px:PXTextEdit>
+                            <px:PXTextEdit runat="server" ID="edBatchNbr" DataField="BatchNbr" Enabled="False"></px:PXTextEdit>
+                            <px:PXLayoutRule runat="server" ControlSize="SM" LabelsWidth="S" StartColumn="True" />
+                            <px:PXSelector runat="server" ID="edVoidedBy" DataField="VoidedBy" Enabled="False"></px:PXSelector>
+                            <px:PXTextEdit runat="server" ID="edVoidReason" DataField="VoidReason" Enabled="False"></px:PXTextEdit>
+                            <px:PXTextEdit runat="server" ID="edVoidBatchNbr" DataField="VoidBatchNbr" Enabled="False"></px:PXTextEdit>
+                        </Template>
+                    </px:PXFormView>
                 </Template>
             </px:PXTabItem>
         </Items>

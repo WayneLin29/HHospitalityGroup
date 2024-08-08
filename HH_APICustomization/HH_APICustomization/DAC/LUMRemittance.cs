@@ -201,7 +201,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region OwnerID
-        [Owner(typeof(workgroupID), DisplayName = "Owner")]
+        [Owner(typeof(workgroupID), DisplayName = "Owner", Enabled = true)]
         [PXDefault(typeof(Search<CREmployee.defContactID, Where<CREmployee.userID, Equal<Current<AccessInfo.userID>>>>), PersistingCheck = PXPersistingCheck.Nothing)]
         public virtual int? OwnerID { get; set; }
         public abstract class ownerID : PX.Data.BQL.BqlInt.Field<ownerID> { }
@@ -228,5 +228,99 @@ namespace HH_APICustomization.DAC
         public abstract class aDRemark : PX.Data.BQL.BqlString.Field<aDRemark> { }
         #endregion
 
+        #region Description
+        [PXDBString(256, IsUnicode = true)]
+        [PXUIField(DisplayName = "Description")]
+        public virtual string Description { get; set; }
+        public abstract class description : PX.Data.BQL.BqlString.Field<description> { }
+        #endregion
+
+        #region RoomRevenue
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "RoomRevenue", Enabled = false)]
+        public virtual decimal? RoomRevenue { get; set; }
+        public abstract class roomRevenue : PX.Data.BQL.BqlDecimal.Field<roomRevenue> { }
+        #endregion
+
+        #region AdjRoomRevenue
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Adj RoomRevenue", Enabled = false)]
+        public virtual decimal? AdjRoomRevenue { get; set; }
+        public abstract class adjRoomRevenue : PX.Data.BQL.BqlDecimal.Field<adjRoomRevenue> { }
+        #endregion
+
+        #region CalcRoomRevenue
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Calc RoomRevenue", Enabled = false)]
+        public virtual decimal? CalcRoomRevenue { get; set; }
+        public abstract class calcRoomRevenue : PX.Data.BQL.BqlDecimal.Field<calcRoomRevenue> { }
+        #endregion
+
+        #region Taxes
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Taxes", Enabled = false)]
+        public virtual decimal? Taxes { get; set; }
+        public abstract class taxes : PX.Data.BQL.BqlDecimal.Field<taxes> { }
+        #endregion
+
+        #region AdjTaxes
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "AdjTaxes", Enabled = false)]
+        public virtual decimal? AdjTaxes { get; set; }
+        public abstract class adjTaxes : PX.Data.BQL.BqlDecimal.Field<adjTaxes> { }
+        #endregion
+
+        #region CalcTaxes
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "CalcTaxes", Enabled = false)]
+        public virtual decimal? CalcTaxes { get; set; }
+        public abstract class calcTaxes : PX.Data.BQL.BqlDecimal.Field<calcTaxes> { }
+        #endregion
+
+        #region Other
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Other", Enabled = false)]
+        public virtual decimal? Other { get; set; }
+        public abstract class other : PX.Data.BQL.BqlDecimal.Field<other> { }
+        #endregion
+
+        #region AdjOther
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "AdjOther", Enabled = false)]
+        public virtual decimal? AdjOther { get; set; }
+        public abstract class adjOther : PX.Data.BQL.BqlDecimal.Field<adjOther> { }
+        #endregion
+
+        #region CalcOther
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "CalcOther", Enabled = false)]
+        public virtual decimal? CalcOther { get; set; }
+        public abstract class calcOther : PX.Data.BQL.BqlDecimal.Field<calcOther> { }
+        #endregion
+
+        #region Payment
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Payment", Enabled = false)]
+        public virtual decimal? Payment { get; set; }
+        public abstract class payment : PX.Data.BQL.BqlDecimal.Field<payment> { }
+        #endregion
+
+        #region Refund
+        [PXDBDecimal(4)]
+        [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Refund", Enabled = false)]
+        public virtual decimal? Refund { get; set; }
+        public abstract class refund : PX.Data.BQL.BqlDecimal.Field<refund> { }
+        #endregion
     }
 }

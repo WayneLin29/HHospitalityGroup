@@ -415,6 +415,9 @@ namespace HH_APICustomization.Graph
                 }
                 #endregion
 
+                // Calculate Document Amount
+                CalculateDocumentAmount(this.RemitTransactions.View.SelectMulti().RowCast<LUMCloudBedTransactions>());
+
                 this.Save.Press();
             });
             return adapter.Get();
@@ -1054,7 +1057,7 @@ namespace HH_APICustomization.Graph
 
                 InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
-
+                InvokeCachePersist<LUMRemittance>(PXDBOperation.Update);
                 sc.Complete();
             }
         }
@@ -1095,6 +1098,7 @@ namespace HH_APICustomization.Graph
                 //FinalCheckScope(tempTrans.Select(x => x.ReservationID).Distinct().ToList(), false);
                 InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
+                InvokeCachePersist<LUMRemittance>(PXDBOperation.Update);
                 sc.Complete();
             }
         }
@@ -1131,24 +1135,22 @@ namespace HH_APICustomization.Graph
                 PropertyID = GetCurrentPropertyID(),
                 Type = string.IsNullOrEmpty(_reservationID) ? "H" : "R"
             };
+            var prefix = _actionType == "OUT" ? -1 : 1;
             var resLine = new LUMRemitReservation();
             resLine.RefNbr = _refNbr;
             resLine.ReservationID = checkObj.Type == "H" ? $"{selectedTrans?.HouseAccountID}-{selectedTrans?.HouseAccountName}" : _reservationID;
             resLine = this.ReservationTransactions.Cache.Locate(resLine) as LUMRemitReservation;
-            CalculateReservationAmount(selectedTrans, resLine, _actionType == "OUT" ? -1 : 1);
+            CalculateReservationAmount(selectedTrans, resLine, prefix);
             resLine.PendingCount = (resLine.PendingCount ?? 0) + (_actionType == "OUT" ? 1 : -1);
             resLine.ToRemitCount = (resLine.ToRemitCount ?? 0) + (_actionType == "OUT" ? -1 : 1);
             //resLine.IsOutOfScope = _actionType == "OUT" ? true : false;
             resLine = this.ReservationTransactions.Update(resLine);
+
+            // Recalculate Documaent Amount
+            CalculateDocumentAmount(new List<LUMCloudBedTransactions>() { selectedTrans }, prefix);
         }
 
-        /// <summary>
-        /// Calculate Reservation Amount
-        /// </summary>
-        /// <param name="baseGraph"> Grpah </param>
-        /// <param name="_refNbr"> Remit Nbr.</param>
-        /// <param name="checkObj"> vHHRemitReservationCheck </param>
-        /// <param name="reservationobj"> LUMRemitReservation </param>
+        /// <summary> Calculate Reservation Amount </summary>
         private void CalculateReservationAmount(string _refNbr, vHHRemitReservationCheck checkObj, LUMRemitReservation reservationobj)
         {
             IEnumerable<LUMCloudBedTransactions> transByReservation = new List<LUMCloudBedTransactions>();
@@ -1206,6 +1208,50 @@ namespace HH_APICustomization.Graph
             // Payment - TransactionType = 'Credit'　
             if (trans?.TransactionType?.ToUpper() == "CREDIT")
                 reservationobj.Payment = (reservationobj.Payment ?? 0) + prefix * (trans?.Amount ?? 0);
+        }
+
+        /// <summary> Calculate Document Amount (RoomRevenue..) </summary>
+        public virtual void CalculateDocumentAmount(IEnumerable<LUMCloudBedTransactions> transactions, int prefix = 1)
+        {
+            var doc = this.Document.Current;
+            if (doc != null)
+            {
+                foreach (var tran in transactions)
+                {
+                    var _type = tran?.TransactionType?.ToUpper();
+                    var _category = tran?.Category?.ToUpper();
+                    var _amount = tran?.Amount ?? 0;
+                    //  TransactionType = 'Debit' AND Category = 'Room Revenue' AND Amount >= 0
+                    if (_type == "DEBIT" && _category == "ROOM REVENUE" && _amount >= 0)
+                        doc.RoomRevenue = (doc.RoomRevenue ?? 0) + prefix * _amount;
+                    // TransactionType = 'Debit' AND Category = 'Room Revenue' AND Amount < 0
+                    else if (_type == "DEBIT" && _category == "ROOM REVENUE" && _amount < 0)
+                        doc.AdjRoomRevenue = (doc.AdjRoomRevenue ?? 0) + prefix * Math.Abs(_amount);
+                    //  TransactionType = 'Debit' AND (Category = 'Taxes' OR Category = 'Fees') AND Amount > 0
+                    else if (_type == "DEBIT" && (_category == "TAXES" || _category == "FEES") && _amount >= 0)
+                        doc.Taxes = (doc.Taxes ?? 0) + prefix * _amount;
+                    //  TransactionType = 'Debit' AND (Category = 'Taxes' OR Category = 'Fees') AND Amount < 0
+                    else if (_type == "DEBIT" && (_category == "TAXES" || _category == "FEES") && _amount < 0)
+                        doc.AdjTaxes = (doc.AdjTaxes ?? 0) + prefix * Math.Abs(_amount);
+                    //  TransactionType = 'Debit' AND Category NOT IN ('Room Revenue', 'Taxes', 'Fees')  AND Amount > 0
+                    else if (_type == "DEBIT" && !new string[] { "TAXES", "FEES" }.Contains(_category) && _amount >= 0)
+                        doc.Other = (doc.Other ?? 0) + prefix * _amount;
+                    //  TransactionType = 'Debit' AND Category NOT IN ('Room Revenue', 'Taxes', 'Fees')  AND Amount < 0
+                    else if (_type == "DEBIT" && !new string[] { "TAXES", "FEES" }.Contains(_category) && _amount < 0)
+                        doc.AdjOther = (doc.AdjOther ?? 0) + prefix * Math.Abs(_amount);
+                    //  TransactionType = 'Credit'　AND TransactionCategory NOT IN ( 'refund', 'void') 
+                    else if (_type == "CREDIT" && !new string[] { "REFUND", "VOID" }.Contains(_category))
+                        doc.Payment = (doc.Payment ?? 0) + prefix * _amount;
+                    //  TransactionType = 'Credit' AND TransactionCategory IN('refund', 'void')
+                    else if (_type == "CREDIT" && new string[] { "REFUND", "VOID" }.Contains(_category))
+                        doc.Refund = (doc.Refund ?? 0) + prefix * _amount;
+
+                    doc.CalcRoomRevenue = CalculateDifference(doc.RoomRevenue, doc.AdjRoomRevenue);
+                    doc.CalcTaxes = CalculateDifference(doc.Taxes, doc.AdjTaxes);
+                    doc.CalcOther = CalculateDifference(doc.Other, doc.AdjOther);
+                }
+                this.Document.UpdateCurrent();
+            }
         }
 
         /// <summary> Get Cloudbed Transaction belong to Reservation </summary>
@@ -1544,6 +1590,8 @@ namespace HH_APICustomization.Graph
         private void FieldControl(LUMRemittance row)
         {
             #region Set Field Enabled (false)
+            PXUIFieldAttribute.SetEnabled<LUMRemittance.ownerID>(this.Document.Cache, null, false);
+
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions.transactionID>(this.PaymentDetails.Cache, null, false);
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions.reservationID>(this.PaymentDetails.Cache, null, false);
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions.houseAccountName>(this.PaymentDetails.Cache, null, false);
@@ -1571,6 +1619,9 @@ namespace HH_APICustomization.Graph
 
             switch (row?.Status)
             {
+                case LUMRemitStatus.Hold:
+                    PXUIFieldAttribute.SetEnabled<LUMRemittance.ownerID>(this.Document.Cache, null, true);
+                    break;
                 case LUMRemitStatus.PendingApproval:
                     PXUIFieldAttribute.SetEnabled<LUMRemitPayment.oPRemark>(this.PaymentTransactions.Cache, null, false);
                     PXUIFieldAttribute.SetEnabled<LUMRemitReservation.oPRemark>(this.PaymentTransactions.Cache, null, false);
@@ -1660,6 +1711,11 @@ namespace HH_APICustomization.Graph
                     this.ReservationTransactions.Update(resLine);
                 }
             }
+        }
+
+        private decimal CalculateDifference(decimal? value, decimal? adjustment)
+        {
+            return (value ?? 0) - (adjustment ?? 0);
         }
 
         #endregion

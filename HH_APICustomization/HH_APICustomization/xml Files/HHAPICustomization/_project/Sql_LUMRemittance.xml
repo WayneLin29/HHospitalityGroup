@@ -26,6 +26,18 @@
   <col name="Rejected" type="Bit" nullable="true" />
   <col name="Release" type="Bit" nullable="true" />
   <col name="PostingDate" type="DateTime" nullable="true" />
+  <col name="Description" type="NVarChar(256)" nullable="true" />
+  <col name="RoomRevenue" type="Decimal(18,6)" nullable="true" />
+  <col name="AdjRoomRevenue" type="Decimal(18,6)" nullable="true" />
+  <col name="CalcRoomRevenue" type="Decimal(18,6)" nullable="true" />
+  <col name="Taxes" type="Decimal(18,6)" nullable="true" />
+  <col name="AdjTaxes" type="Decimal(18,6)" nullable="true" />
+  <col name="CalcTaxes" type="Decimal(18,6)" nullable="true" />
+  <col name="Other" type="Decimal(18,6)" nullable="true" />
+  <col name="AdjOther" type="Decimal(18,6)" nullable="true" />
+  <col name="CalcOther" type="Decimal(18,6)" nullable="true" />
+  <col name="Payment" type="Decimal(18,6)" nullable="true" />
+  <col name="Refund" type="Decimal(18,6)" nullable="true" />
   <index name="LUMRemittance_NoteID" unique="true">
     <col name="NoteID" />
     <col name="CompanyID" />
