@@ -236,7 +236,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region RoomRevenue
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "RoomRevenue", Enabled = false)]
         public virtual decimal? RoomRevenue { get; set; }
@@ -244,7 +244,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region AdjRoomRevenue
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Adj RoomRevenue", Enabled = false)]
         public virtual decimal? AdjRoomRevenue { get; set; }
@@ -252,7 +252,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region CalcRoomRevenue
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Calc RoomRevenue", Enabled = false)]
         public virtual decimal? CalcRoomRevenue { get; set; }
@@ -260,7 +260,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region Taxes
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Taxes", Enabled = false)]
         public virtual decimal? Taxes { get; set; }
@@ -268,7 +268,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region AdjTaxes
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "AdjTaxes", Enabled = false)]
         public virtual decimal? AdjTaxes { get; set; }
@@ -276,7 +276,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region CalcTaxes
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "CalcTaxes", Enabled = false)]
         public virtual decimal? CalcTaxes { get; set; }
@@ -284,7 +284,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region Other
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Other", Enabled = false)]
         public virtual decimal? Other { get; set; }
@@ -292,7 +292,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region AdjOther
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "AdjOther", Enabled = false)]
         public virtual decimal? AdjOther { get; set; }
@@ -300,7 +300,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region CalcOther
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "CalcOther", Enabled = false)]
         public virtual decimal? CalcOther { get; set; }
@@ -308,7 +308,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region Payment
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Payment", Enabled = false)]
         public virtual decimal? Payment { get; set; }
@@ -316,7 +316,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region Refund
-        [PXDBDecimal(4)]
+        [PXDBDecimal(2)]
         [PXDefault(TypeCode.Decimal, "0.00", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Refund", Enabled = false)]
         public virtual decimal? Refund { get; set; }

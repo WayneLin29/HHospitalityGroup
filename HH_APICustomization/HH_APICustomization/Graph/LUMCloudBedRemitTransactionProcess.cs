@@ -416,6 +416,7 @@ namespace HH_APICustomization.Graph
                 #endregion
 
                 // Calculate Document Amount
+                CleanUpDocumentAmount();
                 CalculateDocumentAmount(this.RemitTransactions.View.SelectMulti().RowCast<LUMCloudBedTransactions>());
 
                 this.Save.Press();
@@ -1160,6 +1161,7 @@ namespace HH_APICustomization.Graph
             {
                 // Reservation
                 case "R":
+                case "RS":
                     // Pending Post Count of LUMRemitExcludeTransactions where (RefNbr = Current Remit AND Reservation = Current Reservation)
                     reservationobj.PendingCount = SelectFrom<LUMRemitExcludeTransactions>
                                                  .InnerJoin<LUMCloudBedTransactions>.On<LUMRemitExcludeTransactions.transactionID.IsEqual<LUMCloudBedTransactions.transactionID>
@@ -1226,29 +1228,29 @@ namespace HH_APICustomization.Graph
                         doc.RoomRevenue = (doc.RoomRevenue ?? 0) + prefix * _amount;
                     // TransactionType = 'Debit' AND Category = 'Room Revenue' AND Amount < 0
                     else if (_type == "DEBIT" && _category == "ROOM REVENUE" && _amount < 0)
-                        doc.AdjRoomRevenue = (doc.AdjRoomRevenue ?? 0) + prefix * Math.Abs(_amount);
+                        doc.AdjRoomRevenue = (doc.AdjRoomRevenue ?? 0) + prefix * -1 * Math.Abs(_amount);
                     //  TransactionType = 'Debit' AND (Category = 'Taxes' OR Category = 'Fees') AND Amount > 0
                     else if (_type == "DEBIT" && (_category == "TAXES" || _category == "FEES") && _amount >= 0)
                         doc.Taxes = (doc.Taxes ?? 0) + prefix * _amount;
                     //  TransactionType = 'Debit' AND (Category = 'Taxes' OR Category = 'Fees') AND Amount < 0
                     else if (_type == "DEBIT" && (_category == "TAXES" || _category == "FEES") && _amount < 0)
-                        doc.AdjTaxes = (doc.AdjTaxes ?? 0) + prefix * Math.Abs(_amount);
+                        doc.AdjTaxes = (doc.AdjTaxes ?? 0) + prefix * -1 * Math.Abs(_amount);
                     //  TransactionType = 'Debit' AND Category NOT IN ('Room Revenue', 'Taxes', 'Fees')  AND Amount > 0
                     else if (_type == "DEBIT" && !new string[] { "TAXES", "FEES" }.Contains(_category) && _amount >= 0)
                         doc.Other = (doc.Other ?? 0) + prefix * _amount;
                     //  TransactionType = 'Debit' AND Category NOT IN ('Room Revenue', 'Taxes', 'Fees')  AND Amount < 0
                     else if (_type == "DEBIT" && !new string[] { "TAXES", "FEES" }.Contains(_category) && _amount < 0)
-                        doc.AdjOther = (doc.AdjOther ?? 0) + prefix * Math.Abs(_amount);
+                        doc.AdjOther = (doc.AdjOther ?? 0) + prefix * -1 * Math.Abs(_amount);
                     //  TransactionType = 'Credit'　AND TransactionCategory NOT IN ( 'refund', 'void') 
-                    else if (_type == "CREDIT" && !new string[] { "REFUND", "VOID" }.Contains(_category))
+                    else if (_type == "CREDIT" && !(new string[] { "REFUND", "VOID" }.Contains(_category)))
                         doc.Payment = (doc.Payment ?? 0) + prefix * _amount;
                     //  TransactionType = 'Credit' AND TransactionCategory IN('refund', 'void')
                     else if (_type == "CREDIT" && new string[] { "REFUND", "VOID" }.Contains(_category))
-                        doc.Refund = (doc.Refund ?? 0) + prefix * _amount;
+                        doc.Refund = (doc.Refund ?? 0) + prefix * Math.Abs(_amount);
 
-                    doc.CalcRoomRevenue = CalculateDifference(doc.RoomRevenue, doc.AdjRoomRevenue);
-                    doc.CalcTaxes = CalculateDifference(doc.Taxes, doc.AdjTaxes);
-                    doc.CalcOther = CalculateDifference(doc.Other, doc.AdjOther);
+                    doc.CalcRoomRevenue = CalculateDifference(doc.RoomRevenue, Math.Abs(doc.AdjRoomRevenue ?? 0));
+                    doc.CalcTaxes = CalculateDifference(doc.Taxes, Math.Abs(doc.AdjTaxes ?? 0));
+                    doc.CalcOther = CalculateDifference(doc.Other, Math.Abs(doc.AdjOther ?? 0));
                 }
                 this.Document.UpdateCurrent();
             }
@@ -1716,6 +1718,23 @@ namespace HH_APICustomization.Graph
         private decimal CalculateDifference(decimal? value, decimal? adjustment)
         {
             return (value ?? 0) - (adjustment ?? 0);
+        }
+
+        private void CleanUpDocumentAmount()
+        {
+            var doc = this.Document.Current;
+            doc.RoomRevenue = 0;
+            doc.AdjRoomRevenue = 0;
+            doc.CalcRoomRevenue = 0;
+            doc.Taxes = 0;
+            doc.AdjTaxes = 0;
+            doc.CalcTaxes = 0;
+            doc.Other = 0;
+            doc.AdjOther = 0;
+            doc.CalcOther = 0;
+            doc.Payment = 0;
+            doc.Refund = 0;
+            this.Document.UpdateCurrent();
         }
 
         #endregion
