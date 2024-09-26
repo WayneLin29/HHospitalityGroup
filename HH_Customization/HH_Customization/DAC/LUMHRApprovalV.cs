@@ -7,7 +7,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMHRApprovalV")]
-    public class LUMHRApprovalV : IBqlTable
+    public class LUMHRApprovalV : PXBqlTable, IBqlTable
     {
         #region Selected
         [PXBool]

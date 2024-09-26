@@ -11,7 +11,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourFlight")]
-    public class LUMTourFlight : IBqlTable, IAPLink, ICreateAPData
+    public class LUMTourFlight : PXBqlTable, IBqlTable, IAPLink, ICreateAPData
     {
         #region Const
         public const string FLIGHT = "FLIGHT";

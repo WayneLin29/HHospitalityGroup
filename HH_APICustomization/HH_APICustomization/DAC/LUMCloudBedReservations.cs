@@ -6,7 +6,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMCloudBedReservations")]
-    public class LUMCloudBedReservations : IBqlTable
+    public class LUMCloudBedReservations : PXBqlTable, IBqlTable
     {
         public class PK : PrimaryKeyOf<LUMCloudBedReservations>.By<propertyID, reservationID>
         {

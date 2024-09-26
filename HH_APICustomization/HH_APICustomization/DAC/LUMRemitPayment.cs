@@ -5,7 +5,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMRemitPayment")]
-    public class LUMRemitPayment : IBqlTable
+    public class LUMRemitPayment : PXBqlTable, IBqlTable
     {
         #region RefNbr
         [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]

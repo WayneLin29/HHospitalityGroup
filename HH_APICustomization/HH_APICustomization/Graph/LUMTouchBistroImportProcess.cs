@@ -285,7 +285,7 @@ namespace HH_APICustomization.Graph
         #region Table
         [Serializable]
         [PXCacheName("Import Filter")]
-        public class ImportFilter : IBqlTable
+        public class ImportFilter : PXBqlTable, IBqlTable
         {
             #region IsImported
             [PXBool()]

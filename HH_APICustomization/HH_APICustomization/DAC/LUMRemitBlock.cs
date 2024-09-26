@@ -5,7 +5,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMRemitBlock")]
-    public class LUMRemitBlock : IBqlTable
+    public class LUMRemitBlock : PXBqlTable, IBqlTable
     {
         #region UNBOUND
 

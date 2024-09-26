@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace HH_APICustomization.DAC
 {
-    public class LUMRemitRequestApproval : IBqlTable, IAssignedMap
+    public class LUMRemitRequestApproval : PXBqlTable, IBqlTable, IAssignedMap
     {
         #region ApprovalID
         [PXDBIdentity(IsKey = true)]

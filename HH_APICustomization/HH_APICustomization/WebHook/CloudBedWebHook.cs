@@ -1,20 +1,17 @@
-﻿using HH_APICustomization.Graph;
-using PX.Data;
-using PX.Data.Webhooks;
+﻿using PX.Api.Webhooks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using System.Web.Http.Results;
 using HH_APICustomization.APIHelper;
 using Newtonsoft.Json;
 using HHAPICustomization.DAC;
 using PX.SM;
-using PX.Data.BQL;
+using PX.Data;
+using System.Net;
+using Microsoft.AspNetCore.Http;
 
 namespace HH_APICustomization.WebHook
 {
@@ -23,23 +20,24 @@ namespace HH_APICustomization.WebHook
         [InjectDependency]
         internal ICurrentUserInformationProvider CurrentUserInformationProvider { get; set; }
 
-        public async Task<System.Web.Http.IHttpActionResult> ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public async Task HandleAsync(WebhookContext context, CancellationToken cancellation)
         {
             using (var scope = GetAdminScope())
             {
-                if (request.Method == HttpMethod.Get)
+                if (context.Request.Method == HttpMethod.Get.Method)
                 {
-                    var code = HttpUtility.ParseQueryString(request.RequestUri.Query).Get("CODE");
+                    var code = context.Request.Query["CODE"];
                     // Get Access Token By Code
                     if (!string.IsNullOrEmpty(code))
                         CloudBedHelper.GetAccessToeknByCode(code);
                 }
-                else if (request.Method == HttpMethod.Post)
+                else if (context.Request.Method == HttpMethod.Post.Method)
                 {
                     // Cloudbed Block webhook data
                     var adminID = PXSelect<Users, Where<Users.username, Equal<Required<Users.username>>>>.Select(new PXGraph(), "admin").TopFirst?.PKID;
-                    var body = request.Content.ReadAsStringAsync().Result;
-                    HH_APICustomization.Entity.Blockroom.CloudBed_BlockroomEntity blockroomEntity = JsonConvert.DeserializeObject<HH_APICustomization.Entity.Blockroom.CloudBed_BlockroomEntity>(body);
+                    var body = new JsonTextReader(context.Request.CreateTextReader());
+                    JsonSerializer Serializer = new JsonSerializer();
+                    HH_APICustomization.Entity.Blockroom.CloudBed_BlockroomEntity blockroomEntity = Serializer.Deserialize<HH_APICustomization.Entity.Blockroom.CloudBed_BlockroomEntity>(body);
                     using (PXTransactionScope sc = new PXTransactionScope())
                     {
                         int idx = 1;
@@ -66,7 +64,8 @@ namespace HH_APICustomization.WebHook
                     }
                 }
             }
-            return new OkResult(request);
+            context.Response.StatusCode = StatusCodes.Status200OK;
+            return;
         }
 
         private IDisposable GetAdminScope()

@@ -284,7 +284,7 @@ namespace PX.Objects.SO
             }
         }
 
-        public virtual void DoCreateAP<T>(PXCache cache, List<T> list) where T : IBqlTable, ICreateAPData, IAPLink
+        public virtual void DoCreateAP<T>(PXCache cache, List<T> list) where T : PXBqlTable, IBqlTable, ICreateAPData, IAPLink
         {
             Base.Persist();
             SOOrder header = Base.Document.Current;
@@ -435,12 +435,18 @@ namespace PX.Objects.SO
 
         #region Table
         [PXHidden]
-        public class DailogControl : IBqlTable
+        public class DailogControl : PXBqlTable, IBqlTable
         {
             #region IsShow
             [PXBool()]
             [PXUnboundDefault(false)]
             public virtual bool? IsShow { get; set; }
+
+            public ref PXBqlTableSystemData GetBqlTableSystemData()
+            {
+                throw new NotImplementedException();
+            }
+
             public abstract class isShow : PX.Data.BQL.BqlBool.Field<isShow> { }
             #endregion
         }
@@ -453,7 +459,7 @@ namespace PX.Objects.SO
                 And<LUMTourGuest.sOOrderType, Equal<SOLine.orderType>,
                 And<LUMTourGuest.sOLineNbr, Equal<SOLine.lineNbr>>>>>
         >), Persistent = true)]
-        public class LUMTourGuestLinkDetail : IBqlTable
+        public class LUMTourGuestLinkDetail : PXBqlTable, IBqlTable
         {
             #region Selected
             [PXBool()]
@@ -516,7 +522,7 @@ namespace PX.Objects.SO
                 On<LUMCloudBedRoomRateDetails.reservationID, Equal<LUMCloudBedRoomAssignment.reservationID>,
                 And<LUMCloudBedRoomRateDetails.roomid, Equal<LUMCloudBedRoomAssignment.roomid>>>>>
         >))]
-        public class LUMTourRoomReservations : IBqlTable
+        public class LUMTourRoomReservations : PXBqlTable, IBqlTable
         {
             #region Key
             #region ReservationID

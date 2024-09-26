@@ -29,7 +29,7 @@ namespace HH_APICustomization.Graph
     #region Table
     [Serializable]
     [PXCacheName("Empty Filter")]
-    public class EmptyFilter : IBqlTable
+    public class EmptyFilter : PXBqlTable, IBqlTable
     { }
     #endregion
 

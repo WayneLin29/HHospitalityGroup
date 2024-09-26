@@ -111,7 +111,7 @@ namespace HH_Customization.Graph
         #region Table
         [Serializable]
         [PXHidden]
-        public class LUMAPApplicationFilter : IBqlTable
+        public class LUMAPApplicationFilter : PXBqlTable, IBqlTable
         {
             #region ApplyingRefNbr
             [PXString()]

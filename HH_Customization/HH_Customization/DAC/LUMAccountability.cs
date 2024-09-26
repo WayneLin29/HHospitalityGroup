@@ -12,7 +12,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMAccountability")]
-    public class LUMAccountability : IBqlTable
+    public class LUMAccountability : PXBqlTable, IBqlTable
     {
         #region Key
         public class PK : PrimaryKeyOf<LUMAccountability>.By<bAccountID, lineNbr>

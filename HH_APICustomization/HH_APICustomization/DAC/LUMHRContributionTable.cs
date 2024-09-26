@@ -6,7 +6,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMHRContributionTable")]
-    public class LUMHRContributionTable : IBqlTable
+    public class LUMHRContributionTable : PXBqlTable, IBqlTable
     {
         #region Type
         [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]

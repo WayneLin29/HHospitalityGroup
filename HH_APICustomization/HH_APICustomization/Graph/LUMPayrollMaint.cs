@@ -56,7 +56,7 @@ namespace HH_APICustomization.Graph
     }
 
     [Serializable]
-    public class PayrollFilter : IBqlTable
+    public class PayrollFilter : PXBqlTable, IBqlTable
     {
         [PXInt]
         [PXUIField(DisplayName = "Branch", Required = true)]

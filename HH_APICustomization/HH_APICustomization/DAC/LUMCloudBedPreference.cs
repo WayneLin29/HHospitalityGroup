@@ -6,7 +6,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMCloudBedPreference")]
-    public class LUMCloudBedPreference : IBqlTable
+    public class LUMCloudBedPreference : PXBqlTable, IBqlTable
     {
         #region Selected
         [PXBool]

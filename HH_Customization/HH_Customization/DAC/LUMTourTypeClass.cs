@@ -10,7 +10,7 @@ namespace HH_Customization.DAC
     [Serializable]
     [PXCacheName("LUMTourTypeClass")]
     [PXPrimaryGraph(typeof(LUMTourTypeClassMaint))]
-    public class LUMTourTypeClass : IBqlTable
+    public class LUMTourTypeClass : PXBqlTable, IBqlTable
     {
         #region Key
         public class PK : PrimaryKeyOf<LUMTourTypeClass>.By<typeClassID>

@@ -5,7 +5,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("vHHRemitReservationCheck")]
-    public class vHHRemitReservationCheck : IBqlTable
+    public class vHHRemitReservationCheck : PXBqlTable, IBqlTable
     {
         #region PropertyID
         [PXDBString(50, IsUnicode = true, InputMask = "")]

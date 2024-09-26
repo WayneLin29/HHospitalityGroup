@@ -6,7 +6,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMCloudBedAccountMapping")]
-    public class LUMCloudBedAccountMapping : IBqlTable
+    public class LUMCloudBedAccountMapping : PXBqlTable, IBqlTable
     {
         #region SequenceID
         [PXDBIdentity(IsKey = true)]

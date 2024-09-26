@@ -12,7 +12,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourReservation")]
-    public class LUMTourReservation : IBqlTable, IAPLink, ICreateAPData
+    public class LUMTourReservation : PXBqlTable, IBqlTable, IAPLink, ICreateAPData
     {
         #region Key
         public class PK : PrimaryKeyOf<LUMTourReservation>.By<tourReservationID, sOOrderNbr, sOOrderType>

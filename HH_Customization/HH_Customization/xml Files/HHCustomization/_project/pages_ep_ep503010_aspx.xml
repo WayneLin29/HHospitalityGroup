@@ -1,0 +1,19 @@
+﻿<Page path="~/pages/ep/ep503010.aspx" pageSource="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">
+    <PXGridLevel DataMember="Records" ParentId="phL_grid_Levels#0" TypeFullName="PX.Web.UI.PXGridLevel">
+        <Children Key="Columns">
+            <AddItem>
+                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
+                    <Prop Key="DataField" Value="BranchID" />
+                    <Prop Key="Width" Value="140" />
+                </PXGridColumn>
+            </AddItem>
+            <AddItem>
+                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
+                    <Prop Key="DataField" Value="BranchID_Branch_acctName" />
+                    <Prop Key="Width" Value="220" />
+                </PXGridColumn>
+            </AddItem>
+            <PXGridColumn DataField="Details" OriginalIndex="9" />
+        </Children>
+    </PXGridLevel>
+</Page>

@@ -10,7 +10,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourCostStructure")]
-    public class LUMTourCostStructure : IBqlTable
+    public class LUMTourCostStructure : PXBqlTable, IBqlTable
     {
         #region Key
         public class PK : PrimaryKeyOf<LUMTourCostStructure>.By<costStructureID>

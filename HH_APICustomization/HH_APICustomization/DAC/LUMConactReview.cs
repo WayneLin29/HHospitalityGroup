@@ -6,7 +6,7 @@ namespace HHAPICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMContactReview")]
-    public class LUMContactReview : IBqlTable
+    public class LUMContactReview : PXBqlTable, IBqlTable
     {
         #region ContactID
         [PXDBInt(IsKey = true)]

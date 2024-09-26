@@ -11,7 +11,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMHHSetup")]
-    public class LUMHHSetup : IBqlTable
+    public class LUMHHSetup : PXBqlTable, IBqlTable
     {
         #region RemitSequenceID
         [PXDBString(10, IsUnicode = true, InputMask = "")]

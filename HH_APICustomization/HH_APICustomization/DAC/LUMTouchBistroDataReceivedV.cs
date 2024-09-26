@@ -5,7 +5,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTouchBistroDataReceivedV")]
-    public class LUMTouchBistroDataReceivedV : IBqlTable
+    public class LUMTouchBistroDataReceivedV : PXBqlTable, IBqlTable
     {
         #region Selected
         [PXBool()]

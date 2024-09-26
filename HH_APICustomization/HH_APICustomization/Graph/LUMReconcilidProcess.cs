@@ -309,7 +309,7 @@ namespace HH_APICustomization.Graph
     }
 
     [Serializable]
-    public class ReconcilidFilter : IBqlTable
+    public class ReconcilidFilter : PXBqlTable, IBqlTable
     {
         [PXInt]
         [PXUIField(DisplayName = "Branch", Required = true)]
@@ -382,7 +382,7 @@ namespace HH_APICustomization.Graph
     [PXProjection(typeof(SelectFrom<GLTran>.
                          LeftJoin<LUMCloudBedReservations>.On<GLTran.refNbr.IsEqual<LUMCloudBedReservations.reservationID>>.
                          Where<GLTran.curyDebitAmt.IsNotEqual<Zero>>))]
-    public class GLTranDebit : IBqlTable
+    public class GLTranDebit : PXBqlTable, IBqlTable
     {
         #region Selected
         public abstract class selected : PX.Data.BQL.BqlBool.Field<selected> { }

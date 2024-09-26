@@ -17,7 +17,7 @@ namespace HH_APICustomization.DAC
     [Serializable]
     [PXCacheName("LUMRemittance")]
     [PXPrimaryGraph(typeof(LUMCloudBedRemitTransactionProcess))]
-    public class LUMRemittance : IBqlTable, PX.Data.EP.IAssign
+    public class LUMRemittance : PXBqlTable, IBqlTable, PX.Data.EP.IAssign
     {
         public class PK : PrimaryKeyOf<LUMRemittance>.By<refNbr>
         {

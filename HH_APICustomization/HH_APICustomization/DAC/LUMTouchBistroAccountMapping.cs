@@ -6,7 +6,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTouchBistroAccountMapping")]
-    public class LUMTouchBistroAccountMapping : IBqlTable
+    public class LUMTouchBistroAccountMapping : PXBqlTable, IBqlTable
     {
         #region AccountMappingID
         [PXDBIdentity(IsKey = true)]

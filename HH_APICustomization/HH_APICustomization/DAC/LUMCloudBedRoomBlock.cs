@@ -5,7 +5,7 @@ namespace HHAPICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMCloudBedRoomBlock")]
-    public class LUMCloudBedRoomBlock : IBqlTable
+    public class LUMCloudBedRoomBlock : PXBqlTable, IBqlTable
     {
         #region RoomBlockID
         [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]

@@ -5,7 +5,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMCloudBedRoomRateDetails")]
-    public class LUMCloudBedRoomRateDetails : IBqlTable
+    public class LUMCloudBedRoomRateDetails : PXBqlTable, IBqlTable
     {
         #region ReservationID
         [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]

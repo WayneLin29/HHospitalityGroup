@@ -81,14 +81,14 @@ namespace HH_APICustomization.APIHelper
         }
 
         /// <summary> Get TransactionData </summary>
-        public static List<HH_APICustomization.Entity.Transaction> GetTransactionData(DateTime fromDate, DateTime toDate)
+        public static List<HH_APICustomization.Entity.Transaction> GetTransactionData(DateTime fromDate, DateTime toDate, string propertyID)
         {
             var accessToken = UpdateAccessToken();
             try
             {
                 int pageNumber = 1;
                 var transactionData = new List<HH_APICustomization.Entity.Transaction>();
-                var url = $"https://hotels.cloudbeds.com/api/v1.1/getTransactions?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}";
+                var url = $"https://hotels.cloudbeds.com/api/v1.1/getTransactions?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
                 PXTrace.WriteInformation($"Get Transaction Data : {url}");
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 var transactionEntity = JsonConvert.DeserializeObject<CloudBed_TransactionEntity>(response.Content.ReadAsStringAsync().Result);
@@ -100,7 +100,7 @@ namespace HH_APICustomization.APIHelper
                     int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                     for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                     {
-                        url = $"https://hotels.cloudbeds.com/api/v1.1/getTransactions?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}";
+                        url = $"https://hotels.cloudbeds.com/api/v1.1/getTransactions?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
                         response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                         transactionEntity = JsonConvert.DeserializeObject<CloudBed_TransactionEntity>(response.Content.ReadAsStringAsync().Result);
                         transactionData.AddRange(transactionEntity.data);
@@ -116,7 +116,7 @@ namespace HH_APICustomization.APIHelper
         }
 
         /// <summary> Get Reservation </summary>
-        public static List<HH_APICustomization.Entity.Reservation> GetReservationData(DateTime fromDate, DateTime toDate)
+        public static List<HH_APICustomization.Entity.Reservation> GetReservationData(DateTime fromDate, DateTime toDate, string propertyID)
         {
             var accessToken = UpdateAccessToken();
             try
@@ -124,7 +124,7 @@ namespace HH_APICustomization.APIHelper
                 // 查詢Reservation 因沒給Property，故實區統一為UTC+0
                 int pageNumber = 1;
                 var reservationData = new List<HH_APICustomization.Entity.Reservation>();
-                var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
                 PXTrace.WriteInformation($"Get Reservation Data : {url}");
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -138,7 +138,7 @@ namespace HH_APICustomization.APIHelper
                     int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                     for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                     {
-                        url = url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                        url = url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
                         response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                         reservationEntity = JsonConvert.DeserializeObject<CloudBed_ReservationEntity>(response.Content.ReadAsStringAsync().Result);
                         reservationData.AddRange(reservationEntity.data);

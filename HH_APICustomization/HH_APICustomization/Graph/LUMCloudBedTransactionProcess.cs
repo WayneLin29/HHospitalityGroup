@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using PX.Objects.GL;
 using PX.Data.BQL;
 using PX.Objects.CM;
+using HH_APICustomization.Descriptor;
 
 namespace HH_APICustomization.Graph
 {
@@ -20,12 +21,17 @@ namespace HH_APICustomization.Graph
 
         public PXFilter<TransactionFilter> TransacionFilter;
         public PXFilter<ReservationFilter> ReservationFilter;
-        public PXFilteredProcessing<LUMCloudBedTransactions, TransactionFilter,
-                              Where<LUMCloudBedTransactions.isImported, Equal<Current<TransactionFilter.isImported>>>> Transaction;
+
+        public SelectFrom<LUMCloudBedTransactions>
+              .Where<LUMCloudBedTransactions.isImported.IsEqual<TransactionFilter.isImported.FromCurrent>
+                .And<Brackets<LUMCloudBedTransactions.propertyID.IsEqual<TransactionFilter.cloudBedPropertyID.FromCurrent>.Or<TransactionFilter.cloudBedPropertyID.FromCurrent.IsNull>>>>
+              .ProcessingView Transaction;
 
         public SelectFrom<LUMCloudBedTransactions>.View CurrentTransaction;
 
-        public SelectFrom<LUMCloudBedReservations>.View Reservations;
+        public SelectFrom<LUMCloudBedReservations>
+              .Where<Brackets<LUMCloudBedReservations.propertyID.IsEqual<ReservationFilter.cloudBedPropertyID.FromCurrent>.Or<ReservationFilter.cloudBedPropertyID.FromCurrent.IsNull>>>
+              .View Reservations;
 
         public SelectFrom<LUMCloudBedRoomAssignment>.View RoomAssignment;
 
@@ -125,11 +131,12 @@ namespace HH_APICustomization.Graph
 
         public virtual void CreateJournalTransaction(LUMCloudBedTransactionProcess baseGraph, List<LUMCloudBedTransactions> selectedData)
         {
+            HHHelper helper = new HHHelper();
             var groupData = selectedData.Where(x => !(x.IsImported ?? false)).GroupBy(x => new { x.TransactionDateTime.Value.Date, x.PropertyID, x.Currency });
             var cloudbedProperty = SelectFrom<LUMCloudBedPreference>.View.Select(baseGraph).RowCast<LUMCloudBedPreference>();
             var reservationData = baseGraph.Reservations.Select().RowCast<LUMCloudBedReservations>();
             var AcctMapAData = SelectFrom<LUMCloudBedAccountMapping>.View.Select(baseGraph).RowCast<LUMCloudBedAccountMapping>();
-            var ledgerInfo = SelectFrom<Ledger>.Where<Ledger.ledgerCD.IsEqual<P.AsString>>.View.Select(baseGraph, "ACTUAL").TopFirst;
+            var ledgerInfo = helper.GetActualLedgerInfo();
             foreach (var cloudBedGroupRow in groupData)
             {
                 var glBatchNbr = string.Empty;
@@ -311,7 +318,7 @@ namespace HH_APICustomization.Graph
             var filter = transactionFilter == null ? baseGraph.TransacionFilter.Current : transactionFilter;
             if (!filter.FromDate.HasValue || !filter.ToDate.HasValue)
                 throw new PXException("Datetime is required!!");
-            var transNewData = CloudBedHelper.GetTransactionData(filter.FromDate.Value, filter.ToDate.Value);
+            var transNewData = CloudBedHelper.GetTransactionData(filter.FromDate.Value, filter.ToDate.Value, filter?.CloudBedPropertyID);
             if (transNewData == null)
                 throw new PXException("Get Transaction Failed!!");
             var transOldData = baseGraph.CurrentTransaction.Select().RowCast<LUMCloudBedTransactions>();
@@ -385,7 +392,7 @@ namespace HH_APICustomization.Graph
             var filter = reservationFilter == null ? baseGraph.ReservationFilter.Current : reservationFilter;
             if (!filter.ReservationFromDate.HasValue || !filter.ReservationToDate.HasValue)
                 throw new PXException("Datetime is required!!");
-            var reservationNewData = CloudBedHelper.GetReservationData(filter.ReservationFromDate.Value, filter.ReservationToDate.Value);
+            var reservationNewData = CloudBedHelper.GetReservationData(filter.ReservationFromDate.Value, filter.ReservationToDate.Value, filter?.CloudBedPropertyID);
             if (reservationNewData == null)
                 throw new PXException("Get Reservation Failed!!");
             var reservationOldData = baseGraph.Reservations.Select().RowCast<LUMCloudBedReservations>();
@@ -508,7 +515,7 @@ namespace HH_APICustomization.Graph
     }
 
     [Serializable]
-    public class TransactionFilter : IBqlTable
+    public class TransactionFilter : PXBqlTable, IBqlTable
     {
         [PXDate]
         [PXDefault]
@@ -534,10 +541,19 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "Display Imported Transaction")]
         public virtual bool? IsImported { get; set; }
         public abstract class isImported : PX.Data.BQL.BqlBool.Field<isImported> { }
+
+        #region CloudBedPropertyID
+        [PXString(50, IsUnicode = true, InputMask = "")]
+        [PXSelector(typeof(Search<LUMCloudBedPreference.cloudBedPropertyID>),
+                    typeof(LUMCloudBedPreference.branchID))]
+        [PXUIField(DisplayName = "Property ID")]
+        public virtual string CloudBedPropertyID { get; set; }
+        public abstract class cloudBedPropertyID : PX.Data.BQL.BqlString.Field<cloudBedPropertyID> { }
+        #endregion
     }
 
     [Serializable]
-    public class ReservationFilter : IBqlTable
+    public class ReservationFilter : PXBqlTable, IBqlTable
     {
         [PXDateAndTime(DisplayMask = "g", InputMask = "g")]
         [PXDefault]
@@ -550,5 +566,12 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "ReservationUpdate To")]
         public virtual DateTime? ReservationToDate { get; set; }
         public abstract class reservationToDate : PX.Data.BQL.BqlDateTime.Field<reservationToDate> { }
+
+        [PXString(50, IsUnicode = true, InputMask = "")]
+        [PXSelector(typeof(Search<LUMCloudBedPreference.cloudBedPropertyID>),
+                    typeof(LUMCloudBedPreference.branchID))]
+        [PXUIField(DisplayName = "Property ID")]
+        public virtual string CloudBedPropertyID { get; set; }
+        public abstract class cloudBedPropertyID : PX.Data.BQL.BqlString.Field<cloudBedPropertyID> { }
     }
 }

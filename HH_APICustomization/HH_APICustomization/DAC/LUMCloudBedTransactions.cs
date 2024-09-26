@@ -6,7 +6,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMCloudBedTransactions")]
-    public class LUMCloudBedTransactions : IBqlTable
+    public class LUMCloudBedTransactions : PXBqlTable, IBqlTable
     {
         #region Selected
         [PXBool()]

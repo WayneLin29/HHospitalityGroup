@@ -289,7 +289,7 @@ namespace HH_Customization.Graph
         #region Table
         [Serializable]
         [PXHidden]
-        public class HRApprovalFilter : IBqlTable
+        public class HRApprovalFilter : PXBqlTable, IBqlTable
         {
             #region const
             public const string RELEASE = "1";

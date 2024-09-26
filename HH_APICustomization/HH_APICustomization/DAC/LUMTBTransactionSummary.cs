@@ -6,7 +6,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTBTransactionSummary")]
-    public class LUMTBTransactionSummary : IBqlTable
+    public class LUMTBTransactionSummary : PXBqlTable, IBqlTable
     {
         #region Selected
         [PXBool]

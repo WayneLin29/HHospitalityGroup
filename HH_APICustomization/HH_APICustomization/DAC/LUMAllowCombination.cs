@@ -7,7 +7,7 @@ namespace HHAPICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMAllowCombination")]
-    public class LUMAllowCombination : IBqlTable
+    public class LUMAllowCombination : PXBqlTable, IBqlTable
     {
         #region BranchID
         [PXUIField(DisplayName = "Branch")]

@@ -5,7 +5,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMRemitExcludeTransactions")]
-    public class LUMRemitExcludeTransactions : IBqlTable
+    public class LUMRemitExcludeTransactions : PXBqlTable, IBqlTable
     {
         #region RefNbr
         [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]

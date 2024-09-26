@@ -10,7 +10,7 @@ namespace HHAPICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMPayrollAdjustment")]
-    public class LUMPayrollAdjustment : IBqlTable
+    public class LUMPayrollAdjustment : PXBqlTable, IBqlTable
     {
         #region Branch
         [PXUIField(DisplayName = "Branch")]

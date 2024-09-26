@@ -131,12 +131,12 @@ namespace HH_APICustomization.Graph
         #region Table
         [Serializable]
         [PXCacheName("Empty Filter")]
-        public class EmptyFilter : IBqlTable
+        public class EmptyFilter : PXBqlTable, IBqlTable
         { }
 
         [Serializable]
         [PXCacheName("Account Mapping Filter")]
-        public class AccountMappingFilter : IBqlTable
+        public class AccountMappingFilter : PXBqlTable, IBqlTable
         {
             #region RestaurantID
             [PXInt()]

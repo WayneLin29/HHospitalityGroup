@@ -5,7 +5,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMRemitReservation")]
-    public class LUMRemitReservation : IBqlTable
+    public class LUMRemitReservation : PXBqlTable, IBqlTable
     {
 
         #region Selected

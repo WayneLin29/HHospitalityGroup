@@ -9,7 +9,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("vRemitBlockCheck")]
-    public class vRemitBlockCheck : IBqlTable
+    public class vRemitBlockCheck : PXBqlTable, IBqlTable
     {
         #region RoomBlockID
         [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]

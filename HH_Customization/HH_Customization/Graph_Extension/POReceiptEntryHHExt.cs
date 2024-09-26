@@ -49,7 +49,7 @@ namespace PX.Objects.PO
         #endregion
 
         #region Table
-        public class POReceiptLineSetter : IBqlTable
+        public class POReceiptLineSetter : PXBqlTable, IBqlTable
         {
             #region SiteID
             [PXInt]

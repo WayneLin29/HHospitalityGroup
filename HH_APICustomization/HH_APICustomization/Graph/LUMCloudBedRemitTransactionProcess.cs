@@ -1858,7 +1858,7 @@ namespace HH_APICustomization.Graph
     }
 
     [Serializable]
-    public class LUMShowSystemPostFilter : IBqlTable
+    public class LUMShowSystemPostFilter : PXBqlTable, IBqlTable
     {
         #region ShowPost
         [PXBool]
@@ -1869,7 +1869,7 @@ namespace HH_APICustomization.Graph
     }
 
     [Serializable]
-    public class LUMBatchUpdateAcctFilter : IBqlTable
+    public class LUMBatchUpdateAcctFilter : PXBqlTable, IBqlTable
     {
         #region AccountID
         [PXInt()]

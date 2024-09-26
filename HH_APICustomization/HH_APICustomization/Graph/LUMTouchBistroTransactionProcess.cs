@@ -427,7 +427,7 @@ namespace HH_APICustomization.Grpah
         #region Table
         [Serializable]
         [PXCacheName("Process Filter")]
-        public class ProcessFilter : IBqlTable
+        public class ProcessFilter : PXBqlTable, IBqlTable
         {
             #region IsImported
             [PXBool]

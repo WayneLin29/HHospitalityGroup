@@ -7,7 +7,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTouchBistroPreference")]
-    public class LUMTouchBistroPreference : IBqlTable
+    public class LUMTouchBistroPreference : PXBqlTable, IBqlTable
     {
         #region Keys
         public class PK : PrimaryKeyOf<LUMTouchBistroPreference>.By<restaurantID>

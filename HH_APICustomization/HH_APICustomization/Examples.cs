@@ -61,7 +61,7 @@ namespace MyProject
 	///declare the new class as one that implements the IBqlTable interface and add the [Serializable] to the class.
 	/// </summary>
 	[Serializable]
-	public class MyCustomTable : IBqlTable
+	public class MyCustomTable : PXBqlTable, IBqlTable
 	{
 	}
 	#endregion

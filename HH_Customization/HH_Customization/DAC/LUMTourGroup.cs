@@ -16,7 +16,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourGroup")]
-    public class LUMTourGroup : IBqlTable
+    public class LUMTourGroup : PXBqlTable, IBqlTable
     {
         #region AutoNumber
         public const string NUMBERING_ID = "TOURGROUP";

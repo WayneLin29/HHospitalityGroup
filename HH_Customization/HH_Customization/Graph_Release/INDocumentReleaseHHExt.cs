@@ -1,6 +1,7 @@
 ﻿using PX.Data;
 using PX.Objects.CS;
 using PX.Objects.GL;
+using PX.Objects.IN.InventoryRelease;
 using PX.Objects.PM;
 
 namespace PX.Objects.IN

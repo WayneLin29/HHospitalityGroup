@@ -112,7 +112,7 @@ namespace PX.Objects.PO
 
         #region Table
         [PXHidden]
-        public class EditPOAccrualType : IBqlTable
+        public class EditPOAccrualType : PXBqlTable, IBqlTable
         {
             #region POAccrualType
             [PXString(1, IsFixed = true)]

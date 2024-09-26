@@ -1,0 +1,14 @@
+﻿<Sql TableName="LUMTourGuestLink" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LUMTourGuestLink">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="LinkType" type="NVarChar(6)" />
+  <col name="LinkID" type="Int" />
+  <col name="GuestID" type="Int" />
+  <index name="PK_LUMTourGuestLink" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="LinkType" />
+    <col name="LinkID" />
+    <col name="GuestID" />
+  </index>
+</table>]]></CDATA>
+</Sql>

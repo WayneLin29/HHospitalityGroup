@@ -83,7 +83,7 @@ namespace HH_APICustomization.Graph
     }
 
     [Serializable]
-    public class AccountMappingFilter : IBqlTable
+    public class AccountMappingFilter : PXBqlTable, IBqlTable
     {
         #region CloudBedPropertyID
         [PXString(50, IsUnicode = true)]

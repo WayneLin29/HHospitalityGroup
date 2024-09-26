@@ -9,7 +9,7 @@ namespace HHAPICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMHRPayrollBaseDocument")]
-    public class LUMHRPayrollBaseDocument : IBqlTable
+    public class LUMHRPayrollBaseDocument : PXBqlTable, IBqlTable
     {
 
         public class PK : PrimaryKeyOf<LUMHRPayrollBaseDocument>.By<docRefNbr>

@@ -7,7 +7,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourGuestLink")]
-    public class LUMTourGuestLink : IBqlTable
+    public class LUMTourGuestLink : PXBqlTable, IBqlTable
     {
         #region Key
         public class PK : PrimaryKeyOf<LUMTourGuestLink>.By<linkType, linkID, guestID>

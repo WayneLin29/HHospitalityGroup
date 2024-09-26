@@ -7,7 +7,7 @@ namespace HH_APICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMHRPayrollAccountMapping")]
-    public class LUMHRPayrollAccountMapping : IBqlTable
+    public class LUMHRPayrollAccountMapping : PXBqlTable, IBqlTable
     {
         #region PayrollType
         [PXDBString(200, IsKey = true, IsUnicode = true, InputMask = "")]

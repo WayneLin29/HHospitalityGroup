@@ -215,7 +215,7 @@ namespace HH_APICustomization.Graph
 
     }
 
-    public class ORMaintFilter : IBqlTable
+    public class ORMaintFilter : PXBqlTable, IBqlTable
     {
         #region APRefNbrFrom
         [PXDBString(15, IsUnicode = true, InputMask = "")]

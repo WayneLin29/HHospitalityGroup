@@ -12,7 +12,7 @@ namespace HH_Customization.DAC
 {
     [Serializable]
     [PXCacheName("LUMTourGuest")]
-    public class LUMTourGuest : IBqlTable
+    public class LUMTourGuest : PXBqlTable, IBqlTable
     {
         #region Key
         public class PK : PrimaryKeyOf<LUMTourGuest>.By<tourGroupNbr, tourGuestID>

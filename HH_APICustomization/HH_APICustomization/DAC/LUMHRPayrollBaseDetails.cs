@@ -6,7 +6,7 @@ namespace HHAPICustomization.DAC
 {
     [Serializable]
     [PXCacheName("LUMHRPayrollBaseDetails")]
-    public class LUMHRPayrollBaseDetails : IBqlTable
+    public class LUMHRPayrollBaseDetails : PXBqlTable, IBqlTable
     {
         #region DocRefNbr
         [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
