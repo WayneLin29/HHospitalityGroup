@@ -1,0 +1,25 @@
+﻿<Sql TableName="LumEmployeeAnnualLeave" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LumEmployeeAnnualLeave">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="EmployeeID" type="Int" />
+  <col name="LeaveType" type="NVarChar(20)" />
+  <col name="LineCntr" type="Int" />
+  <col name="NoteID" type="UniqueIdentifier" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <col name="tstamp" type="Timestamp" />
+  <index name="LumEmployeeAnnualLeave_NoteID" unique="true">
+    <col name="NoteID" />
+    <col name="CompanyID" />
+  </index>
+  <index name="PK_LumEmployeeAnnualLeave" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+    <col name="EmployeeID" />
+    <col name="LeaveType" />
+  </index>
+</table>]]></CDATA>
+</Sql>

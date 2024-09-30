@@ -1,0 +1,85 @@
+﻿<Sql TableName="CreatevEmployeeHolidaySummary" SqlScriptPriority="1" CustomScript="#CDATA">
+    <CDATA name="CustomScript"><![CDATA[IF EXISTS
+(
+	SELECT *
+	FROM SYS.views
+	WHERE name = 'v_EmployeeHolidaySummary' AND SCHEMA_ID = SCHEMA_ID('dbo')
+)
+DROP VIEW [dbo].[v_EmployeeHolidaySummary]	
+GO
+CREATE VIEW v_EmployeeHolidaySummary AS
+with leavesummary as(
+	SELECT r.CompanyID,
+		   r.RequestEmployeeID,
+		   r.LeaveType,
+		   YEAR(r.RequestDate) USEDYEAR,
+		   SUM(r.Duration) USEDHour
+	FROM LumLeaveRequest r
+	WHERE r.Status = 'A'
+	GROUP BY r.CompanyID,r.RequestEmployeeID,r.LeaveType,YEAR(r.RequestDate)
+)
+--OHTER LEAVE TYPE
+SELECT t.CompanyID,
+	   t.BAccountID AS EmployeeID,
+	   b.AcctName,
+	   b.AcctCD,
+	   ISNULL(YEAR(annual.StartDate),YEAR(GETDATE())) AS YEAR,
+	   lt.LeaveType,
+	   lt.MaxLeaveDays * 8 AS AVAILABLEHOURS,
+	   ISNULL(s.USEDHour,0) AS USEDHOUR,
+	   (lt.MaxLeaveDays * 8) - ISNULL(s.USEDHour,0) AS ENTITLEDHOURS
+FROM EPEmployee t 
+INNER JOIN BAccount b ON t.CompanyID = b.CompanyID and t.BAccountID = b.BAccountID
+INNER JOIN LumLeaveType lt ON t.CompanyID = lt.CompanyID
+						  AND lt.LeaveType NOT IN ('Annual','Compensated')
+LEFT JOIN LumEmployeeAnnualLeaveLine annual ON t.CompanyID = annual.CompanyID
+										   AND t.BAccountID = annual.EmployeeID
+LEFT JOIN leavesummary s ON t.CompanyID = s.CompanyID
+					    AND t.BAccountID = s.RequestEmployeeID
+						AND lt.LeaveType = s.LeaveType
+						AND YEAR(GETDATE()) = s.USEDYEAR
+UNION
+-- ANNUAL
+SELECT t.CompanyID,
+	   t.BAccountID AS EmployeeID,
+	   b.AcctName,
+	   b.AcctCD,
+	   ISNULL(YEAR(annual.StartDate),YEAR(GETDATE())) AS YEAR,
+	   ISNULL(annual.LeaveType,'Annual') AS LeaveType,
+	   ISNULL(annual.LeaveHours,0) + ISNULL(annual.CarryForwardHours,0) AS AVAILABLEHOURS,
+	   ISNULL(s.USEDHour,0) AS USEDHOUR,
+	   ISNULL(annual.LeaveHours,0) + ISNULL(annual.CarryForwardHours,0) - ISNULL(s.USEDHour,0) AS ENTITLEDHOURS
+FROM EPEmployee t 
+INNER JOIN BAccount b ON t.CompanyID = b.CompanyID and t.BAccountID = b.BAccountID
+LEFT JOIN LumEmployeeAnnualLeaveLine annual ON t.CompanyID = annual.CompanyID
+										   AND  t.BAccountID = annual.EmployeeID
+LEFT JOIN leavesummary s ON t.CompanyID = s.CompanyID
+					    AND t.BAccountID = s.RequestEmployeeID
+						AND annual.LeaveType = s.LeaveType
+						AND YEAR(GETDATE()) = s.USEDYEAR
+UNION
+-- COMPENSATED
+SELECT t.CompanyID,
+	   t.BAccountID AS EmployeeID,
+	   b.AcctName,
+	   b.AcctCD,
+	   ISNULL(comp.YEAR,YEAR(GETDATE())) AS YEAR,
+	   'Compensated' AS LeaveType,
+	   ISNULL(comp.AvailHours,0) AS AVAILABLEHOURS,
+	   ISNULL(s.USEDHour,0) AS USEDHOUR,
+	   ISNULL(comp.AvailHours,0) - ISNULL(s.USEDHour,0) AS ENTITLEDHOURS
+FROM EPEmployee t 
+INNER JOIN BAccount b ON t.CompanyID = b.CompanyID and t.BAccountID = b.BAccountID
+LEFT JOIN (SELECT c.CompanyID,
+			      c.EmployeeID,
+				  'Compensated' as leavetype,
+				  c.AvailableYear AS YEAR,
+				  SUM(c.TransferHours) as AvailHours
+		   FROM  LumEmployeeCompensated c
+		   GROUP BY c.AvailableYear,c.EmployeeID,c.CompanyID) comp ON t.CompanyID = comp.CompanyID
+																  AND t.BAccountID = comp.EmployeeID
+LEFT JOIN leavesummary s ON t.CompanyID = s.CompanyID
+					    AND t.BAccountID = s.RequestEmployeeID
+						AND comp.leavetype = s.LeaveType
+						AND YEAR(GETDATE()) = s.USEDYEAR]]></CDATA>
+</Sql>

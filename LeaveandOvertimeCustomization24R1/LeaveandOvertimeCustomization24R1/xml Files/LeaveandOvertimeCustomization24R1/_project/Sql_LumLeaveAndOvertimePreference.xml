@@ -1,0 +1,24 @@
+﻿<Sql TableName="LumLeaveAndOvertimePreference" TableSchemaXml="#CDATA">
+    <CDATA name="TableSchemaXml"><![CDATA[<table name="LumLeaveAndOvertimePreference">
+  <col name="CompanyID" type="Int" default="Zero" />
+  <col name="LeaveRequestSequenceID" type="NVarChar(10)" nullable="true" />
+  <col name="OvertimeSequenceID" type="NVarChar(10)" nullable="true" />
+  <col name="MaxOTinWorkDay" type="Decimal(7,2)" nullable="true" />
+  <col name="MaxOTinHoliday" type="Decimal(7,2)" nullable="true" />
+  <col name="MaxOTPerMonth" type="Decimal(7,2)" nullable="true" />
+  <col name="OTFactor" type="Decimal(7,2)" nullable="true" />
+  <col name="HolidayFactor" type="Decimal(7,2)" nullable="true" />
+  <col name="NationalholidayFactor" type="Decimal(7,2)" nullable="true" />
+  <col name="LeaveRequestApproval" type="Bit" nullable="true" />
+  <col name="OvertimeApproval" type="Bit" nullable="true" />
+  <col name="CreatedByID" type="UniqueIdentifier" />
+  <col name="CreatedByScreenID" type="Char(8)" />
+  <col name="CreatedDateTime" type="DateTime" />
+  <col name="LastModifiedByID" type="UniqueIdentifier" />
+  <col name="LastModifiedByScreenID" type="Char(8)" />
+  <col name="LastModifiedDateTime" type="DateTime" />
+  <index name="PK_LeaveAndOvertimePreference" clustered="true" primary="true" unique="true">
+    <col name="CompanyID" />
+  </index>
+</table>]]></CDATA>
+</Sql>
