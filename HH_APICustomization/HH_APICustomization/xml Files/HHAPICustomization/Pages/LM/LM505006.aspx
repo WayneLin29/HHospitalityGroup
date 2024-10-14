@@ -36,13 +36,13 @@
 </asp:Content>
 
 <asp:Content ID="cont3" ContentPlaceHolderID="phG" runat="server">
-    <px:PXTab DataMember="PaymentTransactions" ID="PXTab1" runat="server" DataSourceID="ds" Height="800px" Style="z-index: 100" Width="100%" AllowAutoHide="false">
+    <px:PXTab DataMember="PaymentSummary" ID="PXTab1" runat="server" DataSourceID="ds" Height="800px" Style="z-index: 100" Width="100%" AllowAutoHide="false">
         <Items>
-            <px:PXTabItem Text="PAYMENT CHECK">
+            <px:PXTabItem Text="PAYMENT SUMMARY">
                 <Template>
                     <px:PXGrid ID="gridPaymentCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true">
                         <Levels>
-                            <px:PXGridLevel DataMember="PaymentTransactions">
+                            <px:PXGridLevel DataMember="PaymentSummary">
                                 <Columns>
                                     <px:PXGridColumn DataField="Description" Width="250px" CommitChanges="true"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="RecordedAmt" Width="150px"></px:PXGridColumn>
@@ -74,7 +74,7 @@
                             </CustomItems>
                         </ActionBar>
                         <Levels>
-                            <px:PXGridLevel DataMember="PaymentDetails">
+                            <px:PXGridLevel DataMember="PaymentSummaryTransactions">
                                 <Columns>
                                     <px:PXGridColumn DataField="Selected" Type="CheckBox" AllowCheckAll="true" CommitChanges="true" AutoCallBack="true"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="ToRemit" Type="CheckBox"></px:PXGridColumn>
@@ -117,7 +117,7 @@
                     </px:PXGrid>
                 </Template>
             </px:PXTabItem>
-            <px:PXTabItem Text="RESERVATION CHECK">
+            <px:PXTabItem Text="RESERVATION SUMMARY">
                 <Template>
                     <px:PXGrid ID="gridReservationCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" Height="300px" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true" OnRowDataBound="ReservationTrans_RowDataBound">
                         <ActionBar Position="TopAndBottom">
@@ -134,7 +134,7 @@
                             </CustomItems>
                         </ActionBar>
                         <Levels>
-                            <px:PXGridLevel DataMember="ReservationTransactions">
+                            <px:PXGridLevel DataMember="ReservationSummary">
                                 <Columns>
                                     <px:PXGridColumn DataField="Selected" Type="CheckBox" AllowCheckAll="true" CommitChanges="true" AutoCallBack="true"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="IsOutOfScope" Width="130px" Type="CheckBox"></px:PXGridColumn>
@@ -185,7 +185,69 @@
                             </CustomItems>
                         </ActionBar>
                         <Levels>
-                            <px:PXGridLevel DataMember="ReservationDetails">
+                            <px:PXGridLevel DataMember="ReservationSummaryTransactions">
+                                <Columns>
+                                    <px:PXGridColumn DataField="Selected" Type="CheckBox" AllowCheckAll="true" CommitChanges="true" AutoCallBack="true"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="ToRemit" Type="CheckBox"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="TransactionID" Width="150px" AllowUpdate="False"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="ReservationID" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="RemitRefNbr" Width="200px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="Description" Width="180px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="DebitAmount" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="CreditAmount" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="TransactionNotes" Width="240px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="UserName" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="ToggleByID" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="ToggleDateTime" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="AccountID" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="SubAccountID" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="IsImported" Width="100px" Type="CheckBox"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="BatchNbr" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="LineNbr" Width="100px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="TransactionDateTime" Width="150px" DisplayFormat="g"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="CurrentRefNbr" Width="150px"></px:PXGridColumn>
+                                </Columns>
+                                <RowTemplate>
+                                    <px:PXTextEdit runat="server" ID="edFolieTransactionID" DataField="TransactionID" Enabled="false"></px:PXTextEdit>
+                                    <px:PXTextEdit runat="server" ID="edFolieReservationID" DataField="ReservationID" Enabled="false"></px:PXTextEdit>
+                                    <px:PXTextEdit runat="server" ID="edFolieRemitRefNbr" DataField="RemitRefNbr" Enabled="false"></px:PXTextEdit>
+                                    <px:PXTextEdit runat="server" ID="edFolieDescription" DataField="Description" Enabled="false"></px:PXTextEdit>
+                                    <px:PXTextEdit runat="server" ID="edFolieDebitAmount" DataField="DebitAmount" Enabled="false"></px:PXTextEdit>
+                                    <px:PXTextEdit runat="server" ID="edFolieCreditAmount" DataField="CreditAmount" Enabled="false"></px:PXTextEdit>
+                                    <px:PXTextEdit runat="server" ID="edFolieUserName" DataField="UserName" Enabled="false"></px:PXTextEdit>
+                                    <px:PXSelector runat="server" ID="edFolieAccountID" DataField="AccountID"></px:PXSelector>
+                                    <px:PXSelector runat="server" ID="edFolieSubAcoountID" DataField="SubAccountID"></px:PXSelector>
+                                    <px:PXSelector runat="server" ID="edFolieToggleByID" DataField="ToggleByID" Enabled="false"></px:PXSelector>
+                                    <px:PXDateTimeEdit runat="server" ID="edFolieToggleDateTime" DataField="ToggleDateTime" Enabled="false"></px:PXDateTimeEdit>
+                                </RowTemplate>
+                            </px:PXGridLevel>
+                        </Levels>
+                        <Mode AllowAddNew="False" AllowDelete="False" InitNewRow="False" />
+                        <AutoSize Enabled="true" />
+                    </px:PXGrid>
+                </Template>
+            </px:PXTabItem>
+            <px:PXTabItem Text="FOLIO">
+                <Template>
+                    <px:PXGrid ID="gridFolio" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="400px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="FolioTrans_RowDataBound">
+                        <ActionBar Position="TopAndBottom">
+                            <CustomItems>
+                                <px:PXToolBarButton Text="TOGGLE OUT">
+                                    <AutoCallBack Command="FolioToggleOut" Target="ds" />
+                                </px:PXToolBarButton>
+                                <px:PXToolBarButton Text="TOGGLE IN">
+                                    <AutoCallBack Command="FolioToggleIn" Target="ds" />
+                                </px:PXToolBarButton>
+                                <px:PXToolBarButton Text="AUDIT TOGGLE OUT">
+                                    <AutoCallBack Command="AuditFolioToggleOut" Target="ds" />
+                                </px:PXToolBarButton>
+                                <px:PXToolBarButton Text="AUDITTOGGLE IN">
+                                    <AutoCallBack Command="AuditFolioToggleIn" Target="ds" />
+                                </px:PXToolBarButton>
+                            </CustomItems>
+                        </ActionBar>
+                        <Levels>
+                            <px:PXGridLevel DataMember="FolioTransactioins">
                                 <Columns>
                                     <px:PXGridColumn DataField="Selected" Type="CheckBox" AllowCheckAll="true" CommitChanges="true" AutoCallBack="true"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="ToRemit" Type="CheckBox"></px:PXGridColumn>
@@ -326,6 +388,14 @@
 
         .Gridlightgoldenrodyellow {
             background-color: lightgoldenrodyellow !important;
+        }
+
+        .GridDefault {
+            background-color: #fff !important;
+        }
+
+        .GridRed {
+            background-color: #e53f2c !important
         }
     </style>
 

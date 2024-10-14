@@ -1,6 +1,7 @@
 ﻿using HH_APICustomization.DAC;
 using PX.Data.BQL;
 using PX.Data.BQL.Fluent;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,25 @@ public partial class Pages_LM505006 : PX.Web.UI.PXPage
             e.Row.Style.CssClass = "GridAquamarine";
         else if (IsExclude(_currentRefNbr, _transID))
             e.Row.Style.CssClass = "Gridlightgoldenrodyellow";
+    }
+
+    protected void FolioTrans_RowDataBound(object sender, PX.Web.UI.PXGridRowEventArgs e)
+    {
+        var _currentRefNbr = (string)e.Row.Cells["CurrentRefNbr"]?.Value;
+        var _transID = (string)e.Row.Cells["TransactionID"]?.Value;
+        var _toRemit = (bool?)e.Row.Cells["ToRemit"]?.Value;
+        var _rowRemitRefNbr = (string)e.Row.Cells["RemitRefNbr"].Value;
+        var _isImported = (bool?)e.Row.Cells["IsImported"].Value;
+
+
+        if (_toRemit ?? false)
+            e.Row.Style.CssClass = "GridAquamarine";
+        else if (IsExclude(_currentRefNbr, _transID))
+            e.Row.Style.CssClass = "Gridlightgoldenrodyellow";
+        else if (string.IsNullOrEmpty(_rowRemitRefNbr) && !(_isImported ?? false))
+            e.Row.Style.CssClass = "GridRed";
+        else if (_rowRemitRefNbr != _currentRefNbr)
+            e.Row.Style.CssClass = "GridDefault";
     }
 
     protected bool IsExclude(string refNbr, string transID)

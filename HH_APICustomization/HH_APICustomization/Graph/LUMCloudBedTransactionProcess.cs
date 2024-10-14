@@ -25,7 +25,7 @@ namespace HH_APICustomization.Graph
         public SelectFrom<LUMCloudBedTransactions>
               .Where<LUMCloudBedTransactions.isImported.IsEqual<TransactionFilter.isImported.FromCurrent>
                 .And<Brackets<LUMCloudBedTransactions.propertyID.IsEqual<TransactionFilter.cloudBedPropertyID.FromCurrent>.Or<TransactionFilter.cloudBedPropertyID.FromCurrent.IsNull>>>>
-              .ProcessingView Transaction;
+              .ProcessingView.FilteredBy<TransactionFilter> Transaction;
 
         public SelectFrom<LUMCloudBedTransactions>.View CurrentTransaction;
 
