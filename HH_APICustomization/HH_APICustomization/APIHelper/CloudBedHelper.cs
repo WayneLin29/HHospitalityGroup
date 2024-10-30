@@ -251,7 +251,7 @@ namespace HH_APICustomization.APIHelper
         }
 
         /// <summary> Get Cloudbed Transaction data mapping AccountID/Sub-AccountID (RuleA) </summary>
-        public static (int? AccountID, int? SubAccountID) GetCloudbedTransactionMappingAccount(PXGraph baseGraph, LUMCloudBedTransactions selectedData)
+        public static LUMCloudBedAccountMapping GetCloudbedAccountMappingWithScore(PXGraph baseGraph, LUMCloudBedTransactions selectedData)
         {
             var AcctMapAData = SelectFrom<LUMCloudBedAccountMapping>.View.Select(baseGraph).RowCast<LUMCloudBedAccountMapping>();
             var mapReservation = SelectFrom<LUMCloudBedReservations>
@@ -290,11 +290,11 @@ namespace HH_APICustomization.APIHelper
                     sameScoureList.Add(acctMapRow.SequenceID.Value);
             }
             if (winnerAcctMapInfo == null)
-                return (null, null);
+                throw new PXException(" No Account Mapping Found. Please maintain the combination in Preference.");
             if (sameScoureList.Count > 1)
-                return (null, null);
+                throw new PXException($" No Account Mapping Found. Please maintain the combination in Preference ID: {string.Join(",", sameScoureList)}.");
 
-            return (winnerAcctMapInfo?.AccountID, winnerAcctMapInfo?.SubAccountID);
+            return winnerAcctMapInfo;
             #endregion
         }
 

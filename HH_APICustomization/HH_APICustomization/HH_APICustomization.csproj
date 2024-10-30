@@ -125,6 +125,7 @@
     <Compile Include="Examples.cs" />
     <Compile Include="DAC\LUMCloudBedAPIPreference.cs" />
     <Compile Include="Graph\LUMAllowedCombinationMaint.cs" />
+    <Compile Include="Graph\LUMCloudbedAccountMappingMaint.cs" />
     <Compile Include="Graph\LUMCloudBedPreferenceMaint.cs" />
     <Compile Include="Graph\LUMCloudBedRemitTransactionProcess.cs" />
     <Compile Include="Graph\LUMCloudBedTransactionProcess.cs" />

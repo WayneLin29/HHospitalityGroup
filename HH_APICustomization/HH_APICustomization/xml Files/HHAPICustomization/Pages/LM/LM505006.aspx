@@ -38,7 +38,7 @@
 <asp:Content ID="cont3" ContentPlaceHolderID="phG" runat="server">
     <px:PXTab DataMember="PaymentSummary" ID="PXTab1" runat="server" DataSourceID="ds" Height="800px" Style="z-index: 100" Width="100%" AllowAutoHide="false">
         <Items>
-            <px:PXTabItem Text="PAYMENT SUMMARY">
+            <px:PXTabItem Text="PAYMENT">
                 <Template>
                     <px:PXGrid ID="gridPaymentCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true">
                         <Levels>
@@ -117,7 +117,7 @@
                     </px:PXGrid>
                 </Template>
             </px:PXTabItem>
-            <px:PXTabItem Text="RESERVATION SUMMARY">
+            <px:PXTabItem Text="RESERVATION">
                 <Template>
                     <px:PXGrid ID="gridReservationCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" Height="300px" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true" OnRowDataBound="ReservationTrans_RowDataBound">
                         <ActionBar Position="TopAndBottom">
@@ -229,6 +229,12 @@
             </px:PXTabItem>
             <px:PXTabItem Text="FOLIO">
                 <Template>
+                    <px:PXFormView ID="FrmFolioFilter" runat="server" DataMember="FolioFilter" RenderStyle="Normal" Width="100%">
+                        <Template>
+                            <px:PXLayoutRule ID="PXFolioLayoutRule11" runat="server" ControlSize="XM" LabelsWidth="SM" StartColumn="True" />
+                            <px:PXCheckBox ID="edFolioFilterShowPost" runat="server" DataField="ShowPost" CommitChanges="True"></px:PXCheckBox>
+                        </Template>
+                    </px:PXFormView>
                     <px:PXGrid ID="gridFolio" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="400px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="FolioTrans_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
@@ -243,6 +249,9 @@
                                 </px:PXToolBarButton>
                                 <px:PXToolBarButton Text="AUDITTOGGLE IN">
                                     <AutoCallBack Command="AuditFolioToggleIn" Target="ds" />
+                                </px:PXToolBarButton>
+                                <px:PXToolBarButton Text="ACCOUNT ASSIGN">
+                                    <AutoCallBack Command="AccountAssign" Target="ds" />
                                 </px:PXToolBarButton>
                             </CustomItems>
                         </ActionBar>

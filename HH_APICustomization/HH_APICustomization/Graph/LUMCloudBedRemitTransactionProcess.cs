@@ -17,6 +17,7 @@ using HH_APICustomization.Descriptor;
 using PX.SM;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using PX.Objects.IN.WMS;
 
 namespace HH_APICustomization.Graph
 {
@@ -133,10 +134,13 @@ namespace HH_APICustomization.Graph
         [PXCacheName("Folio Transactions")]
         public SelectFrom<LUMCloudBedTransactions3>
               .Where<LUMCloudBedTransactions3.remitRefNbr.IsEqual<LUMRemittance.refNbr.FromCurrent>
-                 .Or<LUMCloudBedTransactions3.remitRefNbr.IsNull>>
+                 .Or<Brackets<LUMCloudBedTransactions.remitRefNbr.IsNull>.And<LUMCloudBedTransactions.isImported.IsNotEqual<True>>>>
+              .OrderBy<Desc<LUMCloudBedTransactions3.sortNumber>>
               .View FolioTransactioins;
 
         public PXFilter<LUMShowSystemPostFilter> TransactionFilter;
+
+        public PXFilter<LUMShowSystemPostFilter> FolioFilter;
 
         public PXFilter<LUMBatchUpdateAcctFilter> QuickAccountDetermine;
 
@@ -263,23 +267,24 @@ namespace HH_APICustomization.Graph
                                                     .And<LUMRemittance.status.IsNotIn<P.AsString>>>
                             .View.Select(this, _remitRefNbr, new string[] { "R", "V" }).RowCast<LUMCloudBedTransactions3>();
 
-            //var newResult = result.Union(toggleOutTrans).Union(otherTrans);
-            var newResult = result.Union(toggleOutTrans);
+            var newResult = result.Union(toggleOutTrans).Union(otherTrans);
+            //var newResult = result.Union(toggleOutTrans);
+
+            var isShowPost = this.TransactionFilter.Current?.ShowPost;
 
             foreach (LUMCloudBedTransactions3 item in newResult)
             {
-                if (item.PropertyID == _propertyID)
-                {
-                    // Transaction RemitRefnbr = Current Remit
-                    // Transaction where remit refnbr is not null AND remit status not in ('R','V')
-                    // Transaction toggle out, and current Remit empty
-                    if (!string.IsNullOrEmpty(item.RemitRefNbr))
-                        yield return item;
-                    // Transaction toggle out, and current Remit empty + Transaction where remit refnbr is null and isimported <> true
-                    else if (string.IsNullOrEmpty(item.RemitRefNbr) && !(item?.IsImported ?? false))
-                        yield return item;
-                }
+                item.SortNumber = CalculateSortNumber(item, _remitRefNbr, toggleOutTrans, otherTrans);
+                if (item.PropertyID != _propertyID)
+                    continue;
+                // Show All
+                if (isShowPost ?? false)
+                    yield return item;
+                // Show not SYSTEM
+                else if (item.UserName != "SYSTEM")
+                    yield return item;
             }
+            FolioTransactioins.OrderByNew<OrderBy<Asc<LUMCloudBedTransactions3.sortNumber>>>();
         }
 
         public IEnumerable remitBlock()
@@ -371,9 +376,9 @@ namespace HH_APICustomization.Graph
                     // 沒有Account/SubAccount 才重新執行
                     if (!pendingItem.AccountID.HasValue || !pendingItem.SubAccountID.HasValue)
                     {
-                        var mapAccountInfo = CloudBedHelper.GetCloudbedTransactionMappingAccount(this, pendingItem);
-                        pendingItem.AccountID = mapAccountInfo.AccountID;
-                        pendingItem.SubAccountID = mapAccountInfo.SubAccountID;
+                        var mapAccountInfo = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, pendingItem);
+                        pendingItem.AccountID = mapAccountInfo?.AccountID;
+                        pendingItem.SubAccountID = mapAccountInfo?.SubAccountID;
                     }
                     pendingItem.RemitRefNbr = _refNbr;
                     this.PropertyCloudbedTransactions.Update(pendingItem);
@@ -862,7 +867,7 @@ namespace HH_APICustomization.Graph
 
         public PXAction<LUMRemittance> AccountDetermine;
         [PXButton]
-        [PXUIField(DisplayName = "ACCOUNT DETERMINE", Enabled = false, MapEnableRights = PXCacheRights.Select)]
+        [PXUIField(DisplayName = "ACCOUNT DETERMINE", Enabled = false, Visible = false, MapEnableRights = PXCacheRights.Select)]
         public virtual IEnumerable accountDetermine(PXAdapter adapter)
         {
             if (this.QuickAccountDetermine.AskExt(true) != WebDialogResult.OK)
@@ -876,6 +881,31 @@ namespace HH_APICustomization.Graph
                 this.ReservationSummaryTransactions.Update(item);
             }
             //this.Save.Press();
+            return adapter.Get();
+        }
+
+        public PXAction<LUMRemittance> AccountAssign;
+        [PXButton]
+        [PXUIField(DisplayName = "ACCOUNT ASSIGN", Enabled = false, MapEnableRights = PXCacheRights.Select)]
+        public virtual IEnumerable accountAssign(PXAdapter adapter)
+        {
+            PXLongOperation.StartOperation(this, () =>
+            {
+                RemittanceHelper helper = new RemittanceHelper();
+                var selectedTrans = this.FolioTransactioins.Cache.Updated.RowCast<LUMCloudBedTransactions3>().Where(x => x.Selected ?? false);
+                // For current remit transactions whose account or sub is empty
+                foreach (var item in selectedTrans.Where(x => !x.AccountID.HasValue || !x.SubAccountID.HasValue))
+                {
+                    var winnerAcctObj = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, item);
+                    if (winnerAcctObj != null)
+                    {
+                        item.AccountID = winnerAcctObj?.AccountID;
+                        item.SubAccountID = winnerAcctObj?.SubAccountID;
+                        this.FolioTransactioins.Update(item);
+                    }
+                }
+                this.Save.Press();
+            });
             return adapter.Get();
         }
 
@@ -1010,6 +1040,8 @@ namespace HH_APICustomization.Graph
 
                 var excludeTrans = this.ExculdeTransactions.Select().RowCast<LUMRemitExcludeTransactions>();
                 row.GetExtension<LUMCloudBedTransactionsExt>().CurrentRefNbr = this.Document.Current?.RefNbr;
+                row.GetExtension<LUMCloudBedTransactionsExt>().CreditAmount = row?.TransactionType?.ToUpper() == "CREDIT" ? row?.Amount : 0;
+                row.GetExtension<LUMCloudBedTransactionsExt>().DebitAmount = row?.TransactionType?.ToUpper() == "DEBIT" ? row?.Amount : 0;
             }
         }
 
@@ -1838,9 +1870,28 @@ namespace HH_APICustomization.Graph
             this.Document.UpdateCurrent();
         }
 
+        /// <summary> 計算Folio的排序 </summary>
+        private int CalculateSortNumber(LUMCloudBedTransactions3 item, string currentRemit, IEnumerable<LUMCloudBedTransactions3> toggleOutTrans, IEnumerable<LUMCloudBedTransactions3> otherTrans)
+        {
+            // Transaction RemitRefnbr = Current Remit
+            if (item?.RemitRefNbr == currentRemit)
+                return 1;
+            // Transaction toggle out, and current Remit empty
+            else if (string.IsNullOrEmpty(item?.RemitRefNbr) && toggleOutTrans.Contains(item))
+                return 2;
+            // Transaction where remit refnbr is null and isimported <> true
+            else if (string.IsNullOrEmpty(item?.RemitRefNbr) && !(item?.IsImported ?? false))
+                return 3;
+            else if (!string.IsNullOrEmpty(item?.RemitRefNbr) && otherTrans.Contains(item))
+                return 4;
+            return 5;
+        }
+
         #endregion
 
     }
+
+    #region Virtual DAC for Remittance
 
     public class LUMCloudBedTransactionsExt : PXCacheExtension<LUMCloudBedTransactions>
     {
@@ -1963,6 +2014,12 @@ namespace HH_APICustomization.Graph
     public class LUMCloudBedTransactions3 : LUMCloudBedTransactions
     {
 
+        #region SortNumber
+        [PXInt]
+        public virtual int? SortNumber { get; set; }
+        public abstract class sortNumber : PX.Data.BQL.BqlInt.Field<sortNumber> { }
+        #endregion
+
         #region Selected
         public new abstract class selected : PX.Data.BQL.BqlBool.Field<selected> { }
         #endregion
@@ -2062,5 +2119,7 @@ namespace HH_APICustomization.Graph
         public abstract class subAccountID : PX.Data.BQL.BqlInt.Field<subAccountID> { }
         #endregion
     }
+
+    #endregion
 
 }

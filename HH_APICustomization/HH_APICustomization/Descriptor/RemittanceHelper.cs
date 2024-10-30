@@ -1,4 +1,5 @@
-﻿using HH_APICustomization.DAC;
+﻿using HH_APICustomization.APIHelper;
+using HH_APICustomization.DAC;
 using PX.Data;
 using System;
 using System.Collections;
@@ -22,7 +23,7 @@ namespace HH_APICustomization.Descriptor
         /// <summary> 取得 待處理 Transactions </summary>
         public IEnumerable<LUMCloudBedTransactions> GetPendingTransactions(PXGraph graph, BqlCommand queryCommand, string propertyID, string refNbr)
         {
-            PXView view = new PXView(graph,false, queryCommand);
+            PXView view = new PXView(graph, false, queryCommand);
             return view.SelectMulti(propertyID, refNbr).RowCast<LUMCloudBedTransactions>();
         }
 

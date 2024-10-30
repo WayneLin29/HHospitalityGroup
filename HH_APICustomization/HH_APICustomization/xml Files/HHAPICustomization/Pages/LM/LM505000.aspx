@@ -22,6 +22,8 @@
                             <px:PXDateTimeEdit runat="server" ID="edToDate" DataField="ToDate" Width="180px"></px:PXDateTimeEdit>
                             <px:PXDropDown runat="server" ID="edProcessType" DataField="ProcessType" Width="200px"></px:PXDropDown>
                             <px:PXCheckBox runat="server" ID="IsImported" DataField="IsImported" CommitChanges="True"></px:PXCheckBox>
+                            <px:PXLayoutRule runat="server" ColumnWidth="M" ControlSize="M" StartColumn="true"></px:PXLayoutRule>
+                            <px:PXSelector runat="server" ID="edCloudBedPropertyID" DataField="CloudBedPropertyID" CommitChanges="true"></px:PXSelector>
                         </Template>
                     </px:PXFormView>
                     <px:PXGrid AllowPaging="True" AdjustPageSize="Auto" SyncPosition="True" ID="TransactionGrid" runat="server" DataSourceID="ds" Width="100%" Height="100%" SkinID="Details" AllowAutoHide="false">

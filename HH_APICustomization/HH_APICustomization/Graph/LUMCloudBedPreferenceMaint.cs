@@ -20,21 +20,6 @@ namespace HH_APICustomization.Graph
         [PXImport(typeof(LUMCloudBedPreference))]
         public SelectFrom<LUMCloudBedPreference>.View CloudBedSetup;
 
-        public PXFilter<AccountMappingFilter> acctFilter;
-
-        [PXImport(typeof(LUMCloudBedAccountMapping))]
-        public SelectFrom<LUMCloudBedAccountMapping>
-              .Where<LUMCloudBedAccountMapping.cloudBedPropertyID.IsEqual<AccountMappingFilter.cloudBedPropertyID.AsOptional>
-                                                                 .Or<AccountMappingFilter.cloudBedPropertyID.AsOptional.IsNull>>
-              .OrderBy<LUMCloudBedAccountMapping.accountID.Asc,
-                       LUMCloudBedAccountMapping.subAccountID.Asc,
-                       LUMCloudBedAccountMapping.cloudBedPropertyID.Asc,
-                       LUMCloudBedAccountMapping.type.Asc,
-                       LUMCloudBedAccountMapping.transCategory.Asc,
-                       LUMCloudBedAccountMapping.transactionCode.Asc,
-                       LUMCloudBedAccountMapping.houseAccount.Asc,
-                       LUMCloudBedAccountMapping.description.Asc>.View AccountMapping;
-
         public SelectFrom<LUMHHSetup>.View Setup;
 
         public SelectFrom<LUMRemitRequestApproval>.View RemitApproval;
