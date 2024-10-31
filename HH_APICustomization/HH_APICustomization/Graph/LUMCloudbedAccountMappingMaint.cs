@@ -20,13 +20,10 @@ namespace HH_APICustomization.Graph
         public SelectFrom<LUMCloudBedAccountMapping>
              .Where<LUMCloudBedAccountMapping.cloudBedPropertyID.IsEqual<AccountMappingFilter.cloudBedPropertyID.AsOptional>
                                                                 .Or<AccountMappingFilter.cloudBedPropertyID.AsOptional.IsNull>>
-             .OrderBy<LUMCloudBedAccountMapping.accountID.Asc,
-                      LUMCloudBedAccountMapping.subAccountID.Asc,
-                      LUMCloudBedAccountMapping.cloudBedPropertyID.Asc,
+             .OrderBy<LUMCloudBedAccountMapping.cloudBedPropertyID.Asc,
                       LUMCloudBedAccountMapping.type.Asc,
-                      LUMCloudBedAccountMapping.transCategory.Asc,
-                      LUMCloudBedAccountMapping.transactionCode.Asc,
-                      LUMCloudBedAccountMapping.houseAccount.Asc,
+                      LUMCloudBedAccountMapping.accountID.Asc,
+                      LUMCloudBedAccountMapping.subAccountID.Asc,
                       LUMCloudBedAccountMapping.description.Asc>.View AccountMapping;
     }
 }

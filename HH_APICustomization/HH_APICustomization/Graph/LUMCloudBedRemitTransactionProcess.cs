@@ -261,20 +261,22 @@ namespace HH_APICustomization.Graph
                                       .And<LUMRemitExcludeTransactions.refNbr.IsEqual<P.AsString>>>
                                 .View.Select(this, _remitRefNbr).RowCast<LUMCloudBedTransactions3>();
 
-            var otherTrans = SelectFrom<LUMCloudBedTransactions3>
-                            .InnerJoin<LUMRemittance>.On<LUMCloudBedTransactions3.remitRefNbr.IsEqual<LUMRemittance.refNbr>
-                                                    .And<LUMRemittance.refNbr.IsNotEqual<P.AsString>>
-                                                    .And<LUMRemittance.status.IsNotIn<P.AsString>>>
-                            .View.Select(this, _remitRefNbr, new string[] { "R", "V" }).RowCast<LUMCloudBedTransactions3>();
+            //var otherTrans = SelectFrom<LUMCloudBedTransactions3>
+            //                .InnerJoin<LUMRemittance>.On<LUMCloudBedTransactions3.remitRefNbr.IsEqual<LUMRemittance.refNbr>
+            //                                        .And<LUMRemittance.refNbr.IsNotEqual<P.AsString>>
+            //                                        .And<LUMRemittance.status.IsNotIn<P.AsString>>>
+            //                .Where<LUMCloudBedTransactions3.propertyID.IsEqual<P.AsString>>
+            //                .View.Select(this, _remitRefNbr, new string[] { "R", "V" }, _propertyID).RowCast<LUMCloudBedTransactions3>();
 
-            var newResult = result.Union(toggleOutTrans).Union(otherTrans);
+            //var newResult = result.Union(toggleOutTrans).Union(otherTrans);
+            var newResult = result.Union(toggleOutTrans);
             //var newResult = result.Union(toggleOutTrans);
 
             var isShowPost = this.TransactionFilter.Current?.ShowPost;
 
             foreach (LUMCloudBedTransactions3 item in newResult)
             {
-                item.SortNumber = CalculateSortNumber(item, _remitRefNbr, toggleOutTrans, otherTrans);
+                item.SortNumber = CalculateSortNumber(item, _remitRefNbr, toggleOutTrans);
                 if (item.PropertyID != _propertyID)
                     continue;
                 // Show All
@@ -1871,7 +1873,7 @@ namespace HH_APICustomization.Graph
         }
 
         /// <summary> 計算Folio的排序 </summary>
-        private int CalculateSortNumber(LUMCloudBedTransactions3 item, string currentRemit, IEnumerable<LUMCloudBedTransactions3> toggleOutTrans, IEnumerable<LUMCloudBedTransactions3> otherTrans)
+        private int CalculateSortNumber(LUMCloudBedTransactions3 item, string currentRemit, IEnumerable<LUMCloudBedTransactions3> toggleOutTrans)
         {
             // Transaction RemitRefnbr = Current Remit
             if (item?.RemitRefNbr == currentRemit)
@@ -1882,7 +1884,7 @@ namespace HH_APICustomization.Graph
             // Transaction where remit refnbr is null and isimported <> true
             else if (string.IsNullOrEmpty(item?.RemitRefNbr) && !(item?.IsImported ?? false))
                 return 3;
-            else if (!string.IsNullOrEmpty(item?.RemitRefNbr) && otherTrans.Contains(item))
+            else if (!string.IsNullOrEmpty(item?.RemitRefNbr))
                 return 4;
             return 5;
         }
