@@ -251,7 +251,7 @@ namespace HH_APICustomization.APIHelper
         }
 
         /// <summary> Get Cloudbed Transaction data mapping AccountID/Sub-AccountID (RuleA) </summary>
-        public static LUMCloudBedAccountMapping GetCloudbedAccountMappingWithScore(PXGraph baseGraph, LUMCloudBedTransactions selectedData)
+        public static LUMCloudBedAccountMapping GetCloudbedAccountMappingWithScore(PXGraph baseGraph, LUMCloudBedTransactions selectedData, bool IsThrowException)
         {
             var AcctMapAData = SelectFrom<LUMCloudBedAccountMapping>.View.Select(baseGraph).RowCast<LUMCloudBedAccountMapping>();
             var mapReservation = SelectFrom<LUMCloudBedReservations>
@@ -289,10 +289,18 @@ namespace HH_APICustomization.APIHelper
                 else if (matchScore == maxScore)
                     sameScoureList.Add(acctMapRow.SequenceID.Value);
             }
-            if (winnerAcctMapInfo == null)
-                throw new PXException(" No Account Mapping Found. Please maintain the combination in Preference.");
-            if (sameScoureList.Count > 1)
-                throw new PXException($" No Account Mapping Found. Please maintain the combination in Preference ID: {string.Join(",", sameScoureList)}.");
+            try
+            {
+                if (winnerAcctMapInfo == null)
+                    throw new PXException(" No Account Mapping Found. Please maintain the combination in Preference.");
+                if (sameScoureList.Count > 1)
+                    throw new PXException($" No Account Mapping Found. Please maintain the combination in Preference ID: {string.Join(",", sameScoureList)}.");
+            }
+            catch (Exception ex)
+            {
+                if (IsThrowException)
+                    throw ex;
+            }
 
             return winnerAcctMapInfo;
             #endregion

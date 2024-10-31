@@ -378,9 +378,12 @@ namespace HH_APICustomization.Graph
                     // 沒有Account/SubAccount 才重新執行
                     if (!pendingItem.AccountID.HasValue || !pendingItem.SubAccountID.HasValue)
                     {
-                        var mapAccountInfo = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, pendingItem);
-                        pendingItem.AccountID = mapAccountInfo?.AccountID;
-                        pendingItem.SubAccountID = mapAccountInfo?.SubAccountID;
+                        var mapAccountInfo = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, pendingItem, false);
+                        if (mapAccountInfo != null)
+                        {
+                            pendingItem.AccountID = mapAccountInfo?.AccountID;
+                            pendingItem.SubAccountID = mapAccountInfo?.SubAccountID;
+                        }
                     }
                     pendingItem.RemitRefNbr = _refNbr;
                     this.PropertyCloudbedTransactions.Update(pendingItem);
@@ -898,7 +901,7 @@ namespace HH_APICustomization.Graph
                 // For current remit transactions whose account or sub is empty
                 foreach (var item in selectedTrans.Where(x => !x.AccountID.HasValue || !x.SubAccountID.HasValue))
                 {
-                    var winnerAcctObj = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, item);
+                    var winnerAcctObj = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, item, true);
                     if (winnerAcctObj != null)
                     {
                         item.AccountID = winnerAcctObj?.AccountID;
