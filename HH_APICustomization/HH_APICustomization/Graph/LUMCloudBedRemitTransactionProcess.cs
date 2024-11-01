@@ -1357,6 +1357,7 @@ namespace HH_APICustomization.Graph
                 {
                     var _type = tran?.TransactionType?.ToUpper();
                     var _category = tran?.Category?.ToUpper();
+                    var _tranCategory = tran?.TransactionCategory?.ToUpper();
                     var _amount = tran?.Amount ?? 0;
                     //  TransactionType = 'Debit' AND Category = 'Room Revenue' AND Amount >= 0
                     if (_type == "DEBIT" && _category == "ROOM REVENUE" && _amount >= 0)
@@ -1377,10 +1378,10 @@ namespace HH_APICustomization.Graph
                     else if (_type == "DEBIT" && !new string[] { "TAXES", "FEES" }.Contains(_category) && _amount < 0)
                         doc.AdjOther = (doc.AdjOther ?? 0) + prefix * -1 * Math.Abs(_amount);
                     //  TransactionType = 'Credit'　AND TransactionCategory NOT IN ( 'refund', 'void') 
-                    else if (_type == "CREDIT" && !(new string[] { "REFUND", "VOID" }.Contains(_category)))
+                    else if (_type == "CREDIT" && !(new string[] { "REFUND", "VOID" }.Contains(_tranCategory)))
                         doc.Payment = (doc.Payment ?? 0) + prefix * _amount;
                     //  TransactionType = 'Credit' AND TransactionCategory IN('refund', 'void')
-                    else if (_type == "CREDIT" && new string[] { "REFUND", "VOID" }.Contains(_category))
+                    else if (_type == "CREDIT" && new string[] { "REFUND", "VOID" }.Contains(_tranCategory))
                         doc.Refund = (doc.Refund ?? 0) + prefix * Math.Abs(_amount);
 
                     doc.CalcRoomRevenue = CalculateDifference(doc.RoomRevenue, Math.Abs(doc.AdjRoomRevenue ?? 0));
