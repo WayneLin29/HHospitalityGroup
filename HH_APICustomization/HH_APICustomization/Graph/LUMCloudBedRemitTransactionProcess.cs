@@ -158,7 +158,7 @@ namespace HH_APICustomization.Graph
             Int32 startrow = PXView.StartRow;
             var result = select.Select(PXView.Currents, PXView.Parameters,
                    PXView.Searches, PXView.SortColumns, PXView.Descendings,
-                   PXView.Filters, ref startrow, PXView.MaximumRows, ref totalrow);
+                   PXView.Filters, ref startrow, 0, ref totalrow);
             PXView.StartRow = 0;
 
             var _propertyID = this.ClodBedPreference.Select().TopFirst?.CloudBedPropertyID;
@@ -194,7 +194,7 @@ namespace HH_APICustomization.Graph
             Int32 startrow = PXView.StartRow;
             var result = select.Select(PXView.Currents, PXView.Parameters,
                    PXView.Searches, PXView.SortColumns, PXView.Descendings,
-                   PXView.Filters, ref startrow, PXView.MaximumRows, ref totalrow);
+                   PXView.Filters, ref startrow, 0, ref totalrow);
             PXView.StartRow = 0;
 
             var _propertyID = this.ClodBedPreference.Select().TopFirst?.CloudBedPropertyID;
@@ -250,7 +250,7 @@ namespace HH_APICustomization.Graph
             Int32 startrow = PXView.StartRow;
             var result = select.Select(PXView.Currents, PXView.Parameters,
                    PXView.Searches, PXView.SortColumns, PXView.Descendings,
-                   PXView.Filters, ref startrow, PXView.MaximumRows, ref totalrow);
+                   PXView.Filters, ref startrow, 0, ref totalrow);
             PXView.StartRow = 0;
 
             var _propertyID = this.ClodBedPreference.Select().TopFirst?.CloudBedPropertyID;
@@ -296,7 +296,7 @@ namespace HH_APICustomization.Graph
             Int32 startrow = PXView.StartRow;
             var result = select.Select(PXView.Currents, PXView.Parameters,
                    PXView.Searches, PXView.SortColumns, PXView.Descendings,
-                   PXView.Filters, ref startrow, PXView.MaximumRows, ref totalrow);
+                   PXView.Filters, ref startrow, 0, ref totalrow);
             PXView.StartRow = 0;
 
             foreach (PXResult<LUMRemitBlock, LUMCloudBedRoomBlock, LUMCloudBedRoomBlockDetails> item in result)
@@ -1273,11 +1273,15 @@ namespace HH_APICustomization.Graph
             resLine.RefNbr = _refNbr;
             resLine.ReservationID = checkObj.Type == "H" ? $"{selectedTrans?.HouseAccountID}-{selectedTrans?.HouseAccountName}" : _reservationID;
             resLine = this.ReservationSummary.Cache.Locate(resLine) as LUMRemitReservation;
-            CalculateReservationAmount(selectedTrans, resLine, prefix);
-            resLine.PendingCount = (resLine.PendingCount ?? 0) + (_actionType == "OUT" ? 1 : -1);
-            resLine.ToRemitCount = (resLine.ToRemitCount ?? 0) + (_actionType == "OUT" ? -1 : 1);
-            //resLine.IsOutOfScope = _actionType == "OUT" ? true : false;
-            resLine = this.ReservationSummary.Update(resLine);
+            // Reservation Summary 沒有就不需要處理
+            if (resLine != null)
+            {
+                CalculateReservationAmount(selectedTrans, resLine, prefix);
+                resLine.PendingCount = (resLine.PendingCount ?? 0) + (_actionType == "OUT" ? 1 : -1);
+                resLine.ToRemitCount = (resLine.ToRemitCount ?? 0) + (_actionType == "OUT" ? -1 : 1);
+                //resLine.IsOutOfScope = _actionType == "OUT" ? true : false;
+                resLine = this.ReservationSummary.Update(resLine);
+            }
 
             // Recalculate Documaent Amount
             CalculateDocumentAmount(new List<LUMCloudBedTransactions>() { selectedTrans }, prefix);
