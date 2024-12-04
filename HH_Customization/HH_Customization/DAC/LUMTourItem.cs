@@ -113,7 +113,9 @@ namespace HH_Customization.DAC
             SubstituteKey = typeof(InventoryItem.inventoryCD),
             DescriptionField = typeof(InventoryItem.descr)
             )]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        //2024/11/27 set not request
+        //[PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.Nothing)]
         public virtual int? InventoryID { get; set; }
         public abstract class inventoryID : PX.Data.BQL.BqlInt.Field<inventoryID> { }
         #endregion

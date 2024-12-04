@@ -7,6 +7,9 @@ using PX.Objects.GL;
 using static PX.Objects.SO.SOOrderEntryHHExt;
 using PX.Objects.AP;
 using HH_Customization.Interface;
+using HH_APICustomization.DAC;
+using PX.Data.BQL.Fluent;
+using PX.Data.BQL;
 
 namespace HH_Customization.DAC
 {
@@ -67,7 +70,9 @@ namespace HH_Customization.DAC
         #region InventoryID
         [PXDBInt()]
         [PXUIField(DisplayName = "Inventory ID",Required = true)]
-        [PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        //2024/11/27 set not request
+        //[PXDefault(PersistingCheck = PXPersistingCheck.NullOrBlank)]
+        [PXDefault(PersistingCheck = PXPersistingCheck.Nothing)]
         [PXSelector(typeof(Search<InventoryItem.inventoryID>),
             typeof(InventoryItem.inventoryCD),
             typeof(InventoryItem.descr),
@@ -216,9 +221,15 @@ namespace HH_Customization.DAC
         #region ExtCost(CB)
         [PXDecimal()]
         [PXUIField(DisplayName = "Ext Cost(CB)",IsReadOnly = true)]
-        [PXUnboundDefault(typeof(Search4<LUMTourRoomReservations.extCost
-            , Where<LUMTourRoomReservations.reservationID, Equal<Current<reservationID>>>
-            , Aggregate<Sum<LUMTourRoomReservations.extCost>>>))]
+        [PXUnboundDefault(typeof(SelectFrom<LUMCloudBedTransactions>
+            .Where<LUMCloudBedTransactions.reservationID.IsEqual<reservationID.FromCurrent>
+             .And<Brackets<LUMCloudBedTransactions.description.IsLike<flReceivable>.Or<LUMCloudBedTransactions.description.IsLike<flCollect>>>>>
+            .AggregateTo<Sum<LUMCloudBedTransactions.amount>>
+            .SearchFor<LUMCloudBedTransactions.amount>
+            ))]
+        //[PXUnboundDefault(typeof(Search4<LUMTourRoomReservations.extCost
+        //    , Where<LUMTourRoomReservations.reservationID, Equal<Current<reservationID>>>
+        //    , Aggregate<Sum<LUMTourRoomReservations.extCost>>>))]
         public virtual Decimal? ExtCostCB { get; set; }
         public abstract class extCostCB : PX.Data.BQL.BqlDecimal.Field<extCostCB> { }
         #endregion
