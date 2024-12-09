@@ -348,8 +348,15 @@ namespace HH_APICustomization.Graph
 
                 // 既有的Remit Payment
                 var existsRemitPayments = helper.GetBqlCommand<LUMRemitPayment>(this, this.PaymentSummary.View.BqlSelect);
+                var newRemitPayments = pendingTransactions.Where(x => x.TransactionType == "credit" && !(x?.IsImported ?? false) && x.UserName != "SYSTEM").GroupBy(x => x.Description);
+                // Delete LUMRemitPayment
+                foreach (var existing in existsRemitPayments)
+                {
+                    if (!newRemitPayments.ToList().Exists(x => x.Key == existing?.Description))
+                        this.PaymentSummary.Delete(existing);
+                }
                 // Insert/Update LUMRemitPayment 
-                foreach (var matchedTransaction in pendingTransactions.Where(x => x.TransactionType == "credit" && !(x?.IsImported ?? false) && x.UserName != "SYSTEM").GroupBy(x => x.Description))
+                foreach (var matchedTransaction in newRemitPayments)
                 {
                     var paymentLine = existsRemitPayments.FirstOrDefault(x => x.Description == matchedTransaction.Key);
                     if (paymentLine != null)
