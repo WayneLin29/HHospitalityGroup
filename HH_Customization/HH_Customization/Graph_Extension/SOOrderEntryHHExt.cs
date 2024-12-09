@@ -11,6 +11,8 @@ using HH_APICustomization.DAC;
 using static HH_Customization.Descriptor.LUMStringList;
 using HH_Customization.Interface;
 using PX.Objects.AP;
+using PX.Data.BQL.Fluent;
+using PX.Data.BQL;
 
 namespace PX.Objects.SO
 {
@@ -27,6 +29,11 @@ namespace PX.Objects.SO
         public const string DATE_FORMAT = "MMddyyyy";
         /**User Defined */
         public const string UD_BILLTYPE = "AttributeBILLTYPE";
+
+        public const string FL_RECIVABLE = "%receivable%";
+        public const string FL_COLLECT = "%collect%";
+        public class flReceivable : PX.Data.BQL.BqlString.Constant<flReceivable> { public flReceivable() : base(FL_RECIVABLE) { } }
+        public class flCollect : PX.Data.BQL.BqlString.Constant<flCollect> { public flCollect() : base(FL_COLLECT) { } }
         #endregion
 
         #region View
@@ -39,8 +46,12 @@ namespace PX.Objects.SO
             Where<LUMTourReservation.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
             And<LUMTourReservation.sOOrderType, Equal<Current<SOOrder.orderType>>>>> Reservations;
 
-        public PXSelectReadonly<LUMTourRoomReservations,
-            Where<LUMTourRoomReservations.reservationID, Equal<Current<LUMTourReservation.reservationID>>>> RoomReservations;
+        public SelectFrom<LUMCloudBedTransactions>
+            .Where<LUMCloudBedTransactions.reservationID.IsEqual<LUMTourReservation.reservationID.FromCurrent>
+             .And<Brackets<LUMCloudBedTransactions.description.IsLike<flReceivable>.Or<LUMCloudBedTransactions.description.IsLike<flCollect>>>>>
+            .View.ReadOnly RoomReservations;
+        //public PXSelectReadonly<LUMTourRoomReservations,
+        //    Where<LUMTourRoomReservations.reservationID, Equal<Current<LUMTourReservation.reservationID>>>> RoomReservations;
 
         public PXSelect<LUMTourItem,
             Where<LUMTourItem.sOOrderNbr, Equal<Current<SOOrder.orderNbr>>,
@@ -241,6 +252,7 @@ namespace PX.Objects.SO
         public void ValidatoeAPLink(IAPLink row)
         {
             if (row == null) return;
+            if (Base.Accessinfo.ScreenID?.Replace(".", "") == "AP301000") return;
             if (HasAPLink(row))
                 throw new PXException($"Please delete AP Bill before delete the item", PXErrorLevel.RowError);
         }
