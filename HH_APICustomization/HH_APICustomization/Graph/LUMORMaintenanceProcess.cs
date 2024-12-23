@@ -75,7 +75,7 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "APH Branch")]
         [PXMergeAttributes(Method = MergeMethod.Merge)]
         public virtual void _(Events.CacheAttached<APInvoice.branchID> e) { }
-        
+
         public virtual void _(Events.FieldUpdated<ORMaintFilter.updCleanUp> e)
         {
             if (((bool?)e.NewValue) ?? false)
@@ -167,8 +167,8 @@ namespace HH_APICustomization.Graph
                              Set<APTranExtension.usrORTaxZone, Required<APTranExtension.usrORTaxZone>,
                              Set<APTran.projectID, Required<APTran.projectID>,
                              Set<APTran.taskID, Required<APTran.taskID>,
-                             Set<APTran.accountID,Required<APTran.accountID>,
-                             Set<APTran.subID,Required<APTran.subID>>>>>>>>>>>,
+                             Set<APTran.accountID, Required<APTran.accountID>,
+                             Set<APTran.subID, Required<APTran.subID>>>>>>>>>>>,
                         APTran,
                         Where<APTran.tranType, Equal<Required<APTran.tranType>>,
                               And<APTran.refNbr, Equal<Required<APTran.refNbr>>,
@@ -270,7 +270,7 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region APHBranch
-        [Branch(typeof(APRegister.branchID),PersistingCheck = PXPersistingCheck.Nothing)]
+        [Branch(typeof(APRegister.branchID), PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "APH Branch")]
         public virtual int? APHBranch { get; set; }
         public abstract class apHBranch : PX.Data.BQL.BqlInt.Field<apHBranch> { }
@@ -279,7 +279,8 @@ namespace HH_APICustomization.Graph
         #region ORStatus
         [PXDBString(1)]
         [PXSelector(typeof(SearchFor<CSAttributeDetail.valueID>
-                           .Where<CSAttributeDetail.attributeID.IsEqual<ORSTATUSAttr>>),
+                           .Where<CSAttributeDetail.attributeID.IsEqual<ORSTATUSAttr>
+                             .And<CSAttributeDetail.disabled.IsEqual<False>>>),
                     DescriptionField = typeof(CSAttributeDetail.description))]
         [PXUIField(DisplayName = "OR Status", Visibility = PXUIVisibility.SelectorVisible)]
         public virtual string ORStatus { get; set; }
@@ -376,7 +377,8 @@ namespace HH_APICustomization.Graph
         #region UpdORStatus
         [PXDBString]
         [PXSelector(typeof(SearchFor<CSAttributeDetail.valueID>
-                           .Where<CSAttributeDetail.attributeID.IsEqual<ORSTATUSAttr>>),
+                           .Where<CSAttributeDetail.attributeID.IsEqual<ORSTATUSAttr>
+                             .And<CSAttributeDetail.disabled.IsEqual<False>>>),
                     SubstituteKey = typeof(CSAttributeDetail.description))]
         [PXUIField(DisplayName = "OR Status", Visibility = PXUIVisibility.SelectorVisible)]
         public virtual string UpdORStatus { get; set; }
@@ -392,7 +394,7 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region UpdProjectID
-        [ProjectDefault(BatchModule.AP, typeof(Search<PX.Objects.CR.Location.vDefProjectID, Where<PX.Objects.CR.Location.bAccountID, Equal<Current<APInvoice.vendorID>>, And<PX.Objects.CR.Location.locationID, Equal<Current<APInvoice.vendorLocationID>>>>>), typeof(APTran.accountID),PersistingCheck = PXPersistingCheck.Nothing)]
+        [ProjectDefault(BatchModule.AP, typeof(Search<PX.Objects.CR.Location.vDefProjectID, Where<PX.Objects.CR.Location.bAccountID, Equal<Current<APInvoice.vendorID>>, And<PX.Objects.CR.Location.locationID, Equal<Current<APInvoice.vendorLocationID>>>>>), typeof(APTran.accountID), PersistingCheck = PXPersistingCheck.Nothing)]
         [APActiveProject]
         [PXForeignReference(typeof(Field<updProjectID>.IsRelatedTo<PMProject.contractID>))]
         public virtual Int32? UpdProjectID { get; set; }
@@ -414,15 +416,15 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region UpdAccountID
-        [Account(typeof(ORMaintFilter.updORBranch),DisplayName = "Account", Visibility = PXUIVisibility.Visible, Filterable = false, DescriptionField = typeof(Account.description))]
-        public virtual int? UpdAccountID { get;set;}
+        [Account(typeof(ORMaintFilter.updORBranch), DisplayName = "Account", Visibility = PXUIVisibility.Visible, Filterable = false, DescriptionField = typeof(Account.description))]
+        public virtual int? UpdAccountID { get; set; }
         public abstract class updAccountID : PX.Data.BQL.BqlInt.Field<updAccountID> { }
 
         #endregion
 
         #region UpdSubID
         [SubAccount(typeof(ORMaintFilter.updAccountID), typeof(ORMaintFilter.updORBranch), true, DisplayName = "Subaccount", Visibility = PXUIVisibility.Visible, Filterable = true, TabOrder = 100)]
-        public virtual int? UpdSubID { get;set;}
+        public virtual int? UpdSubID { get; set; }
         public abstract class updSubID : PX.Data.BQL.BqlInt.Field<updSubID> { }
 
         #endregion

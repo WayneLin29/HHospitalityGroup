@@ -18,14 +18,16 @@
                     <px:PXGridColumn DataField="BranchID" Width="120" CommitChanges="True"></px:PXGridColumn>
                     <px:PXGridColumn DataField="LedgerID" Width="120" CommitChanges="True"></px:PXGridColumn>
                     <px:PXGridColumn DataField="AccountID" Width="150" CommitChanges="True"></px:PXGridColumn>
-                    <px:PXGridColumn DataField="SubID" Width="200"></px:PXGridColumn>
+                    <px:PXGridColumn DataField="AccountDescription" Width="200"></px:PXGridColumn>
+                    <px:PXGridColumn DataField="SubID" Width="200" CommitChanges="True"></px:PXGridColumn>
+                    <px:PXGridColumn DataField="SubAccountDescription" Width="200"></px:PXGridColumn>
                     <px:PXGridColumn DataField="Remark" Width="300"></px:PXGridColumn>
                 </Columns>
                 <RowTemplate>
                     <px:PXSelector runat="server" ID="edBranchID" DataField="BranchID"></px:PXSelector>
                     <px:PXSelector runat="server" ID="edLedgerID" DataField="LedgerID"></px:PXSelector>
-                    <px:PXSelector runat="server" ID="edAccountID" DataField="AccountID"></px:PXSelector>
-                    <px:PXSelector runat="server" ID="edSubID" DataField="SubID"></px:PXSelector>
+                    <px:PXSelector runat="server" ID="edAccountID" DataField="AccountID" CommitChanges="True"></px:PXSelector>
+                    <px:PXSelector runat="server" ID="edSubID" DataField="SubID" CommitChanges="True"></px:PXSelector>
                 </RowTemplate>
             </px:PXGridLevel>
         </Levels>

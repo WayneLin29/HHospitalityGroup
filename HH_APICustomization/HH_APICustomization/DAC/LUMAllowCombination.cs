@@ -1,7 +1,11 @@
 ﻿using System;
+using HH_APICustomization.Graph;
 using PX.Data;
+using PX.Data.BQL.Fluent;
+using PX.Objects.CA;
 using PX.Objects.GL;
 using PX.Objects.GL.DAC;
+using static HHAPICustomization.DAC.LUMAllowCombination;
 
 namespace HHAPICustomization.DAC
 {
@@ -47,6 +51,14 @@ namespace HHAPICustomization.DAC
         public abstract class accountID : PX.Data.BQL.BqlInt.Field<accountID> { }
         #endregion
 
+        #region AccountDescription
+        [PXString]
+        [PXUIField(DisplayName = "Account Description", Enabled = false)]
+        [PXFormula(typeof(Selector<LUMAllowCombination.accountID, Account.description>))]
+        public virtual string AccountDescription { get; set; }
+        public abstract class accountDescription : PX.Data.BQL.BqlString.Field<accountDescription> { }
+        #endregion
+
         #region Subid
         [PXDBInt(IsKey = true)]
         [PXDefault]
@@ -57,6 +69,14 @@ namespace HHAPICustomization.DAC
                     SubstituteKey = typeof(Sub.subCD))]
         public virtual int? Subid { get; set; }
         public abstract class subid : PX.Data.BQL.BqlInt.Field<subid> { }
+        #endregion
+
+        #region SubAccountDescription
+        [PXString]
+        [PXUIField(DisplayName = "SubAccount Description", Enabled = false)]
+        [PXFormula(typeof(Selector<LUMAllowCombination.subid, Sub.description>))]
+        public virtual string SubAccountDescription { get; set; }
+        public abstract class subAccountDescription : PX.Data.BQL.BqlString.Field<subAccountDescription> { }
         #endregion
 
         #region Remeark
