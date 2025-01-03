@@ -27,7 +27,8 @@ namespace PX.Objects.AP
         [PXDBString]
         [PXDefault("A", PersistingCheck = PXPersistingCheck.Nothing)]
         [PXSelector(typeof(SearchFor<CSAttributeDetail.valueID>
-                           .Where<CSAttributeDetail.attributeID.IsEqual<ORSTATUSAttr>>),
+                           .Where<CSAttributeDetail.attributeID.IsEqual<ORSTATUSAttr>
+                             .And<CSAttributeDetail.disabled.IsEqual<False>>>),
                     SubstituteKey = typeof(CSAttributeDetail.description))]
         [PXUIField(DisplayName = "OR Status", Visibility = PXUIVisibility.SelectorVisible)]
         public virtual string UsrORStatus { get; set; }

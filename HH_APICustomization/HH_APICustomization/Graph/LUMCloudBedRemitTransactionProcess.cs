@@ -417,19 +417,26 @@ namespace HH_APICustomization.Graph
 
                 #region Insert/Update/Remove LUMRemitReservation (Reservation Summary)
 
+                /// Remit Reservation 處理邏輯
+                /// 1.根據Check SQL View 找到尚未處理的TransactionID
+                /// 2.並將沒有Reservaion ID的Trans 改成 SqlView 的Reservation ID (House Account + House Account Name)
+                /// 3.處理既有的Remit Reservation
+                /// 4.Inser/Update Data        
                 // Insert/Update/Delete LUMRemitReservation
-                foreach (var grpAvailableTran in matchReservationCheckTransactions.GroupBy(x => new { x.PropertyID, x.ReservationID, x.HouseAccountID }))
+                // Group by PropertyID + ReservationID (ReservationID/House Acct + House Name)
+                foreach (var grpAvailableTran in matchReservationCheckTransactions.GroupBy(x => new { x.PropertyID, x.ReservationID }))
                 {
+                    // 已經將Trans的ReservationID 改為跟Check SQL View相同
+                    var checkObject = reservationChecks.FirstOrDefault(x => x.ReservationID == grpAvailableTran.Key.ReservationID);
                     var resLine = new LUMRemitReservation();
                     var mapReservation = LUMCloudBedReservations.PK.Find(this, grpAvailableTran.Key.PropertyID, grpAvailableTran.Key.ReservationID);
-                    var isExists = currentRemitReservations.FirstOrDefault(x => x.RefNbr == _refNbr && x.ReservationID == grpAvailableTran.Key.ReservationID) != null;
+                    var isExists = currentRemitReservations.FirstOrDefault(x => x.RefNbr == _refNbr && (x.ReservationID == grpAvailableTran.Key.ReservationID || x.ReservationID == GetHouseAccountByReservationID(grpAvailableTran.Key.ReservationID))) != null;
                     resLine = currentRemitReservations.FirstOrDefault(x => x.RefNbr == _refNbr && x.ReservationID == grpAvailableTran.Key.ReservationID) ?? resLine;
                     resLine.RefNbr = _refNbr;
-                    resLine.ReservationID = grpAvailableTran.Key.ReservationID ?? grpAvailableTran.Key.HouseAccountID?.ToString();
+                    resLine.ReservationID = grpAvailableTran.Key.ReservationID;
                     if (resLine?.IsOutOfScope ?? false)
                         continue;
 
-                    var checkObject = reservationChecks.FirstOrDefault(x => x.ReservationID == grpAvailableTran.Key.ReservationID || GetHouseAccountByReservationID(x.ReservationID) == grpAvailableTran.Key.HouseAccountID?.ToString());
                     // 刪除Type != 'RS' 而且該Reservatioin下Transaction 不等於Current RemitRef
                     //if (checkObj.Type != "RS" && !availableReservation)
                     //{

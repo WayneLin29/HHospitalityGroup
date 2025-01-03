@@ -54,7 +54,10 @@ namespace HH_APICustomization.Descriptor
                 if (checkResv.ReservationID.Contains("-"))
                 {
                     var houseAccountId = checkResv.ReservationID.Substring(0, checkResv.ReservationID.IndexOf('-'));
-                    matchTransactions.AddRange(allTransactions.Where(x => x.HouseAccountID?.ToString() == houseAccountId));
+                    var _allowTrans = allTransactions.Where(x => x.HouseAccountID?.ToString() == houseAccountId);
+                    // 將ReservationID = null的改成Hous AccountID = House Acoount Name
+                    _allowTrans.ToList().ForEach(x => { x.ReservationID = checkResv.ReservationID; });
+                    matchTransactions.AddRange(_allowTrans);
                 }
                 else
                 {
