@@ -25,7 +25,7 @@ namespace HH_APICustomization.APIHelper
                 try
                 {
                     var preference = GetCloudBedAPIPreference();
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, $"https://hotels.cloudbeds.com/api/v1.1/access_token");
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, preference?.AccessTokenUrl);
                     requestMessage.Content = new FormUrlEncodedContent(GetTokenFormBodyByCode(code));
                     HttpResponseMessage response = client.SendAsync(requestMessage).GetAwaiter().GetResult();
                     var responseResult = response.Content.ReadAsStringAsync().Result;
@@ -58,7 +58,7 @@ namespace HH_APICustomization.APIHelper
                 try
                 {
                     var preference = GetCloudBedAPIPreference();
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, $"https://hotels.cloudbeds.com/api/v1.1/access_token");
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, preference?.AccessTokenUrl);
                     requestMessage.Content = new FormUrlEncodedContent(GetTokenFormBodyByRefreshToken());
                     HttpResponseMessage response = client.SendAsync(requestMessage).GetAwaiter().GetResult();
                     var accessEntity = JsonConvert.DeserializeObject<CloudBed_TokenEntity>(response.Content.ReadAsStringAsync().Result);
@@ -84,11 +84,12 @@ namespace HH_APICustomization.APIHelper
         public static List<HH_APICustomization.Entity.Transaction> GetTransactionData(DateTime fromDate, DateTime toDate, string propertyID)
         {
             var accessToken = UpdateAccessToken();
+            var preference = GetCloudBedAPIPreference();
             try
             {
                 int pageNumber = 1;
                 var transactionData = new List<HH_APICustomization.Entity.Transaction>();
-                var url = $"https://hotels.cloudbeds.com/api/v1.1/getTransactions?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
+                var url = $"{preference?.GetTransactionsUrl}?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
                 PXTrace.WriteInformation($"Get Transaction Data : {url}");
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 var transactionEntity = JsonConvert.DeserializeObject<CloudBed_TransactionEntity>(response.Content.ReadAsStringAsync().Result);
@@ -100,7 +101,7 @@ namespace HH_APICustomization.APIHelper
                     int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                     for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                     {
-                        url = $"https://hotels.cloudbeds.com/api/v1.1/getTransactions?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
+                        url = $"{preference?.GetTransactionsUrl}?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
                         response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                         transactionEntity = JsonConvert.DeserializeObject<CloudBed_TransactionEntity>(response.Content.ReadAsStringAsync().Result);
                         transactionData.AddRange(transactionEntity.data);
@@ -119,12 +120,13 @@ namespace HH_APICustomization.APIHelper
         public static List<HH_APICustomization.Entity.Reservation> GetReservationData(DateTime fromDate, DateTime toDate, string propertyID)
         {
             var accessToken = UpdateAccessToken();
+            var preference = GetCloudBedAPIPreference();
             try
             {
                 // 查詢Reservation 因沒給Property，故實區統一為UTC+0
                 int pageNumber = 1;
                 var reservationData = new List<HH_APICustomization.Entity.Reservation>();
-                var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
+                var url = $"{preference?.GetReservationsUrl}?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
                 PXTrace.WriteInformation($"Get Reservation Data : {url}");
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -138,7 +140,7 @@ namespace HH_APICustomization.APIHelper
                     int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                     for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                     {
-                        url = url = $"https://hotels.cloudbeds.com/api/v1.1/getReservations?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
+                        url = url = $"{preference?.GetReservationsUrl}?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
                         response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                         reservationEntity = JsonConvert.DeserializeObject<CloudBed_ReservationEntity>(response.Content.ReadAsStringAsync().Result);
                         reservationData.AddRange(reservationEntity.data);
@@ -157,6 +159,7 @@ namespace HH_APICustomization.APIHelper
         public static List<ReservationRateDetail> GetReservationWithRate(List<string> propertyidList, DateTime fromDate, DateTime toDate)
         {
             var accessToken = UpdateAccessToken();
+            var preference = GetCloudBedAPIPreference();
             try
             {
                 var tempJbList = new List<JObject>();
@@ -164,7 +167,7 @@ namespace HH_APICustomization.APIHelper
                 foreach (var propertyID in propertyidList)
                 {
                     int pageNumber = 1;
-                    var url = $"https://hotels.cloudbeds.com/api/v1.1/getReservationsWithRateDetails?propertyID={propertyID}&modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                    var url = $"{preference?.GetReservationRateDetailsUrl}?propertyID={propertyID}&modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
                     PXTrace.WriteInformation($"Get Reservation WithRate : {url}");
                     HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -178,7 +181,7 @@ namespace HH_APICustomization.APIHelper
                         int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                         for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                         {
-                            url = $"https://hotels.cloudbeds.com/api/v1.1/getReservationsWithRateDetails?propertyID={propertyID}&modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
+                            url = $"{preference?.GetReservationRateDetailsUrl}?propertyID={propertyID}&modifiedFrom={fromDate.ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}";
                             response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                             reservationJObject = JsonConvert.DeserializeObject<JObject>(response.Content.ReadAsStringAsync().Result);
                             AddJobjectManualy("data", reservationJObject, tempJbList);
@@ -241,10 +244,11 @@ namespace HH_APICustomization.APIHelper
         /// <summary> Subscribe Cloudbed Webhook </summary>
         public static CloudBed_SubscribeWebhookEntity SubscribeClodbedWebhook(string accessToken, Dictionary<string, string> parm)
         {
+            var preference = GetCloudBedAPIPreference();
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://hotels.cloudbeds.com/api/v1.1/postWebhook") { Content = new FormUrlEncodedContent(parm) };
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{preference?.SubscribeWebhookUrl}") { Content = new FormUrlEncodedContent(parm) };
                 HttpResponseMessage response = client.SendAsync(request).GetAwaiter().GetResult();
                 return JsonConvert.DeserializeObject<CloudBed_SubscribeWebhookEntity>(response.Content.ReadAsStringAsync().Result);
             }

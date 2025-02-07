@@ -112,5 +112,43 @@ namespace HH_APICustomization.DAC
         public virtual byte[] Tstamp { get; set; }
         public abstract class tstamp : PX.Data.BQL.BqlByteArray.Field<tstamp> { }
         #endregion
+
+        #region AccessTokenUrl
+        /// <summary>
+        /// https://hotels.cloudbeds.com/api/v1.1/access_token
+        /// </summary>
+        [PXDBString(1024, IsUnicode = true)]
+        [PXUIField(DisplayName = "Refresh Access Token Url")]
+        public virtual string AccessTokenUrl { get; set; }
+        public abstract class accessTokenUrl : PX.Data.BQL.BqlString.Field<accessTokenUrl> { }
+        #endregion
+
+        #region GetTransactionsUrl
+        [PXDBString(1024, IsUnicode = true)]
+        [PXUIField(DisplayName = "Get Transactions Url")]
+        public virtual string GetTransactionsUrl { get; set; }
+        public abstract class getTransactionsUrl : PX.Data.BQL.BqlString.Field<getTransactionsUrl> { }
+        #endregion
+
+        #region GetReservationsUrl
+        [PXDBString(1024, IsUnicode = true)]
+        [PXUIField(DisplayName = "Get Reservations Url")]
+        public virtual string GetReservationsUrl { get; set; }
+        public abstract class getReservationsUrl : PX.Data.BQL.BqlString.Field<getReservationsUrl> { }
+        #endregion
+
+        #region GetReservationRateDetailsUrl
+        [PXDBString(1024, IsUnicode = true)]
+        [PXUIField(DisplayName = "Get Reservations Rate Details Url")]
+        public virtual string GetReservationRateDetailsUrl { get; set; }
+        public abstract class getReservationRateDetailsUrl : PX.Data.BQL.BqlString.Field<getReservationRateDetailsUrl> { }
+        #endregion
+
+        #region SubscribeWebhookUrl
+        [PXDBString(1024, IsUnicode = true)]
+        [PXUIField(DisplayName = "Subscribe webhook Url")]
+        public virtual string SubscribeWebhookUrl { get; set; }
+        public abstract class subscribeWebhookUrl : PX.Data.BQL.BqlString.Field<subscribeWebhookUrl> { }
+        #endregion
     }
 }

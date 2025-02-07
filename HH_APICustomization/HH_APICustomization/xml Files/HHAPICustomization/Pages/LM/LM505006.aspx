@@ -18,7 +18,7 @@
             <px:PXLayoutRule runat="server" ControlSize="SM" LabelsWidth="S" StartColumn="True" />
             <px:PXSelector runat="server" ID="edRefNbr" DataField="RefNbr" Width="150px" CommitChanges="true"></px:PXSelector>
             <px:PXDateTimeEdit runat="server" ID="edDate" DataField="Date" Width="150px" TextMode="DateTime"></px:PXDateTimeEdit>
-            <px:PXDropDown runat="server" ID="edShift" DataField="Shift" Width="150px"></px:PXDropDown>
+            <px:PXSelector runat="server" ID="edShift" DataField="Shift" Width="150px"></px:PXSelector>
             <px:PXSelector runat="server" ID="edBranch" DataField="Branch" Width="150px"></px:PXSelector>
             <px:PXDropDown ID="edStatus" runat="server" DataField="Status" Enabled="False" />
             <px:PXLayoutRule runat="server" ColumnSpan="2"></px:PXLayoutRule>

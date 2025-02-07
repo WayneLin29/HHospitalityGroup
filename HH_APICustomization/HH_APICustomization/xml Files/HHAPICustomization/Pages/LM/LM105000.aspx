@@ -26,6 +26,11 @@
                     <px:PXTextEdit runat="server" ID="edRefreshToken" DataField="RefreshToken" Width="500px" TextMode="Password"></px:PXTextEdit>
                     <px:PXDateTimeEdit runat="server" ID="edRefreshTokenExpiresTime" DataField="RefreshTokenExpiresTime"></px:PXDateTimeEdit>
                     <px:PXTextEdit runat="server" ID="edWebHookUrl" DataField="WebHookUrl" Width="400px"></px:PXTextEdit>
+                    <px:PXTextEdit runat="server" ID="edAccessTokenUrl" DataField="AccessTokenUrl" TextMode="Password"></px:PXTextEdit>
+                    <px:PXTextEdit runat="server" ID="edGetTransactionsUrl" DataField="GetTransactionsUrl" TextMode="Password"></px:PXTextEdit>
+                    <px:PXTextEdit runat="server" ID="edGetReservationsUrl" DataField="GetReservationsUrl" TextMode="Password"></px:PXTextEdit>
+                    <px:PXTextEdit runat="server" ID="edGetReservationRateDetailsUrl" DataField="GetReservationRateDetailsUrl" TextMode="Password"></px:PXTextEdit>
+                    <px:PXTextEdit runat="server" ID="edSubscribeWebhookUrl" DataField="SubscribeWebhookUrl" TextMode="Password"></px:PXTextEdit>
                 </Template>
             </px:PXTabItem>
             <px:PXTabItem Text="Property">

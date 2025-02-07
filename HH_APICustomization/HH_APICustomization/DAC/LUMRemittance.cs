@@ -4,11 +4,14 @@ using HH_APICustomization.Descriptor;
 using HH_APICustomization.Graph;
 using PX.Data;
 using PX.Data.BQL.Fluent;
+using PX.Data.EP;
 using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.AP;
 using PX.Objects.CR;
 using PX.Objects.CS;
 using PX.Objects.GL;
+using PX.Objects.SM;
+using PX.Objects.SO;
 using PX.SM;
 using PX.TM;
 
@@ -19,6 +22,11 @@ namespace HH_APICustomization.DAC
     [PXPrimaryGraph(typeof(LUMCloudBedRemitTransactionProcess))]
     public class LUMRemittance : PXBqlTable, IBqlTable, PX.Data.EP.IAssign
     {
+        public class REMITSHIFTAttr : PX.Data.BQL.BqlString.Constant<REMITSHIFTAttr>
+        {
+            public REMITSHIFTAttr() : base("REMITSHIFT") { }
+        }
+
         public class PK : PrimaryKeyOf<LUMRemittance>.By<refNbr>
         {
             public static LUMRemittance Find(PXGraph graph, string refNbr) => FindBy(graph, refNbr);
@@ -33,6 +41,7 @@ namespace HH_APICustomization.DAC
             typeof(LUMRemittance.branch),
             typeof(LUMRemittance.date),
             typeof(LUMRemittance.status))]
+        [PXFieldDescription]
         public virtual string RefNbr { get; set; }
         public abstract class refNbr : PX.Data.BQL.BqlString.Field<refNbr> { }
         #endregion
@@ -49,8 +58,12 @@ namespace HH_APICustomization.DAC
         [PXDBString(20, IsUnicode = true, InputMask = "")]
         [PXDefault]
         [PXUIField(DisplayName = "Shift")]
-        [PXStringList(new string[] { "AM", "PM", "GY", "RESA", "RESA GY" },
-                      new string[] { "AM", "PM", "GY", "RESA", "RESA GY" })]
+        [PXSelector(typeof(SearchFor<CSAttributeDetail.valueID>
+                          .Where<CSAttributeDetail.attributeID.IsEqual<REMITSHIFTAttr>
+                            .And<CSAttributeDetail.disabled.IsEqual<False>>>),
+                    typeof(CSAttributeDetail.description))]
+        //[PXStringList(new string[] { "AM", "PM", "GY", "RESA", "RESA GY" },
+        //              new string[] { "AM", "PM", "GY", "RESA", "RESA GY" })]
         public virtual string Shift { get; set; }
         public abstract class shift : PX.Data.BQL.BqlString.Field<shift> { }
         #endregion
@@ -103,9 +116,26 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region Noteid
-        [PXNote()]
-        public virtual Guid? Noteid { get; set; }
-        public abstract class noteid : PX.Data.BQL.BqlGuid.Field<noteid> { }
+        [PXNote(ShowInReferenceSelector = true,
+                DescriptionField = typeof(LUMRemittance.refNbr),
+                Selector = typeof(LUMRemittance.refNbr),
+                BqlField = typeof(LUMRemittance.noteID))]
+        [PXSearchable(PX.Objects.SM.SearchCategory.All,
+                      "Remittance: {0}",
+                      new Type[] { typeof(LUMRemittance.refNbr) },
+                      new Type[] { typeof(LUMRemittance.refNbr) },
+                      NumberFields = new Type[] { typeof(LUMRemittance.refNbr) },
+                      Line1Format = "{0}{1}{2}{3}", Line1Fields = new Type[] { typeof(LUMRemittance.refNbr), typeof(LUMRemittance.status), typeof(LUMRemittance.branch), typeof(LUMRemittance.description) }
+                      //Line2Format = "{0}{2}{3}{4}{5}", Line2Fields = new Type[] { typeof(SOShipment.shipmentDesc), typeof(SOShipment.shipAddressID), typeof(SOAddress.addressLine1),
+                      //                                                            typeof(SOAddress.addressLine2), typeof(SOAddress.city), typeof(SOAddress.state) },
+                      //MatchWithJoin = typeof(LeftJoin<SOShipmentKvExt, On<SOShipmentKvExt.recordID, Equal<SOShipment.noteID>,
+                      //                                                    And<SOShipmentKvExt.fieldName, Equal<AttrInvoiceNo>>>>),
+                      //SelectForFastIndexing = typeof(Select2<SOShipment, InnerJoin<PX.Objects.AR.Customer, On<SOShipment.customerID, Equal<PX.Objects.AR.Customer.bAccountID>>>>)
+                      //SelectForFastIndexing = typeof(Select2<SOShipment, InnerJoin<SOShipmentKvExt, On<SOShipmentKvExt.recordID, Equal<SOShipment.noteID>,
+                      //                                                                                 And<SOShipmentKvExt.fieldName, Equal<AttrInvoiceNo>>>>>)
+        )]
+        public virtual Guid? NoteID { get; set; }
+        public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
         #endregion
 
         #region CreatedByID

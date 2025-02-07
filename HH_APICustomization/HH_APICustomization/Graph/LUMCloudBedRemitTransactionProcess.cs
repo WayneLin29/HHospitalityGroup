@@ -565,7 +565,7 @@ namespace HH_APICustomization.Graph
                 this.Document.Cache.SetValueExt<LUMRemittance.hold>(doc, false);
                 this.Document.Update(doc);
                 // 如果沒有進入簽核則直接將狀態改為Approve
-                if (SelectFrom<EPApproval>.Where<EPApproval.refNoteID.IsEqual<P.AsGuid>>.View.Select(this, doc.Noteid).Count == 0)
+                if (SelectFrom<EPApproval>.Where<EPApproval.refNoteID.IsEqual<P.AsGuid>>.View.Select(this, doc.NoteID).Count == 0)
                 {
                     this.Document.Cache.SetValue<LUMRemittance.approved>(doc, true);
                     this.Document.Cache.SetValue<LUMRemittance.status>(doc, LUMRemitStatus.Open);
@@ -1103,7 +1103,7 @@ namespace HH_APICustomization.Graph
                 if (doc != null)
                 {
                     // 寫入Approval 
-                    e.Cache.SetValue<EPApproval.refNoteID>(e.Row, doc.Noteid);
+                    e.Cache.SetValue<EPApproval.refNoteID>(e.Row, doc.NoteID);
 
                     var requestContactobj = GetContactObject();
 
@@ -1145,6 +1145,7 @@ namespace HH_APICustomization.Graph
             watch.Start();
             // Load Cloudbed transaction data
             cloudbedGraph.TransacionFilter.Current = cloudbedGraph.TransacionFilter.Cache.CreateInstance() as TransactionFilter;
+            cloudbedGraph.TransacionFilter.Current.CloudBedPropertyID = (this.ClodBedPreference.View.SelectSingle() as LUMCloudBedPreference)?.CloudBedPropertyID;
             cloudbedGraph.TransacionFilter.Current.FromDate = Accessinfo.BusinessDate.Value.Date;
             cloudbedGraph.TransacionFilter.Current.ToDate = PX.Common.PXTimeZoneInfo.Now.AddDays(1).Date;
             cloudbedGraph.importTransactionData.Press();
@@ -1606,7 +1607,7 @@ namespace HH_APICustomization.Graph
         {
             var approvalRecord = SelectFrom<EPApproval>
                                  .Where<EPApproval.refNoteID.IsEqual<P.AsGuid>>
-                                 .View.Select(this, doc.Noteid).RowCast<EPApproval>().FirstOrDefault(x => x.Status == LUMRemitStatus.PendingApproval);
+                                 .View.Select(this, doc.NoteID).RowCast<EPApproval>().FirstOrDefault(x => x.Status == LUMRemitStatus.PendingApproval);
             if (approvalRecord != null)
             {
                 BAccount acct = SelectFrom<BAccount>
@@ -1625,7 +1626,7 @@ namespace HH_APICustomization.Graph
             if (SelectFrom<EPApproval>
                .Where<EPApproval.status.IsEqual<P.AsString>
                     .And<EPApproval.refNoteID.IsEqual<P.AsGuid>>>
-               .View.Select(this, LUMRemitStatus.PendingApproval, doc.Noteid).Count > 0 && doc.Status == LUMRemitStatus.Open)
+               .View.Select(this, LUMRemitStatus.PendingApproval, doc.NoteID).Count > 0 && doc.Status == LUMRemitStatus.Open)
             {
                 PXUpdate<Set<LUMRemittance.approved, Required<LUMRemittance.approved>,
                          Set<LUMRemittance.status, Required<LUMRemittance.status>>>,
@@ -1637,7 +1638,7 @@ namespace HH_APICustomization.Graph
         }
 
         public void RemoveApprovalHistory(LUMRemittance doc)
-            => PXDatabase.Delete<EPApproval>(new PXDataFieldRestrict<EPApproval.refNoteID>(doc?.Noteid));
+            => PXDatabase.Delete<EPApproval>(new PXDataFieldRestrict<EPApproval.refNoteID>(doc?.NoteID));
 
         /// <summary> Get Current PropertyID </summary>
         private string GetCurrentPropertyID()

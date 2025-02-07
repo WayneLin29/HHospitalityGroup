@@ -17,6 +17,11 @@
   <col name="LastModifiedDateTime" type="DateTime" />
   <col name="tstamp" type="Timestamp" />
   <col name="AuthResponseMessage" type="NVarChar(2048)" nullable="true" />
+  <col name="AccessTokenUrl" type="NVarChar(1024)" nullable="true" />
+  <col name="GetTransactionsUrl" type="NVarChar(1024)" nullable="true" />
+  <col name="GetReservationsUrl" type="NVarChar(1024)" nullable="true" />
+  <col name="GetReservationRateDetailsUrl" type="NVarChar(1024)" nullable="true" />
+  <col name="SubscribeWebhookUrl" type="NVarChar(1024)" nullable="true" />
   <index name="PK_LUMCloudBedPreference" clustered="true" primary="true" unique="true">
     <col name="CompanyID" />
   </index>

@@ -109,6 +109,7 @@
     <Compile Include="DAC_Extension\APTranExtension.cs" />
     <Compile Include="DAC_Extension\FADetailsExtension.cs" />
     <Compile Include="DAC_Extension\GLTranExtension.cs" />
+    <Compile Include="DAC_Extension\SearchCategoryExt.cs" />
     <Compile Include="DAC_Extension\UploadFileHHExt.cs" />
     <Compile Include="Descriptor\AssignmentMapType.cs" />
     <Compile Include="Descriptor\HHHelper.cs" />
