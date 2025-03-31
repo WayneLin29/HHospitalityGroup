@@ -531,7 +531,7 @@ namespace HH_APICustomization.Graph
         [PXString(IsUnicode = true)]
         [PXDefault("ImportTransaction")]
         [PXUIField(DisplayName = "Process type")]
-        [PXStringList(new string[] { "ImportTransaction", "ImportReservation", "CreateJournalTransaction" }, new string[] { "Import Transaction", "Import Reservation", "Create Journal Transaction" })]
+        [PXStringList(new string[] { "ImportTransaction", "ImportReservation" }, new string[] { "Import Transaction", "Import Reservation" })]
         public virtual string ProcessType { get; set; }
         public abstract class processType : PX.Data.BQL.BqlString.Field<processType> { }
 
