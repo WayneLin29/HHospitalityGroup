@@ -43,6 +43,7 @@ namespace HH_APICustomization.Graph
                 .And<Brackets<LUMCloudBedTransactions.remitRefNbr.IsNull>.Or<LUMCloudBedTransactions.remitRefNbr.IsEqual<LUMCloudBedTransactions.remitRefNbr.AsOptional>>>
                 .And<Brackets<LUMCloudBedTransactions.isImported.IsNull>.Or<LUMCloudBedTransactions.isImported.IsEqual<False>>>
                 .And<Brackets<LUMCloudBedTransactions.isDeleted.IsNull>.Or<LUMCloudBedTransactions.isDeleted.IsEqual<False>>>
+                .And<LUMCloudBedTransactions.transactionDateTime.IsLessEqual<LUMRemittance.date.FromCurrent>>
                 .And<Brackets<LUMCloudBedTransactions.houseAccountID.IsNotNull>.Or<LUMCloudBedTransactions.reservationID.IsNotNull>>>
               .View PendingTransactions;
 
