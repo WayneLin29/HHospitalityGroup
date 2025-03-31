@@ -1,5 +1,6 @@
 using System;
 using PX.Data;
+using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.GL;
 
 namespace HH_APICustomization.DAC
@@ -8,6 +9,16 @@ namespace HH_APICustomization.DAC
     [PXCacheName("LUMCloudBedTransactions")]
     public class LUMCloudBedTransactions : PXBqlTable, IBqlTable
     {
+
+        #region PK
+
+        public class PK : PrimaryKeyOf<LUMCloudBedTransactions>.By<propertyID, transactionID>
+        {
+            public static LUMCloudBedTransactions Find(PXGraph graph, string propertyID, string transactionID) => FindBy(graph, propertyID, transactionID);
+        }
+
+        #endregion
+
         #region Selected
         [PXBool()]
         [PXUIField(DisplayName = "Selected")]
@@ -37,7 +48,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region PropertyID
-        [PXDBString(50, IsUnicode = true, InputMask = "")]
+        [PXDBString(50, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Property ID")]
         public virtual string PropertyID { get; set; }
         public abstract class propertyID : PX.Data.BQL.BqlString.Field<propertyID> { }

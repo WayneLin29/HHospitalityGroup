@@ -417,6 +417,35 @@
         </px:PXFormView>
     </px:PXSmartPanel>
 
+    <%-- SYNC CLOUDBED TRANSACTION SMART PANEL --%>
+    <px:PXSmartPanel ID="CstQuickSyncPanel1" runat="server" Caption="SYNC Cloubed Transactions" CaptionVisible="True" LoadOnDemand="True" Key="QuickSync"
+        AutoCallBack-Target="PXQuickSyncFormView" AutoCallBack-Command="Refresh" CallBackMode-CommitChanges="True" CallBackMode-PostData="Page" Height="295px" Width="450px">
+
+        <px:PXLayoutRule runat="server" StartColumn="True" />
+
+        <px:PXFormView ID="PXQuickSyncFormView" runat="server" DataSourceID="ds" Width="100%" DataMember="QuickSync" CaptionVisible="False" SkinID="Transparent" Height="230px">
+            <Template>
+                <px:PXLayoutRule ID="QuickSyncFormLayout" runat="server" StartColumn="True" LabelsWidth="S" ControlSize="XM" />
+                <px:PXLayoutRule runat="server" Merge="True" />
+                <px:PXDateTimeEdit runat="server" ID="edFromDate_Date" DataField="FromDate_Date" Width="120px"></px:PXDateTimeEdit>
+                <px:PXDateTimeEdit runat="server" ID="edFromDate_Time" DataField="FromDate_Time" TimeMode="True" SuppressLabel="True"></px:PXDateTimeEdit>
+                <px:PXLayoutRule runat="server" Merge="True" ControlSize="XM" LabelsWidth="S" />
+                <px:PXDateTimeEdit runat="server" ID="edToDate_Date" DataField="ToDate_Date" Width="120px"></px:PXDateTimeEdit>
+                <px:PXDateTimeEdit runat="server" ID="edToDate_Time" DataField="ToDate_Time" TimeMode="True" SuppressLabel="True"></px:PXDateTimeEdit>
+                <px:PXLayoutRule runat="server" StartRow="true" LabelsWidth="S" ControlSize="XM"></px:PXLayoutRule>
+                <px:PXTextEdit runat="server" ID="edCloudBedPropertyID2" DataField="CloudBedPropertyID" Enabled="false"></px:PXTextEdit>
+                <px:PXTextEdit runat="server" ID="edQuickTransactionID2" DataField="TransactionID"></px:PXTextEdit>
+                <px:PXTextEdit runat="server" ID="edQuickReservationID2" DataField="ReservationID" CommitChanges="true"></px:PXTextEdit>
+            </Template>
+        </px:PXFormView>
+
+        <px:PXPanel runat="server" ID="CstQuickSYNCtSmartPanel2" SkinID="Buttons">
+            <px:PXButton runat="server" ID="QuickSyncOkBtn" CommitChanges="True" Text="SYNC" DialogResult="OK" CommandSourceID="ds" SyncVisible="True" Height="20" CommandName="GoSYNCOk" />
+            <px:PXButton ID="PXButton5" runat="server" DialogResult="Cancel" Text="Cancel" Height="20" />
+        </px:PXPanel>
+
+    </px:PXSmartPanel>
+
     <style type="text/css">
         .GridAquamarine {
             background-color: aquamarine !important;

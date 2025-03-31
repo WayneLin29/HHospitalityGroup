@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace HH_APICustomization.APIHelper
 {
@@ -81,18 +82,35 @@ namespace HH_APICustomization.APIHelper
         }
 
         /// <summary> Get TransactionData </summary>
-        public static List<HH_APICustomization.Entity.Transaction> GetTransactionData(DateTime fromDate, DateTime toDate, string propertyID)
+        public static List<HH_APICustomization.Entity.Transaction> GetTransactionData(TransactionFilter filter)
         {
             var accessToken = UpdateAccessToken();
             var preference = GetCloudBedAPIPreference();
             try
             {
                 int pageNumber = 1;
+                var parm = new Dictionary<string, string>();
+                parm.Add("includeDeleted", "true");
+                parm.Add("sortBy", "transactionDateTime");
+                parm.Add("orderBy", "desc");
+                parm.Add("pageSize", "100");
+                parm.Add("pageNumber", pageNumber.ToString());
+                parm.Add("modifiedFrom", filter?.FromDate.Value.ToString("yyyy-MM-dd"));
+                parm.Add("modifiedTo", filter?.ToDate.Value.ToString("yyyy-MM-dd"));
+                if (!string.IsNullOrEmpty(filter?.CloudBedPropertyID))
+                    parm.Add("propertyID", filter?.CloudBedPropertyID);
+                if (!string.IsNullOrEmpty(filter?.ReservationID))
+                    parm.Add("reservationID", filter?.ReservationID);
+                if (!string.IsNullOrEmpty(filter?.TransactionID))
+                    parm.Add("transactionIDs", filter?.TransactionID);
+
                 var transactionData = new List<HH_APICustomization.Entity.Transaction>();
-                var url = $"{preference?.GetTransactionsUrl}?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
+                var url = BuildCloudbedAPIUrl(preference?.GetTransactionsUrl, parm);
                 PXTrace.WriteInformation($"Get Transaction Data : {url}");
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 var transactionEntity = JsonConvert.DeserializeObject<CloudBed_TransactionEntity>(response.Content.ReadAsStringAsync().Result);
+                if (transactionEntity.total == 0)
+                    return transactionData;
                 transactionData.AddRange(transactionEntity.data);
                 var total = transactionEntity.total;
                 // 重複抓取資料直到全抓
@@ -101,7 +119,8 @@ namespace HH_APICustomization.APIHelper
                     int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                     for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                     {
-                        url = $"{preference?.GetTransactionsUrl}?includeDeleted=true&sortBy=transactionDateTime&orderBy=desc&pageSize=100&pageNumber={pageNumber}&modifiedFrom={fromDate.ToString("yyyy-MM-dd")}&modifiedTo={toDate.ToString("yyyy-MM-dd")}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
+                        parm["pageNumber"] = pageNumber.ToString();
+                        url = BuildCloudbedAPIUrl(preference?.GetTransactionsUrl, parm);
                         response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                         transactionEntity = JsonConvert.DeserializeObject<CloudBed_TransactionEntity>(response.Content.ReadAsStringAsync().Result);
                         transactionData.AddRange(transactionEntity.data);
@@ -111,13 +130,12 @@ namespace HH_APICustomization.APIHelper
             }
             catch (Exception ex)
             {
-                PXTrace.WriteError(ex.Message);
-                return null;
+                throw ex;
             }
         }
 
         /// <summary> Get Reservation </summary>
-        public static List<HH_APICustomization.Entity.Reservation> GetReservationData(DateTime fromDate, DateTime toDate, string propertyID)
+        public static List<HH_APICustomization.Entity.Reservation> GetReservationData(ReservationFilter filter)
         {
             var accessToken = UpdateAccessToken();
             var preference = GetCloudBedAPIPreference();
@@ -125,8 +143,17 @@ namespace HH_APICustomization.APIHelper
             {
                 // 查詢Reservation 因沒給Property，故實區統一為UTC+0
                 int pageNumber = 1;
+                var parm = new Dictionary<string, string>();
+                parm.Add("pageSize", "100");
+                parm.Add("pageNumber", pageNumber.ToString());
+                parm.Add("modifiedFrom", filter.ReservationFromDate.Value.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss"));
+                parm.Add("modifiedTo", filter.ReservationToDate.Value.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss"));
+                if (!string.IsNullOrEmpty(filter?.CloudBedPropertyID))
+                    parm.Add("propertyID", filter?.CloudBedPropertyID);
+                if (!string.IsNullOrEmpty(filter?.ReservationID))
+                    parm.Add("reservationID", filter?.ReservationID);
                 var reservationData = new List<HH_APICustomization.Entity.Reservation>();
-                var url = $"{preference?.GetReservationsUrl}?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
+                var url = BuildCloudbedAPIUrl(preference?.GetReservationsUrl, parm);
                 PXTrace.WriteInformation($"Get Reservation Data : {url}");
                 HttpResponseMessage response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -140,7 +167,8 @@ namespace HH_APICustomization.APIHelper
                     int totalPage = total % 100 == 0 ? total / 100 : total / 100 + 1;
                     for (pageNumber = 2; pageNumber <= totalPage; pageNumber++)
                     {
-                        url = url = $"{preference?.GetReservationsUrl}?modifiedFrom={fromDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&modifiedTo={toDate.AddHours(-8).ToString("yyyy-MM-dd HH:mm:ss")}&pageSize=100&pageNumber={pageNumber}{(string.IsNullOrEmpty(propertyID) ? "" : "&propertyID=" + propertyID)}";
+                        parm["pageNumber"] = pageNumber.ToString();
+                        url = BuildCloudbedAPIUrl(preference?.GetReservationsUrl, parm);
                         response = SendAPIRequest(url, accessToken, HttpMethod.Get);
                         reservationEntity = JsonConvert.DeserializeObject<CloudBed_ReservationEntity>(response.Content.ReadAsStringAsync().Result);
                         reservationData.AddRange(reservationEntity.data);
@@ -321,6 +349,27 @@ namespace HH_APICustomization.APIHelper
             return match;
         }
 
+        public static string BuildCloudbedAPIUrl(string baseUrl, Dictionary<string, string> additionalParams = null)
+        {
+            var queryParams = HttpUtility.ParseQueryString(string.Empty);
+
+            // 加入額外參數
+            if (additionalParams != null)
+            {
+                foreach (var param in additionalParams)
+                {
+                    if (!string.IsNullOrWhiteSpace(param.Key))
+                        queryParams[param.Key] = param.Value;
+                }
+            }
+
+            var builder = new UriBuilder(baseUrl)
+            {
+                Query = queryParams.ToString()
+            };
+
+            return builder.ToString();
+        }
         private static LUMCloudBedAPIPreference GetCloudBedAPIPreference()
             => SelectFrom<LUMCloudBedAPIPreference>.View.Select(new PX.Data.PXGraph()).TopFirst;
 

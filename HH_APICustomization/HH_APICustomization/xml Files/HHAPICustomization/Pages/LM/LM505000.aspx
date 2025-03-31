@@ -21,9 +21,11 @@
                             <px:PXDateTimeEdit runat="server" ID="edFromDate" DataField="FromDate" Width="180px"></px:PXDateTimeEdit>
                             <px:PXDateTimeEdit runat="server" ID="edToDate" DataField="ToDate" Width="180px"></px:PXDateTimeEdit>
                             <px:PXDropDown runat="server" ID="edProcessType" DataField="ProcessType" Width="200px"></px:PXDropDown>
-                            <px:PXCheckBox runat="server" ID="IsImported" DataField="IsImported" CommitChanges="True"></px:PXCheckBox>
+                            <%--<px:PXCheckBox runat="server" ID="IsImported" DataField="IsImported" CommitChanges="True"></px:PXCheckBox>--%>
                             <px:PXLayoutRule runat="server" ColumnWidth="M" ControlSize="M" StartColumn="true"></px:PXLayoutRule>
                             <px:PXSelector runat="server" ID="edCloudBedPropertyID" DataField="CloudBedPropertyID" CommitChanges="true"></px:PXSelector>
+                            <px:PXTextEdit runat="server" ID="edReservationID1" DataField="ReservationID"></px:PXTextEdit>
+                            <px:PXTextEdit runat="server" ID="edTransactionID2" DataField="TransactionID"></px:PXTextEdit>
                         </Template>
                     </px:PXFormView>
                     <px:PXGrid AllowPaging="True" AdjustPageSize="Auto" SyncPosition="True" ID="TransactionGrid" runat="server" DataSourceID="ds" Width="100%" Height="100%" SkinID="Details" AllowAutoHide="false">
@@ -79,7 +81,7 @@
             </px:PXTabItem>
             <px:PXTabItem Text="Reservation">
                 <Template>
-                    <px:PXFormView ID="ReservationForm" runat="server" DataSourceID="ds" DataMember="ReservationFilter" Width="100%" Height="80px" AllowAutoHide="false">
+                    <px:PXFormView ID="ReservationForm" runat="server" DataSourceID="ds" DataMember="ReservationFilter" Width="100%" Height="120px" AllowAutoHide="false">
                         <Template>
                             <px:PXLayoutRule runat="server" Merge="True" ControlSize="XM" LabelsWidth="S" />
                             <px:PXDateTimeEdit runat="server" ID="edReservationFromDate_Date" DataField="ReservationFromDate_Date" Width="120px"></px:PXDateTimeEdit>
@@ -87,6 +89,8 @@
                             <px:PXLayoutRule runat="server" Merge="True" ControlSize="XM" LabelsWidth="S" />
                             <px:PXDateTimeEdit runat="server" ID="edReservationToDate_Date" DataField="ReservationToDate_Date" Width="120px"></px:PXDateTimeEdit>
                             <px:PXDateTimeEdit runat="server" ID="edReservationToDate_Time" DataField="ReservationToDate_Time" TimeMode="True" SuppressLabel="True"></px:PXDateTimeEdit>
+                            <px:PXLayoutRule runat="server" StartRow="true" LabelsWidth="S" ControlSize="XM"></px:PXLayoutRule>
+                            <px:PXTextEdit runat="server" ID="edReservationID3" DataField="ReservationID"></px:PXTextEdit>
                         </Template>
                     </px:PXFormView>
                     <px:PXGrid AllowPaging="True" AdjustPageSize="Auto" SyncPosition="True" ID="ReservationsGrid" runat="server" DataSourceID="ds" Width="100%" Height="100%" SkinID="Details" AllowAutoHide="false">

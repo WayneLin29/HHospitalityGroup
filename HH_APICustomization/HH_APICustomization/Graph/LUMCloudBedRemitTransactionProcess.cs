@@ -18,9 +18,13 @@ using PX.SM;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using PX.Objects.IN.WMS;
+using PX.Objects.AR;
+using PX.Objects.SO;
+using PX.Common;
 
 namespace HH_APICustomization.Graph
 {
+    /// <summary> ScreenID = LM505006.aspx </summary>
     public class LUMCloudBedRemitTransactionProcess : PXGraph<LUMCloudBedRemitTransactionProcess, LUMRemittance>
     {
         #region Hidden BQL View
@@ -142,7 +146,11 @@ namespace HH_APICustomization.Graph
 
         public PXFilter<LUMShowSystemPostFilter> FolioFilter;
 
+        [PXCopyPasteHiddenView]
         public PXFilter<LUMBatchUpdateAcctFilter> QuickAccountDetermine;
+
+        [PXCopyPasteHiddenView]
+        public PXFilter<LUMRemittanceQuickSYNC> QuickSync;
 
         [PXViewName("Approval Remit")]
         public EPApprovalAutomation<LUMRemittance, LUMRemittance.approved, LUMRemittance.rejected, LUMRemittance.hold, LUMRemitRequestApproval> Approval;
@@ -493,6 +501,8 @@ namespace HH_APICustomization.Graph
         [PXUIField(DisplayName = "SYNC", MapEnableRights = PXCacheRights.Select)]
         public virtual IEnumerable sync(PXAdapter adapter)
         {
+            if (AskQuickSYNCDialog("SYNC Cloudbed transactions") != WebDialogResult.OK)
+                return adapter.Get();
             PXLongOperation.StartOperation(this, () =>
             {
                 ReloadCloudBedData();
@@ -928,6 +938,12 @@ namespace HH_APICustomization.Graph
             return adapter.Get();
         }
 
+        public PXAction<ARInvoice> GoSyncOk;
+        [PXUIField(DisplayName = "SYNC", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
+        [PXButton(DisplayOnMainToolbar = false)]
+        protected virtual IEnumerable goSyncOk(PXAdapter adapter)
+            => adapter.Get();
+
         #region Audit Action
 
         /// <summary> AUDIT TOGGLE OUT transaction </summary>
@@ -1134,20 +1150,49 @@ namespace HH_APICustomization.Graph
             }
         }
 
+        public virtual void _(Events.RowSelected<LUMRemittanceQuickSYNC> e)
+        {
+            var hasError = false;
+            foreach (string field in e.Cache.Fields)
+            {
+                PXUIFieldAttribute pXUIFieldAttribute = QuickSync.Cache.GetAttributesReadonly(e.Row, field).OfType<PXUIFieldAttribute>().FirstOrDefault();
+                if ((pXUIFieldAttribute != null && pXUIFieldAttribute.ErrorLevel.IsIn(PXErrorLevel.Error, PXErrorLevel.RowError)) || (pXUIFieldAttribute != null && pXUIFieldAttribute.Required && QuickSync.Cache.GetValue(e.Row, field).IsIn(null, 0m)))
+                {
+                    hasError = true;
+                }
+            }
+            if (string.IsNullOrEmpty(e.Row.ReservationID))
+                hasError = true;
+            this.GoSyncOk.SetEnabled(!hasError);
+        }
+
+        public virtual void _(Events.FieldVerifying<LUMRemittanceQuickSYNC.reservationID> e)
+        {
+            if (string.IsNullOrEmpty((string)e.NewValue))
+                e.Cache.RaiseExceptionHandling<LUMRemittanceQuickSYNC.reservationID>(e.Row, e.NewValue,
+                    new PXSetPropertyException(e.Cache.ActiveRow, "Reservation ID is mandatory.", PXErrorLevel.Error));
+        }
+
         #endregion
 
         #region Method
         /// <summary> 重新載入 Cloudbed API 資料</summary>
         public virtual void ReloadCloudBedData()
         {
+            var syncFilter = this.QuickSync.Current;
+            if (string.IsNullOrEmpty(syncFilter.ReservationID))
+                throw new PXException("ReservationID is mandatory.");
+
             var cloudbedGraph = PXGraph.CreateInstance<LUMCloudBedTransactionProcess>();
             var watch = Stopwatch.StartNew();
             watch.Start();
             // Load Cloudbed transaction data
             cloudbedGraph.TransacionFilter.Current = cloudbedGraph.TransacionFilter.Cache.CreateInstance() as TransactionFilter;
-            cloudbedGraph.TransacionFilter.Current.CloudBedPropertyID = (this.ClodBedPreference.View.SelectSingle() as LUMCloudBedPreference)?.CloudBedPropertyID;
-            cloudbedGraph.TransacionFilter.Current.FromDate = Accessinfo.BusinessDate.Value.Date;
-            cloudbedGraph.TransacionFilter.Current.ToDate = PX.Common.PXTimeZoneInfo.Now.AddDays(1).Date;
+            cloudbedGraph.TransacionFilter.Current.CloudBedPropertyID = syncFilter.CloudBedPropertyID;
+            cloudbedGraph.TransacionFilter.Current.FromDate = syncFilter.FromDate;
+            cloudbedGraph.TransacionFilter.Current.ToDate = syncFilter.ToDate;
+            cloudbedGraph.TransacionFilter.Current.TransactionID = syncFilter.TransactionID;
+            cloudbedGraph.TransacionFilter.Current.ReservationID = syncFilter.ReservationID;
             cloudbedGraph.importTransactionData.Press();
             watch.Stop();
             PXTrace.WriteInformation($"Finfish Get ClodbedTransaction via API :{watch.ElapsedMilliseconds}");
@@ -1155,8 +1200,9 @@ namespace HH_APICustomization.Graph
             watch.Restart();
             // Load Cloudbed reservation data
             cloudbedGraph.ReservationFilter.Current = cloudbedGraph.ReservationFilter.Cache.CreateInstance() as ReservationFilter;
-            cloudbedGraph.ReservationFilter.Current.ReservationFromDate = Accessinfo.BusinessDate.Value.Date;
-            cloudbedGraph.ReservationFilter.Current.ReservationToDate = PX.Common.PXTimeZoneInfo.Now.AddDays(1).Date;
+            cloudbedGraph.ReservationFilter.Current.ReservationFromDate = syncFilter.FromDate;
+            cloudbedGraph.ReservationFilter.Current.ReservationToDate = syncFilter.ToDate;
+            cloudbedGraph.ReservationFilter.Current.ReservationID = syncFilter.ReservationID;
             cloudbedGraph.importReservationData.Press();
             watch.Stop();
             PXTrace.WriteInformation($"Finfish Get Reservation via API :{watch.ElapsedMilliseconds}");
@@ -1912,6 +1958,55 @@ namespace HH_APICustomization.Graph
             return 5;
         }
 
+        /// <summary> Open Quick SYNC Panel </summary>
+        protected virtual WebDialogResult AskQuickSYNCDialog(string header)
+        {
+            try
+            {
+                string header2 = PXMessages.LocalizeNoPrefix(header);
+                WebDialogResult webDialogResult = this.QuickSync.View.AskExtWithHeader(header2, InitializeSYNCPanel);
+                switch (webDialogResult)
+                {
+                    case WebDialogResult.No:
+                        return WebDialogResult.OK;
+                    case WebDialogResult.Yes:
+                        return WebDialogResult.OK;
+                    case WebDialogResult.Abort:
+                        return WebDialogResult.OK;
+                    default:
+                        return webDialogResult;
+                }
+            }
+            catch (PXBaseRedirectException ex)
+            {
+                ex.RepaintControls = true;
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Initial Quick SYNC panel
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="viewName"></param>
+        protected virtual void InitializeSYNCPanel(PXGraph graph, string viewName)
+        {
+            ClearQuickSYNC(this.QuickSync.Current);
+            this.QuickSync.Current.FromDate = PX.Common.PXTimeZoneInfo.Now;
+            this.QuickSync.Current.ToDate = PX.Common.PXTimeZoneInfo.Now.AddHours(-1);
+            this.QuickSync.Current.CloudBedPropertyID = (this.ClodBedPreference.View.SelectSingle() as LUMCloudBedPreference)?.CloudBedPropertyID;
+        }
+
+        protected virtual void ClearQuickSYNC(LUMRemittanceQuickSYNC filter)
+        {
+            filter.FromDate = null;
+            filter.ToDate = null;
+            filter.CloudBedPropertyID = null;
+            filter.TransactionID = null;
+            filter.ReservationID = null;
+            this.QuickSync.Update(filter);
+        }
+
         #endregion
 
     }
@@ -2142,6 +2237,51 @@ namespace HH_APICustomization.Graph
                     SubstituteKey = typeof(Sub.subCD))]
         public virtual int? SubAccountID { get; set; }
         public abstract class subAccountID : PX.Data.BQL.BqlInt.Field<subAccountID> { }
+        #endregion
+    }
+
+    [Serializable]
+    public class LUMRemittanceQuickSYNC : PXBqlTable, IBqlTable
+    {
+        #region FromDate
+        [PXDateAndTime(DisplayMask = "g", InputMask = "g")]
+        [PXDefault]
+        [PXUIField(DisplayName = "Transaction From")]
+        public virtual DateTime? FromDate { get; set; }
+        public abstract class fromDate : PX.Data.BQL.BqlDateTime.Field<fromDate> { }
+        #endregion
+
+        #region ToDate
+        [PXDateAndTime(DisplayMask = "g", InputMask = "g")]
+        [PXDefault]
+        [PXUIField(DisplayName = "Transaction To")]
+        public virtual DateTime? ToDate { get; set; }
+        public abstract class toDate : PX.Data.BQL.BqlDateTime.Field<toDate> { }
+        #endregion
+
+        #region CloudBedPropertyID
+        [PXString(50, IsUnicode = true, InputMask = "")]
+        [PXDefault]
+        [PXSelector(typeof(Search<LUMCloudBedPreference.cloudBedPropertyID>),
+                    typeof(LUMCloudBedPreference.branchID))]
+        [PXUIField(DisplayName = "Property ID", Enabled = false)]
+        public virtual string CloudBedPropertyID { get; set; }
+        public abstract class cloudBedPropertyID : PX.Data.BQL.BqlString.Field<cloudBedPropertyID> { }
+        #endregion
+
+        #region ReservationID
+        [PXDefault]
+        [PXString(50, IsUnicode = true)]
+        [PXUIField(DisplayName = "Reservation ID")]
+        public virtual string ReservationID { get; set; }
+        public abstract class reservationID : PX.Data.BQL.BqlString.Field<reservationID> { }
+        #endregion
+
+        #region TransactionID
+        [PXString(50, IsUnicode = true)]
+        [PXUIField(DisplayName = "Transaction ID")]
+        public virtual string TransactionID { get; set; }
+        public abstract class transactionID : PX.Data.BQL.BqlString.Field<transactionID> { }
         #endregion
     }
 

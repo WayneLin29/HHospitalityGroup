@@ -48,6 +48,7 @@ namespace HH_APICustomization.Entity
         public string parentTransactionID { get; set; }
         public string cardType { get; set; }
         public bool isDeleted { get; set; }
+        public string accountingID { get;set;}
     }
 
    
