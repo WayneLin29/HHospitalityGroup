@@ -357,5 +357,13 @@ namespace HH_APICustomization.DAC
         public virtual string RemitRefNbr { get; set; }
         public abstract class remitRefNbr : PX.Data.BQL.BqlString.Field<remitRefNbr> { }
         #endregion
+
+        #region BranchID
+        [Branch(typeof(PX.Objects.AP.APRegister.branchID))]
+        [PXDefault(typeof(AccessInfo.branchID), PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Branch")]
+        public virtual int? BranchID { get; set; }
+        public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
+        #endregion
     }
 }

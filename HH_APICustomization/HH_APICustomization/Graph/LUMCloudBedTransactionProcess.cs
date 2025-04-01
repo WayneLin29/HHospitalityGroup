@@ -178,43 +178,13 @@ namespace HH_APICustomization.Graph
                             if (mapReservation == null && long.TryParse(row.ReservationID, out validReservation))
                                 throw new PXException("Can not Mapping Reservation Data!!");
 
+                            winnerAcctMapInfo = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, row, true);
+
                             #region RuleA
-                            int maxScore = 0;                                 // 最高分
-                            var sameScoureList = new List<int>();             // 相同分數清單
-                            var target = new LUMCloudBedAccountMapping()
-                            {
-                                CloudBedPropertyID = row?.PropertyID,
-                                TransCategory = row?.Category,
-                                HouseAccount = row?.HouseAccountID?.ToString(),
-                                TransactionCode = row?.TransactionCode,
-                                Description = row?.Description,
-                                Source = mapReservation?.Source
-                            };  // 比對目標
-                            winnerAcctMapInfo = null;// 最高分物件
-                                                     // Compare Account Mapping
-                            foreach (var acctMapRow in AcctMapAData)
-                            {
-                                // 只比對相同PropertyID
-                                if (acctMapRow.CloudBedPropertyID != target.CloudBedPropertyID)
-                                    continue;
-                                var matchScore = CloudBedHelper.CompareProps(target, acctMapRow);
-                                if (matchScore > maxScore)
-                                {
-                                    sameScoureList.Clear();
-                                    winnerAcctMapInfo = acctMapRow;
-                                    maxScore = matchScore;
-                                    sameScoureList.Add(acctMapRow.SequenceID.Value);
-                                }
-                                else if (matchScore == maxScore)
-                                    sameScoureList.Add(acctMapRow.SequenceID.Value);
-                            }
-                            if (winnerAcctMapInfo == null)
-                                throw new PXException(" No Account Mapping Found. Please maintain the combination in Preference.");
-                            if (sameScoureList.Count > 1)
-                                throw new PXException($" No Account Mapping Found. Please maintain the combination in Preference ID: {string.Join(",", sameScoureList)}.");
                             var line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
                             line.AccountID = winnerAcctMapInfo?.AccountID;
                             line.SubID = winnerAcctMapInfo?.SubAccountID;
+                            line.BranchID = winnerAcctMapInfo?.BranchID;
                             line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
                             if (line.RefNbr.Length > 15)
                                 line.RefNbr = line?.RefNbr.Substring(0, 15);
@@ -232,6 +202,7 @@ namespace HH_APICustomization.Graph
                             line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
                             line.AccountID = mapCloudbedProerty?.ClearingAcct;
                             line.SubID = mapCloudbedProerty?.ClearingSub;
+                            //line.BranchID = mapCloudbedProerty?.BranchID;
                             line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
                             if (line.RefNbr.Length > 15)
                                 line.RefNbr = line?.RefNbr?.Substring(0, 15);

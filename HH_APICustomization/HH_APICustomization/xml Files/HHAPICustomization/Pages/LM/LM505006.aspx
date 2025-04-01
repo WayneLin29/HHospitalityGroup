@@ -92,6 +92,7 @@
                                     <px:PXGridColumn DataField="TransactionID" Width="150px" AllowUpdate="False"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="ReservationID" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="RemitRefNbr" Width="150px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="BranchID" Width="120px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="HouseAccountName" Width="200px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="GuestName" Width="180px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="LUMCloudBedReservations__Source" Width="150px"></px:PXGridColumn>
@@ -119,6 +120,7 @@
                                     <px:PXSelector runat="server" ID="edPmtAccountID" DataField="AccountID"></px:PXSelector>
                                     <px:PXSelector runat="server" ID="edPmtSubAcoountID" DataField="SubAccountID"></px:PXSelector>
                                     <px:PXSelector runat="server" ID="edPmtToggleByID" DataField="ToggleByID" Enabled="false"></px:PXSelector>
+                                    <px:PXSelector runat="server" ID="edPmtBranchID" DataField="BranchID"></px:PXSelector>
                                     <px:PXDateTimeEdit runat="server" ID="edPmtToggleDateTime" DataField="ToggleDateTime" Enabled="false"></px:PXDateTimeEdit>
                                 </RowTemplate>
                             </px:PXGridLevel>
@@ -203,6 +205,7 @@
                                     <px:PXGridColumn DataField="TransactionID" Width="150px" AllowUpdate="False"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="ReservationID" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="RemitRefNbr" Width="200px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="BranchID" Width="120px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Description" Width="180px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="DebitAmount" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="CreditAmount" Width="150px"></px:PXGridColumn>
@@ -229,6 +232,7 @@
                                     <px:PXSelector runat="server" ID="edFolieAccountID" DataField="AccountID"></px:PXSelector>
                                     <px:PXSelector runat="server" ID="edFolieSubAcoountID" DataField="SubAccountID"></px:PXSelector>
                                     <px:PXSelector runat="server" ID="edFolieToggleByID" DataField="ToggleByID" Enabled="false"></px:PXSelector>
+                                    <px:PXSelector runat="server" ID="edFolieBranchID" DataField="BranchID"></px:PXSelector>
                                     <px:PXDateTimeEdit runat="server" ID="edFolieToggleDateTime" DataField="ToggleDateTime" Enabled="false"></px:PXDateTimeEdit>
                                 </RowTemplate>
                             </px:PXGridLevel>
@@ -246,7 +250,7 @@
                             <px:PXCheckBox ID="edFolioFilterShowPost" runat="server" DataField="ShowPost" CommitChanges="True"></px:PXCheckBox>
                         </Template>
                     </px:PXFormView>
-                    <px:PXGrid ID="gridFolio" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="400px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="FolioTrans_RowDataBound">
+                    <px:PXGrid ID="gridFolio" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="300px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="FolioTrans_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="TOGGLE OUT">
@@ -274,6 +278,7 @@
                                     <px:PXGridColumn DataField="TransactionID" Width="150px" AllowUpdate="False"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="ReservationID" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="RemitRefNbr" Width="200px"></px:PXGridColumn>
+                                    <px:PXGridColumn DataField="BranchID" Width="120px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="Description" Width="180px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="DebitAmount" Width="150px"></px:PXGridColumn>
                                     <px:PXGridColumn DataField="CreditAmount" Width="150px"></px:PXGridColumn>
@@ -300,12 +305,13 @@
                                     <px:PXSelector runat="server" ID="edResAccountID" DataField="AccountID"></px:PXSelector>
                                     <px:PXSelector runat="server" ID="edResSubAcoountID" DataField="SubAccountID"></px:PXSelector>
                                     <px:PXSelector runat="server" ID="edResToggleByID" DataField="ToggleByID" Enabled="false"></px:PXSelector>
+                                    <px:PXSelector runat="server" ID="edResBranchID" DataField="BranchID"></px:PXSelector>
                                     <px:PXDateTimeEdit runat="server" ID="edResToggleDateTime" DataField="ToggleDateTime" Enabled="false"></px:PXDateTimeEdit>
                                 </RowTemplate>
                             </px:PXGridLevel>
                         </Levels>
                         <Mode AllowAddNew="False" AllowDelete="False" InitNewRow="False" />
-                        <AutoSize Enabled="true" />
+                        <AutoSize Enabled="true" MinHeight="300" />
                     </px:PXGrid>
                 </Template>
             </px:PXTabItem>

@@ -142,5 +142,13 @@ namespace HH_APICustomization.DAC
         public virtual byte[] Tstamp { get; set; }
         public abstract class tstamp : PX.Data.BQL.BqlByteArray.Field<tstamp> { }
         #endregion
+
+        #region BranchID
+        [Branch(typeof(PX.Objects.AP.APRegister.branchID))]
+        [PXDefault(typeof(AccessInfo.branchID))]
+        [PXUIField(DisplayName = "Branch")]
+        public virtual int? BranchID { get; set; }
+        public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
+        #endregion
     }
 }

@@ -25,6 +25,7 @@
             <px:PXGridLevel DataMember="AccountMapping">
                 <Columns>
                     <px:PXGridColumn DataField="SequenceID"></px:PXGridColumn>
+                    <px:PXGridColumn DataField="BranchID"></px:PXGridColumn>
                     <px:PXGridColumn DataField="CloudBedPropertyID" CommitChanges="true" />
                     <px:PXGridColumn DataField="Type" />
                     <px:PXGridColumn DataField="TransCategory" />
@@ -37,6 +38,7 @@
                 </Columns>
                 <RowTemplate>
                     <px:PXSelector runat="server" ID="edCloudBedPropertyIDMap" DataField="CloudBedPropertyID"></px:PXSelector>
+                    <px:PXSelector runat="server" ID="edBranchID" DataField="BranchID"></px:PXSelector>
                     <px:PXSelector runat="server" ID="edAccountIDMap" DataField="AccountID"></px:PXSelector>
                     <px:PXSelector runat="server" ID="edSubAccountIDMap" DataField="SubAccountID"></px:PXSelector>
                 </RowTemplate>

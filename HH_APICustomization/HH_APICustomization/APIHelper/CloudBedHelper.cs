@@ -290,52 +290,46 @@ namespace HH_APICustomization.APIHelper
                                 .Where<LUMCloudBedReservations.propertyID.IsEqual<P.AsString>
                                   .And<LUMCloudBedReservations.reservationID.IsEqual<P.AsString>>>
                                 .View.Select(baseGraph, selectedData?.PropertyID, selectedData?.ReservationID).TopFirst;
-
-            #region RuleA
-            int maxScore = 0;                                 // 最高分
-            var sameScoureList = new List<int>();             // 相同分數清單
-            var target = new LUMCloudBedAccountMapping()
-            {
-                CloudBedPropertyID = selectedData?.PropertyID,
-                TransCategory = selectedData?.Category,
-                HouseAccount = selectedData?.HouseAccountID?.ToString(),
-                TransactionCode = selectedData?.TransactionCode,
-                Description = selectedData?.Description,
-                Source = mapReservation?.Source
-            };  // 比對目標
             LUMCloudBedAccountMapping winnerAcctMapInfo = null;
-            // Compare Account Mapping
-            foreach (var acctMapRow in AcctMapAData)
+            // Accoumt mapping conditions
+            var conditions = new Func<LUMCloudBedAccountMapping, bool>[]
             {
-                // 只比對相同PropertyID
-                if (acctMapRow.CloudBedPropertyID != target.CloudBedPropertyID)
-                    continue;
-                var matchScore = CompareProps(target, acctMapRow);
-                if (matchScore > maxScore)
-                {
-                    sameScoureList.Clear();
-                    winnerAcctMapInfo = acctMapRow;
-                    maxScore = matchScore;
-                    sameScoureList.Add(acctMapRow.SequenceID.Value);
-                }
-                else if (matchScore == maxScore)
-                    sameScoureList.Add(acctMapRow.SequenceID.Value);
+                // 1.Trans Category + Desc + House Account
+                x => x.TransCategory == selectedData.TransactionCategory &&
+                     x.Description == selectedData.Description &&
+                     x.HouseAccount == selectedData.HouseAccountID?.ToString(),
+                // 2.Trans Category +Desc
+                x => x.TransCategory == selectedData.TransactionCategory &&
+                     x.Description == selectedData.Description,
+                // 3.Trans Category + Transation Code + House Account
+                x => x.TransCategory == selectedData.TransactionCategory &&
+                     x.TransactionCode == selectedData.TransactionCode &&
+                     x.HouseAccount == selectedData.HouseAccountID?.ToString(),
+                // 4.Trans Category + Transation Code
+                x => x.TransCategory == selectedData.TransactionCategory &&
+                     x.TransactionCode == selectedData.TransactionCode,
+                // 5.Trans Category + Source
+                 x => x.TransCategory == selectedData.TransactionCategory &&
+                      x.Source == mapReservation?.Source
+            };
+
+            foreach (var condition in conditions)
+            {
+                winnerAcctMapInfo = AcctMapAData.FirstOrDefault(condition);
+                if (winnerAcctMapInfo != null)
+                    return winnerAcctMapInfo;
             }
             try
             {
                 if (winnerAcctMapInfo == null)
                     throw new PXException(" No Account Mapping Found. Please maintain the combination in Preference.");
-                if (sameScoureList.Count > 1)
-                    throw new PXException($" No Account Mapping Found. Please maintain the combination in Preference ID: {string.Join(",", sameScoureList)}.");
             }
             catch (Exception ex)
             {
                 if (IsThrowException)
                     throw ex;
             }
-
             return winnerAcctMapInfo;
-            #endregion
         }
 
         public static int CompareProps(LUMCloudBedAccountMapping target, LUMCloudBedAccountMapping source)

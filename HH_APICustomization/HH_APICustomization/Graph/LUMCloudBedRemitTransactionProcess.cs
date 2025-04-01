@@ -16,10 +16,7 @@ using PX.Objects.EP;
 using HH_APICustomization.Descriptor;
 using PX.SM;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using PX.Objects.IN.WMS;
 using PX.Objects.AR;
-using PX.Objects.SO;
 using PX.Common;
 
 namespace HH_APICustomization.Graph
@@ -399,6 +396,7 @@ namespace HH_APICustomization.Graph
                         {
                             pendingItem.AccountID = mapAccountInfo?.AccountID;
                             pendingItem.SubAccountID = mapAccountInfo?.SubAccountID;
+                            pendingItem.BranchID = mapAccountInfo?.BranchID;
                         }
                     }
                     pendingItem.RemitRefNbr = _refNbr;
@@ -819,7 +817,22 @@ namespace HH_APICustomization.Graph
             #endregion
             PXLongOperation.StartOperation(this, () =>
             {
+                bool isvalid = true;
                 var selectedData = this.RemitTransactions.View.SelectMulti().RowCast<LUMCloudBedTransactions>();
+
+                foreach (var item in selectedData)
+                {
+                    if (!item.BranchID.HasValue)
+                    {
+                        this.RemitTransactions.Cache.RaiseExceptionHandling<LUMCloudBedTransactions.branchID>(item, item.BranchID,
+                            new PXSetPropertyException(item, "BranchID is mandatory.", PXErrorLevel.Error));
+                        isvalid = false;
+                    }
+                }
+
+                if (!isvalid)
+                    throw new PXSetPropertyException<LUMCloudBedTransactions.branchID>("BranchID is mandatory.", PXErrorLevel.Error);
+
                 CreateJournalTransaction(this, selectedData.ToList());
                 this.Save.Press();
             });
@@ -931,6 +944,7 @@ namespace HH_APICustomization.Graph
                     {
                         item.AccountID = winnerAcctObj?.AccountID;
                         item.SubAccountID = winnerAcctObj?.SubAccountID;
+                        item.BranchID = winnerAcctObj?.BranchID;
                         this.FolioTransactioins.Update(item);
                     }
                 }
@@ -1564,6 +1578,7 @@ namespace HH_APICustomization.Graph
                                 var line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
                                 line.AccountID = row?.AccountID;
                                 line.SubID = row?.SubAccountID;
+                                line.BranchID = row?.BranchID ?? this.Document.Current?.Branch;
                                 line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
                                 if (line.RefNbr.Length > 15)
                                     line.RefNbr = line?.RefNbr.Substring(0, 15);
@@ -1581,6 +1596,7 @@ namespace HH_APICustomization.Graph
                                 line = glGraph.GLTranModuleBatNbr.Cache.CreateInstance() as GLTran;
                                 line.AccountID = mapCloudbedProerty?.ClearingAcct;
                                 line.SubID = mapCloudbedProerty?.ClearingSub;
+                                //line.BranchID = mapCloudbedProerty?.BranchID;
                                 line.RefNbr = string.IsNullOrEmpty(row?.ReservationID) ? row.HouseAccountID.ToString() : row.ReservationID;
                                 if (line.RefNbr.Length > 15)
                                     line.RefNbr = line?.RefNbr?.Substring(0, 15);
