@@ -5,12 +5,19 @@
 <asp:Content ID="cont1" ContentPlaceHolderID="phDS" runat="Server">
     <px:PXDataSource ID="ds" runat="server" Visible="True" Width="100%"
         TypeName="HH_APICustomization.Graph.LUMAllowedCombinationMaint"
-        PrimaryView="AllowData">
+        PrimaryView="Setup">
         <CallbackCommands>
         </CallbackCommands>
     </px:PXDataSource>
 </asp:Content>
 <asp:Content ID="cont2" ContentPlaceHolderID="phF" runat="Server">
+    <px:PXFormView ID="SetupFrom" runat="server" DataSourceID="ds" DataMember="Setup" Width="100%" Height="150px" AllowAutoHide="false">
+        <Template>
+            <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
+            <px:PXLayoutRule ControlSize="L" runat="server" ID="CstPXLayoutRule4" StartGroup="True" GroupCaption="SETUP"></px:PXLayoutRule>
+            <px:PXCheckBox runat="server" ID="edEnableCheckAllowedAccountCombination" DataField="EnableCheckAllowedAccountCombination" AlignLeft="true"></px:PXCheckBox>
+        </Template>
+    </px:PXFormView>
     <px:PXGrid AllowPaging="True" AdjustPageSize="Auto" SyncPosition="True" ID="AllowDataGrid" runat="server" DataSourceID="ds" Width="100%" Height="100%" SkinID="Details" AllowAutoHide="false">
         <Levels>
             <px:PXGridLevel DataMember="AllowData">

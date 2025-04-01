@@ -77,7 +77,6 @@
                             <px:PXSelector runat="server" ID="edRemitSequenceID" DataField="RemitSequenceID"></px:PXSelector>
                             <px:PXSelector runat="server" ID="edPostingSequenceID" DataField="PostingSequenceID"></px:PXSelector>
                             <px:PXCheckBox runat="server" ID="edRemitRequestApproval" DataField="RemitRequestApproval"></px:PXCheckBox>
-                            <px:PXCheckBox ID="edEnableCheckAllowedAccountCombination" runat="server" DataField="EnableCheckAllowedAccountCombination"></px:PXCheckBox>
                         </Template>
                     </px:PXFormView>
                     <px:PXGrid ID="gridApproval" runat="server" DataSourceID="ds" SkinID="Details" Width="100%">
