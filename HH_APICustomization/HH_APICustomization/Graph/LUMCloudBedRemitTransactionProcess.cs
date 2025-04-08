@@ -1685,7 +1685,7 @@ namespace HH_APICustomization.Graph
                 BAccount acct = SelectFrom<BAccount>
                                 .InnerJoin<EPEmployee>.On<BAccount.bAccountID.IsEqual<EPEmployee.bAccountID>>
                                 .Where<EPEmployee.userID.IsEqual<AccessInfo.userID.FromCurrent>>.View.Select(this);
-                if (acct.DefContactID == approvalRecord.OwnerID)
+                if (acct?.DefContactID == approvalRecord.OwnerID)
                     return true;
                 return false;
             }
