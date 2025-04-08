@@ -1,7 +1,13 @@
 using System;
 using PX.Data;
+using PX.Data.BQL.Fluent;
+using PX.Data.Licensing;
 using PX.Data.ReferentialIntegrity.Attributes;
+using PX.Objects.CR;
 using PX.Objects.GL;
+using PX.SM;
+using BAccount = PX.Objects.CR.BAccount;
+using Branch = PX.Objects.GL.Branch;
 
 namespace HH_APICustomization.DAC
 {
@@ -359,9 +365,9 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region BranchID
-        [Branch(typeof(PX.Objects.AP.APRegister.branchID))]
-        [PXDefault(typeof(AccessInfo.branchID), PersistingCheck = PXPersistingCheck.Nothing)]
-        [PXUIField(DisplayName = "Branch")]
+        [Branch(PersistingCheck = PXPersistingCheck.Nothing)]
+        //[PXDefault(PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXUIField(DisplayName = "Branch", FieldClass = "COMPANYBRANCH")]
         public virtual int? BranchID { get; set; }
         public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }
         #endregion

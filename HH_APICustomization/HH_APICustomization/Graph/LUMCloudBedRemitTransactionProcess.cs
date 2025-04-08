@@ -40,7 +40,7 @@ namespace HH_APICustomization.Graph
                 .And<Brackets<LUMCloudBedTransactions.remitRefNbr.IsNull>.Or<LUMCloudBedTransactions.remitRefNbr.IsEqual<LUMCloudBedTransactions.remitRefNbr.AsOptional>>>
                 .And<Brackets<LUMCloudBedTransactions.isImported.IsNull>.Or<LUMCloudBedTransactions.isImported.IsEqual<False>>>
                 .And<Brackets<LUMCloudBedTransactions.isDeleted.IsNull>.Or<LUMCloudBedTransactions.isDeleted.IsEqual<False>>>
-                .And<LUMCloudBedTransactions.transactionDateTime.IsLessEqual<LUMRemittance.date.FromCurrent>>
+                .And<LUMCloudBedTransactions.transactionDateTime.IsLessEqual<LUMRemittance.date.AsOptional>>
                 .And<Brackets<LUMCloudBedTransactions.houseAccountID.IsNotNull>.Or<LUMCloudBedTransactions.reservationID.IsNotNull>>>
               .View PendingTransactions;
 
@@ -333,8 +333,9 @@ namespace HH_APICustomization.Graph
                 var _refNbr = this.Document.Current?.RefNbr;
                 // ReloadCloudBedData();
                 var _propertyID = this.ClodBedPreference.Select().TopFirst?.CloudBedPropertyID;
+                var _remitDate = this.Document.Current.Date.Value.AddDays(1);
                 // 符合條件且未被處理的Transactions(Old: allowTransByProperty)
-                var pendingTransactions = helper.GetBqlCommand<LUMCloudBedTransactions>(this, this.PendingTransactions.View.BqlSelect, _propertyID, _refNbr);
+                var pendingTransactions = helper.GetBqlCommand<LUMCloudBedTransactions>(this, this.PendingTransactions.View.BqlSelect, _propertyID, _refNbr, _remitDate);
                 // 被Toggle out 的Transactions
                 var excludedTransactions = helper.GetBqlCommand<LUMRemitExcludeTransactions>(this, this.ExculdeTransactions.View.BqlSelect);
                 // expected ExcludeTransaction
@@ -1244,6 +1245,12 @@ namespace HH_APICustomization.Graph
                     var excludeData = this.ExculdeTransactions.Cache.CreateInstance() as LUMRemitExcludeTransactions;
                     excludeData.RefNbr = this.Document.Current?.RefNbr;
                     excludeData.TransactionID = item?.TransactionID;
+                    var exisData = (LUMRemitExcludeTransactions)this.ExculdeTransactions.Cache.Locate(excludeData);
+                    if (exisData != null)
+                    {
+                        this.ExculdeTransactions.Delete(excludeData);
+                        this.ExculdeTransactions.Cache.PersistDeleted(excludeData);
+                    }
                     excludeData = this.ExculdeTransactions.Insert(excludeData);
                     this.ExculdeTransactions.Cache.PersistInserted(excludeData);
                     // Remove Remit RefNbr(Payment Amount).
@@ -1277,7 +1284,6 @@ namespace HH_APICustomization.Graph
             if (selectedTransItems.Count() == 0)
                 return;
             InitialToggleData(selectedTransItems);
-
             var tempTrans = new List<LUMCloudBedTransactions>();
             using (PXTransactionScope sc = new PXTransactionScope())
             {
@@ -1512,6 +1518,9 @@ namespace HH_APICustomization.Graph
             watch.Stop();
             PXTrace.WriteInformation($"Get CloudbedTransaction Time:{watch.ElapsedMilliseconds}");
             watch.Restart();
+
+            // Initial Exculde transaction data
+            this.ExculdeTransactions.View.SelectMulti();
 
             this.ReservationSummary.View.SelectMulti();
             watch.Stop();
