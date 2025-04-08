@@ -57,7 +57,8 @@ namespace HHAPICustomization.DAC
         #region AdjustmentType
         [PXDBString(20, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Adjustment Type")]
-        [PXSelector(typeof(Search<CSAttributeDetail.valueID, Where<CSAttributeDetail.attributeID, Equal<PADJUSTAttr>>>),
+        [PXSelector(typeof(Search<CSAttributeDetail.valueID, Where<CSAttributeDetail.attributeID, Equal<PADJUSTAttr>,
+                            And<CSAttributeDetail.disabled, NotEqual<True>>>>),
                     typeof(CSAttributeDetail.description))]
         public virtual string AdjustmentType { get; set; }
         public abstract class adjustmentType : PX.Data.BQL.BqlString.Field<adjustmentType> { }

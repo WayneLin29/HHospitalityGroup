@@ -8,6 +8,7 @@ using PX.Objects.TX;
 using PX.Objects.GL;
 using PX.Data.BQL.Fluent;
 using PX.CS;
+using HH_APICustomization.Graph;
 
 namespace PX.Objects.AP
 {
@@ -16,7 +17,7 @@ namespace PX.Objects.AP
         #region UsrORTaxZone
         [PXDBString(10, IsUnicode = true)]
         [PXUIField(DisplayName = "OR TaxZone", Visibility = PXUIVisibility.Visible)]
-        [PXDefault(typeof(APInvoice.taxZoneID),PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXDefault(typeof(APInvoice.taxZoneID), PersistingCheck = PXPersistingCheck.Nothing)]
         [PXSelector(typeof(TaxZone.taxZoneID), DescriptionField = typeof(TaxZone.descr), Filterable = true)]
         [PXFormula(typeof(Default<APInvoice.suppliedByVendorLocationID, APInvoice.suppliedByVendorID, APInvoice.vendorLocationID>))]
         public virtual string UsrORTaxZone { get; set; }
@@ -42,11 +43,15 @@ namespace PX.Objects.AP
         public abstract class usrORNumber : PX.Data.BQL.BqlString.Field<usrORNumber> { }
         #endregion
 
-        #region UsrORBranch
-        [Branch(typeof(APRegister.branchID),PersistingCheck = PXPersistingCheck.Nothing)]
+        #region UsrORBranch2
+        [PXSelector(typeof(Search<CSAttributeDetail.valueID,
+                          Where<CSAttributeDetail.attributeID, Equal<IVBRANCHAttr>,
+                            And<CSAttributeDetail.disabled, NotEqual<True>>>>),
+                   typeof(CSAttributeDetail.description))]
+        [PXDefault(PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "OR Branch")]
-        public virtual int? UsrORBranch { get; set; }
-        public abstract class usrORBranch : PX.Data.BQL.BqlInt.Field<usrORBranch> { }
+        public virtual string UsrORBranch2 { get; set; }
+        public abstract class usrORBranch2 : PX.Data.BQL.BqlString.Field<usrORBranch2> { }
         #endregion
 
         #region UsrORDate

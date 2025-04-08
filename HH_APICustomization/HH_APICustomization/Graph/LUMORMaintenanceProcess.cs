@@ -15,6 +15,7 @@ using PX.Data.ReferentialIntegrity.Attributes;
 using PX.Objects.PM;
 using PX.Data.BQL;
 using PX.Objects.CA;
+using HHAPICustomization.DAC;
 
 namespace HH_APICustomization.Graph
 {
@@ -50,8 +51,8 @@ namespace HH_APICustomization.Graph
                 select.WhereAnd<Where<APTranExtension.usrORNumber, Between<Current<ORMaintFilter.orNumberFrom>, Current<ORMaintFilter.orNumberTo>>>>();
             if (filter.ORVendor.HasValue)
                 select.WhereAnd<Where<APTranExtension.usrORVendor, Equal<Current<ORMaintFilter.orVendor>>>>();
-            if (filter.ORBranch.HasValue)
-                select.WhereAnd<Where<APTranExtension.usrORBranch, Equal<Current<ORMaintFilter.orBranch>>>>();
+            if (!string.IsNullOrEmpty(filter.ORBranch))
+                select.WhereAnd<Where<APTranExtension.usrORBranch2, Equal<Current<ORMaintFilter.orBranch>>>>();
 
             List<object> result = select.Select(PXView.Currents, PXView.Parameters,
                 PXView.Searches, PXView.SortColumns, PXView.Descendings,
@@ -87,8 +88,6 @@ namespace HH_APICustomization.Graph
                 row.UpdORNumber = null;
                 row.UpdORStatus = null;
                 row.UpdORTaxZone = null;
-                row.UpdProjectID = null;
-                row.UpdTaskID = null;
                 row.UpdAccountID = null;
                 row.UpdSubID = null;
                 this.Filter.UpdateCurrent();
@@ -99,8 +98,6 @@ namespace HH_APICustomization.Graph
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORNumber>(e.Cache, null, false);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORStatus>(e.Cache, null, false);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORTaxZone>(e.Cache, null, false);
-                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updProjectID>(e.Cache, null, false);
-                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updTaskID>(e.Cache, null, false);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updAccountID>(e.Cache, null, false);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updSubID>(e.Cache, null, false);
             }
@@ -112,35 +109,11 @@ namespace HH_APICustomization.Graph
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORNumber>(e.Cache, null, true);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORStatus>(e.Cache, null, true);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updORTaxZone>(e.Cache, null, true);
-                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updProjectID>(e.Cache, null, true);
-                PXUIFieldAttribute.SetEnabled<ORMaintFilter.updTaskID>(e.Cache, null, true);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updAccountID>(e.Cache, null, true);
                 PXUIFieldAttribute.SetEnabled<ORMaintFilter.updSubID>(e.Cache, null, true);
             }
         }
 
-        public virtual void _(Events.FieldUpdated<ORMaintFilter.updProjectID> e)
-        {
-            if (e.NewValue != null)
-            {
-                object newTaskID;
-                e.Cache.RaiseFieldDefaulting<ORMaintFilter.updTaskID>(e.Row, out newTaskID);
-                ((ORMaintFilter)e.Row).UpdTaskID = (int?)newTaskID;
-            }
-        }
-
-        public virtual void _(Events.FieldDefaulting<ORMaintFilter.updTaskID> e)
-        {
-            var row = e.Row as ORMaintFilter;
-            if (e.Row != null)
-            {
-                var newTask = SelectFrom<PMTask>
-                              .Where<PMTask.projectID.IsEqual<P.AsInt>
-                                .And<PMTask.isDefault.IsEqual<True>>>
-                              .View.Select(this, row?.UpdProjectID).TopFirst;
-                e.NewValue = newTask?.TaskID;
-            }
-        }
         #endregion
 
         #region Method
@@ -159,30 +132,26 @@ namespace HH_APICustomization.Graph
                 try
                 {
                     var aptranExtensionInfo = selectedItem.GetExtension<APTranExtension>();
-                    PXUpdate<Set<APTranExtension.usrORBranch, Required<APTranExtension.usrORBranch>,
+                    PXUpdate<Set<APTranExtension.usrORBranch2, Required<APTranExtension.usrORBranch2>,
                              Set<APTranExtension.usrORDate, Required<APTranExtension.usrORDate>,
                              Set<APTranExtension.usrORVendor, Required<APTranExtension.usrORVendor>,
                              Set<APTranExtension.usrORNumber, Required<APTranExtension.usrORNumber>,
                              Set<APTranExtension.usrORStatus, Required<APTranExtension.usrORStatus>,
                              Set<APTranExtension.usrORTaxZone, Required<APTranExtension.usrORTaxZone>,
-                             Set<APTran.projectID, Required<APTran.projectID>,
-                             Set<APTran.taskID, Required<APTran.taskID>,
                              Set<APTran.accountID, Required<APTran.accountID>,
-                             Set<APTran.subID, Required<APTran.subID>>>>>>>>>>>,
+                             Set<APTran.subID, Required<APTran.subID>>>>>>>>>,
                         APTran,
                         Where<APTran.tranType, Equal<Required<APTran.tranType>>,
                               And<APTran.refNbr, Equal<Required<APTran.refNbr>>,
                               And<APTran.lineNbr, Equal<Required<APTran.lineNbr>>>>>>
                     .Update(
                         baseGraph,
-                        (filter.UpdCleanUp ?? false) ? null : filter.UpdORBranch ?? aptranExtensionInfo?.UsrORBranch,
+                        (filter.UpdCleanUp ?? false) ? null : filter.UpdORBranch ?? aptranExtensionInfo?.UsrORBranch2,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORDate ?? aptranExtensionInfo?.UsrORDate,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORVendor ?? aptranExtensionInfo?.UsrORVendor,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORNumber ?? aptranExtensionInfo?.UsrOrNumber,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORStatus ?? aptranExtensionInfo?.UsrORStatus,
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORTaxZone ?? aptranExtensionInfo?.UsrORTaxZone,
-                        (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.ProjectID : filter.UpdProjectID ?? selectedItem?.ProjectID,
-                        (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.TaskID : filter.UpdTaskID ?? selectedItem?.TaskID,
                         (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.AccountID : filter.UpdAccountID ?? selectedItem?.AccountID,
                         (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.SubID : filter.UpdSubID ?? selectedItem?.SubID,
                         selectedItem.TranType,
@@ -203,8 +172,6 @@ namespace HH_APICustomization.Graph
             filter.UpdORNumber = null;
             filter.UpdORStatus = null;
             filter.UpdORTaxZone = null;
-            filter.UpdProjectID = null;
-            filter.UpdTaskID = null;
             filter.UpdAccountID = null;
             filter.UpdSubID = null;
             this.Filter.UpdateCurrent();
@@ -263,7 +230,7 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region APBranch
-        [Branch(typeof(APRegister.branchID))]
+        [Branch(typeof(APRegister.branchID), PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "AP Branch")]
         public virtual int? APBranch { get; set; }
         public abstract class apBranch : PX.Data.BQL.BqlInt.Field<apBranch> { }
@@ -302,10 +269,14 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region ORBranch
-        [Branch(typeof(APRegister.branchID), PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXSelector(typeof(Search<CSAttributeDetail.valueID,
+                           Where<CSAttributeDetail.attributeID, Equal<IVBRANCHAttr>,
+                             And<CSAttributeDetail.disabled, NotEqual<True>>>>),
+                    typeof(CSAttributeDetail.description))]
+        [PXDefault]
         [PXUIField(DisplayName = "OR Branch")]
-        public virtual int? ORBranch { get; set; }
-        public abstract class orBranch : PX.Data.BQL.BqlInt.Field<orBranch> { }
+        public virtual string ORBranch { get; set; }
+        public abstract class orBranch : PX.Data.BQL.BqlString.Field<orBranch> { }
         #endregion
 
         #region ORDateFrom
@@ -342,10 +313,13 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region UpdORBranch
-        [Branch(typeof(APRegister.branchID), PersistingCheck = PXPersistingCheck.Nothing)]
+        [PXSelector(typeof(Search<CSAttributeDetail.valueID,
+                          Where<CSAttributeDetail.attributeID, Equal<IVBRANCHAttr>,
+                            And<CSAttributeDetail.disabled, NotEqual<True>>>>),
+                   typeof(CSAttributeDetail.description))]
         [PXUIField(DisplayName = "OR Branch")]
-        public virtual int? UpdORBranch { get; set; }
-        public abstract class updORBranch : PX.Data.BQL.BqlInt.Field<updORBranch> { }
+        public virtual string UpdORBranch { get; set; }
+        public abstract class updORBranch : PX.Data.BQL.BqlString.Field<updORBranch> { }
         #endregion
 
         #region UpdORDate
@@ -393,28 +367,6 @@ namespace HH_APICustomization.Graph
         public abstract class updCleanUp : PX.Data.BQL.BqlBool.Field<updCleanUp> { }
         #endregion
 
-        #region UpdProjectID
-        [ProjectDefault(BatchModule.AP, typeof(Search<PX.Objects.CR.Location.vDefProjectID, Where<PX.Objects.CR.Location.bAccountID, Equal<Current<APInvoice.vendorID>>, And<PX.Objects.CR.Location.locationID, Equal<Current<APInvoice.vendorLocationID>>>>>), typeof(APTran.accountID), PersistingCheck = PXPersistingCheck.Nothing)]
-        [APActiveProject]
-        [PXForeignReference(typeof(Field<updProjectID>.IsRelatedTo<PMProject.contractID>))]
-        public virtual Int32? UpdProjectID { get; set; }
-        public abstract class updProjectID : PX.Data.BQL.BqlInt.Field<updProjectID> { }
-        #endregion
-
-        #region UpdTaskID
-        [PXDefault(PersistingCheck = PXPersistingCheck.Nothing)]
-        [PXSelector(typeof(SelectFrom<PMTask>
-                          .Where<PMTask.projectID.IsEqual<ORMaintFilter.updProjectID.FromCurrent>
-                            .And<PMTask.isActive.IsEqual<True>>>
-                          .SearchFor<PMTask.taskID>),
-            typeof(PMTask.description),
-            typeof(PMTask.isActive),
-            SubstituteKey = typeof(PMTask.taskCD))]
-        [PXUIField(DisplayName = "Project Task")]
-        public virtual Int32? UpdTaskID { get; set; }
-        public abstract class updTaskID : PX.Data.BQL.BqlInt.Field<updTaskID> { }
-        #endregion
-
         #region UpdAccountID
         [Account(typeof(ORMaintFilter.updORBranch), DisplayName = "Account", Visibility = PXUIVisibility.Visible, Filterable = false, DescriptionField = typeof(Account.description))]
         public virtual int? UpdAccountID { get; set; }
@@ -429,5 +381,10 @@ namespace HH_APICustomization.Graph
 
         #endregion
 
+    }
+
+    public class IVBRANCHAttr : PX.Data.BQL.BqlString.Constant<IVBRANCHAttr>
+    {
+        public IVBRANCHAttr() : base("IVBRANCH") { }
     }
 }

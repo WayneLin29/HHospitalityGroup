@@ -43,8 +43,6 @@
             <px:PXSelector runat="server" ID="edUpdORTaxZone" DataField="UpdORTaxZone" Width="150px" CommitChanges="true"></px:PXSelector>
             <px:PXCheckBox runat="server" ID="edUpdCleanUp" DataField="UpdCleanUp" CommitChanges="true"></px:PXCheckBox>
             <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
-            <px:PXSelector runat="server" ID="edUpdProjectID" DataField="UpdProjectID" Width="150px" CommitChanges="true"></px:PXSelector>
-            <px:PXSelector runat="server" ID="edUpdTaskID" DataField="UpdTaskID" Width="150px" CommitChanges="true" AutoRefresh="true"></px:PXSelector>
             <px:PXSelector runat="server" ID="edUpdAccountID" DataField="UpdAccountID" Width="150px" CommitChanges="true"></px:PXSelector>
             <px:PXSelector runat="server" ID="edUpdSubID" DataField="UpdSubID" Width="150px" CommitChanges="true" AutoRefresh="true"></px:PXSelector>
         </Template>

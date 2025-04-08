@@ -3,13 +3,7 @@
         <Children Key="Columns">
             <AddItem>
                 <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
-                    <Prop Key="DataField" Value="UsrORBranch" />
-                    <Prop Key="Width" Value="140" />
-                </PXGridColumn>
-            </AddItem>
-            <AddItem>
-                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
-                    <Prop Key="DataField" Value="UsrOrNumber" />
+                    <Prop Key="DataField" Value="UsrORBranch2" />
                     <Prop Key="Width" Value="70" />
                 </PXGridColumn>
             </AddItem>
