@@ -44,6 +44,7 @@ namespace PX.Objects.AP
         #endregion
 
         #region UsrORBranch2
+        [PXDBString(15,IsUnicode = true)]
         [PXSelector(typeof(Search<CSAttributeDetail.valueID,
                           Where<CSAttributeDetail.attributeID, Equal<IVBRANCHAttr>,
                             And<CSAttributeDetail.disabled, NotEqual<True>>>>),

@@ -144,8 +144,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region BranchID
-        [Branch(typeof(PX.Objects.AP.APRegister.branchID))]
-        [PXDefault(typeof(AccessInfo.branchID))]
+        [Branch(PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Branch")]
         public virtual int? BranchID { get; set; }
         public abstract class branchID : PX.Data.BQL.BqlInt.Field<branchID> { }

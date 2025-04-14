@@ -16,6 +16,7 @@ using PX.Objects.PM;
 using PX.Data.BQL;
 using PX.Objects.CA;
 using HHAPICustomization.DAC;
+using static PX.Objects.GL.ControlAccountModule;
 
 namespace HH_APICustomization.Graph
 {
@@ -139,7 +140,8 @@ namespace HH_APICustomization.Graph
                              Set<APTranExtension.usrORStatus, Required<APTranExtension.usrORStatus>,
                              Set<APTranExtension.usrORTaxZone, Required<APTranExtension.usrORTaxZone>,
                              Set<APTran.accountID, Required<APTran.accountID>,
-                             Set<APTran.subID, Required<APTran.subID>>>>>>>>>,
+                             Set<APTran.subID, Required<APTran.subID>,
+                             Set<APTran.taxCategoryID, Required<APTran.taxCategoryID>>>>>>>>>>,
                         APTran,
                         Where<APTran.tranType, Equal<Required<APTran.tranType>>,
                               And<APTran.refNbr, Equal<Required<APTran.refNbr>>,
@@ -154,6 +156,7 @@ namespace HH_APICustomization.Graph
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORTaxZone ?? aptranExtensionInfo?.UsrORTaxZone,
                         (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.AccountID : filter.UpdAccountID ?? selectedItem?.AccountID,
                         (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.SubID : filter.UpdSubID ?? selectedItem?.SubID,
+                        (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.TaxCategoryID : filter.UpdTaxCategoryID ?? selectedItem?.TaxCategoryID,
                         selectedItem.TranType,
                         selectedItem.RefNbr,
                         selectedItem.LineNbr
@@ -269,6 +272,7 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region ORBranch
+        [PXDBString(15)]
         [PXSelector(typeof(Search<CSAttributeDetail.valueID,
                            Where<CSAttributeDetail.attributeID, Equal<IVBRANCHAttr>,
                              And<CSAttributeDetail.disabled, NotEqual<True>>>>),
@@ -313,6 +317,7 @@ namespace HH_APICustomization.Graph
         #endregion
 
         #region UpdORBranch
+        [PXDBString]
         [PXSelector(typeof(Search<CSAttributeDetail.valueID,
                           Where<CSAttributeDetail.attributeID, Equal<IVBRANCHAttr>,
                             And<CSAttributeDetail.disabled, NotEqual<True>>>>),
@@ -378,6 +383,16 @@ namespace HH_APICustomization.Graph
         [SubAccount(typeof(ORMaintFilter.updAccountID), typeof(ORMaintFilter.updORBranch), true, DisplayName = "Subaccount", Visibility = PXUIVisibility.Visible, Filterable = true, TabOrder = 100)]
         public virtual int? UpdSubID { get; set; }
         public abstract class updSubID : PX.Data.BQL.BqlInt.Field<updSubID> { }
+
+        #endregion
+
+        #region UpdTaxCategoryID
+        [PXDBString(TaxCategory.taxCategoryID.Length, IsUnicode = true)]
+        [PXUIField(DisplayName = "Tax Category", Visibility = PXUIVisibility.Visible)]
+        [PXSelector(typeof(TaxCategory.taxCategoryID), DescriptionField = typeof(TaxCategory.descr))]
+        [PXRestrictor(typeof(Where<TaxCategory.active, Equal<True>>), PX.Objects.TX.Messages.InactiveTaxCategory, typeof(TaxCategory.taxCategoryID))]
+        public virtual string UpdTaxCategoryID { get; set; }
+        public abstract class updTaxCategoryID : PX.Data.BQL.BqlString.Field<updTaxCategoryID> { }
 
         #endregion
 

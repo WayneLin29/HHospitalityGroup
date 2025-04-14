@@ -3,15 +3,15 @@
 <%@ MasterType VirtualPath="~/MasterPages/TabView.master" %>
 
 <asp:Content ID="cont1" ContentPlaceHolderID="phDS" runat="Server">
-    <px:pxdatasource id="ds" runat="server" visible="True" width="100%"
-        typename="HH_APICustomization.Graph.LUMORMaintenanceProcess"
-        primaryview="Filter">
+    <px:PXDataSource ID="ds" runat="server" Visible="True" Width="100%"
+        TypeName="HH_APICustomization.Graph.LUMORMaintenanceProcess"
+        PrimaryView="Filter">
         <CallbackCommands>
         </CallbackCommands>
-    </px:pxdatasource>
+    </px:PXDataSource>
 </asp:Content>
 <asp:Content ID="cont2" ContentPlaceHolderID="phF" runat="Server">
-    <px:pxformview id="transactionForm" runat="server" datasourceid="ds" datamember="Filter" width="100%" height="250px" allowautohide="false">
+    <px:PXFormView ID="transactionForm" runat="server" DataSourceID="ds" DataMember="Filter" Width="100%" Height="250px" AllowAutoHide="false">
         <Template>
             <px:PXLayoutRule runat="server" StartGroup="true" GroupCaption="AP FILTER"></px:PXLayoutRule>
             <px:PXLayoutRule runat="server" StartColumn="true" LabelsWidth="M" ControlSize="S" />
@@ -45,12 +45,13 @@
             <px:PXLayoutRule runat="server" StartColumn="true"></px:PXLayoutRule>
             <px:PXSelector runat="server" ID="edUpdAccountID" DataField="UpdAccountID" Width="150px" CommitChanges="true"></px:PXSelector>
             <px:PXSelector runat="server" ID="edUpdSubID" DataField="UpdSubID" Width="150px" CommitChanges="true" AutoRefresh="true"></px:PXSelector>
+            <px:PXSelector runat="server" ID="edUpdTaxCategoryID" DataField="UpdTaxCategoryID" Width="150px" CommitChanges="true"></px:PXSelector>
         </Template>
-    </px:pxformview>
+    </px:PXFormView>
 </asp:Content>
 
 <asp:Content ID="cont3" ContentPlaceHolderID="phG" runat="server">
-    <px:pxgrid allowpaging="True" adjustpagesize="Auto" syncposition="True" id="TransactionsGrid" runat="server" datasourceid="ds" width="100%" height="100%" skinid="Details" allowautohide="false">
+    <px:PXGrid AllowPaging="True" AdjustPageSize="Auto" SyncPosition="True" ID="TransactionsGrid" runat="server" DataSourceID="ds" Width="100%" Height="100%" SkinID="Details" AllowAutoHide="false">
         <Levels>
             <px:PXGridLevel DataMember="Transactions">
                 <Columns>
@@ -84,5 +85,5 @@
         <ActionBar>
         </ActionBar>
         <Mode AllowDelete="false" AllowAddNew="false" />
-    </px:pxgrid>
+    </px:PXGrid>
 </asp:Content>

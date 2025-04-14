@@ -310,7 +310,7 @@
                                 </RowTemplate>
                             </px:PXGridLevel>
                         </Levels>
-                        <Mode AllowAddNew="False" AllowDelete="False" InitNewRow="False" />
+                        <Mode AllowAddNew="False" InitNewRow="False" AllowDelete="False" />
                         <AutoSize Enabled="true" MinHeight="300" />
                     </px:PXGrid>
                 </Template>

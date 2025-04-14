@@ -1844,6 +1844,21 @@ namespace HH_APICustomization.Graph
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions2.isImported>(this.ReservationSummaryTransactions.Cache, null, false);
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions2.batchNbr>(this.ReservationSummaryTransactions.Cache, null, false);
             PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions2.lineNbr>(this.ReservationSummaryTransactions.Cache, null, false);
+
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.transactionID>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.reservationID>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.houseAccountName>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.guestName>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.amount>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.userName>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.transactionNotes>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.createdDateTime>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.remitRefNbr>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.isImported>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.batchNbr>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.lineNbr>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.description>(this.FolioTransactioins.Cache, null, false);
+            PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions3.transactionDateTime>(this.FolioTransactioins.Cache, null, false);
             #endregion
 
             switch (row?.Status)

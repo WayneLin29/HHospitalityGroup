@@ -295,21 +295,21 @@ namespace HH_APICustomization.APIHelper
             var conditions = new Func<LUMCloudBedAccountMapping, bool>[]
             {
                 // 1.Trans Category + Desc + House Account
-                x => x.TransCategory == selectedData.TransactionCategory &&
+                x => x.TransCategory == selectedData.Category &&
                      x.Description == selectedData.Description &&
                      x.HouseAccount == selectedData.HouseAccountID?.ToString(),
                 // 2.Trans Category +Desc
-                x => x.TransCategory == selectedData.TransactionCategory &&
+                x => x.TransCategory == selectedData.Category &&
                      x.Description == selectedData.Description,
                 // 3.Trans Category + Transation Code + House Account
-                x => x.TransCategory == selectedData.TransactionCategory &&
+                x => x.TransCategory == selectedData.Category &&
                      x.TransactionCode == selectedData.TransactionCode &&
                      x.HouseAccount == selectedData.HouseAccountID?.ToString(),
                 // 4.Trans Category + Transation Code
-                x => x.TransCategory == selectedData.TransactionCategory &&
+                x => x.TransCategory == selectedData.Category &&
                      x.TransactionCode == selectedData.TransactionCode,
                 // 5.Trans Category + Source
-                 x => x.TransCategory == selectedData.TransactionCategory &&
+                 x => x.TransCategory == selectedData.Category &&
                       x.Source == mapReservation?.Source
             };
 
