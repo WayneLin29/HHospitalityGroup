@@ -30,7 +30,7 @@ namespace HH_APICustomization.Graph
                .InnerJoin<APInvoice>.On<APInvoice.docType.IsEqual<APTran.tranType>
                      .And<APInvoice.refNbr.IsEqual<APTran.refNbr>>>
                .Where<APInvoice.docDate.IsBetween<ORMaintFilter.apStartDate.FromCurrent, ORMaintFilter.apEndDate.FromCurrent>
-                 .And<APTran.branchID.IsEqual<ORMaintFilter.apBranch.FromCurrent>>
+                 .And<APTranExtension.usrORBranch2.IsEqual<ORMaintFilter.orBranch.FromCurrent>>
                  .And<APInvoice.branchID.IsEqual<ORMaintFilter.apHBranch.FromCurrent>.Or<ORMaintFilter.apHBranch.FromCurrent.IsNull>>>.ProcessingView.FilteredBy<ORMaintFilter> Transactions;
 
         public IEnumerable transactions()
@@ -52,8 +52,8 @@ namespace HH_APICustomization.Graph
                 select.WhereAnd<Where<APTranExtension.usrORNumber, Between<Current<ORMaintFilter.orNumberFrom>, Current<ORMaintFilter.orNumberTo>>>>();
             if (filter.ORVendor.HasValue)
                 select.WhereAnd<Where<APTranExtension.usrORVendor, Equal<Current<ORMaintFilter.orVendor>>>>();
-            if (!string.IsNullOrEmpty(filter.ORBranch))
-                select.WhereAnd<Where<APTranExtension.usrORBranch2, Equal<Current<ORMaintFilter.orBranch>>>>();
+            if (filter.APBranch.HasValue)
+                select.WhereAnd<Where<APTran.branchID, Equal<Current<ORMaintFilter.apBranch>>>>();
 
             List<object> result = select.Select(PXView.Currents, PXView.Parameters,
                 PXView.Searches, PXView.SortColumns, PXView.Descendings,

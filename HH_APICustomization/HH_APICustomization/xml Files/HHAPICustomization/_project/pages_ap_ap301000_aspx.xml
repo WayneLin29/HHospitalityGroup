@@ -21,6 +21,12 @@
             </AddItem>
             <AddItem>
                 <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
+                    <Prop Key="DataField" Value="UsrOrNumber" />
+                    <Prop Key="Width" Value="70" />
+                </PXGridColumn>
+            </AddItem>
+            <AddItem>
+                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
                     <Prop Key="DataField" Value="UsrORTaxZone" />
                     <Prop Key="Width" Value="120" />
                 </PXGridColumn>
