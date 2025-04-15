@@ -72,7 +72,8 @@
                     <px:PXGridColumn DataField="APTran__AccountID"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__SubID"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__CuryLineAmt"></px:PXGridColumn>
-                    <px:PXGridColumn DataField="APTran__UsrORBranch"></px:PXGridColumn>
+                    <px:PXGridColumn DataField="APTran__UsrORBranch2"></px:PXGridColumn>
+                    <px:PXGridColumn DataField="APTran__TaxCategoryID"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__UsrORVendor"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__UsrORDate"></px:PXGridColumn>
                     <px:PXGridColumn DataField="APTran__UsrOrNumber"></px:PXGridColumn>

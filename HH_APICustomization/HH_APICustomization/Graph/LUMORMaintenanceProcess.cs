@@ -156,7 +156,7 @@ namespace HH_APICustomization.Graph
                         (filter.UpdCleanUp ?? false) ? null : filter.UpdORTaxZone ?? aptranExtensionInfo?.UsrORTaxZone,
                         (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.AccountID : filter.UpdAccountID ?? selectedItem?.AccountID,
                         (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.SubID : filter.UpdSubID ?? selectedItem?.SubID,
-                        (filter.UpdCleanUp ?? false) || (selectedItem.Released ?? false) ? selectedItem?.TaxCategoryID : filter.UpdTaxCategoryID ?? selectedItem?.TaxCategoryID,
+                        (filter.UpdCleanUp ?? false) ? selectedItem?.TaxCategoryID : filter.UpdTaxCategoryID ?? selectedItem?.TaxCategoryID,
                         selectedItem.TranType,
                         selectedItem.RefNbr,
                         selectedItem.LineNbr
