@@ -147,6 +147,7 @@
     <Compile Include="DAC\LUMTBTransactionSummary.cs" />
     <Compile Include="DAC\LUMTouchBistroDataReceivedV.cs" />
     <Compile Include="Graph\LUMTouchBistroTransactionProcess.cs" />
+    <Compile Include="Graph_Extension\APInvoiceEntryExtension.cs" />
     <Compile Include="Graph_Extension\ContactMaintExtension.cs" />
     <Compile Include="Graph_Extension\EPApprovalMapMaintExtension.cs" />
     <Compile Include="Graph_Extension\JournalEntryExtension.cs" />

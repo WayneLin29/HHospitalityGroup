@@ -47,11 +47,11 @@
 </asp:Content>
 
 <asp:Content ID="cont3" ContentPlaceHolderID="phG" runat="server">
-    <px:PXTab DataMember="PaymentSummary" ID="PXTab1" runat="server" DataSourceID="ds" Height="800px" Style="z-index: 100" Width="100%" AllowAutoHide="false">
+    <px:PXTab DataMember="PaymentSummary" ID="PXTab1" runat="server" DataSourceID="ds" Height="450px" Style="z-index: 100" Width="100%" AllowAutoHide="false">
         <Items>
             <px:PXTabItem Text="PAYMENT">
                 <Template>
-                    <px:PXGrid ID="gridPaymentCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true">
+                    <px:PXGrid ID="gridPaymentCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px;" Width="100%" Height="150px" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true">
                         <Levels>
                             <px:PXGridLevel DataMember="PaymentSummary">
                                 <Columns>
@@ -67,7 +67,7 @@
                         <AutoCallBack ActiveBehavior="True" Command="Refresh" Target="gridPaymentDetails" Enabled="True" />
                         <Mode AllowAddNew="False" InitNewRow="False" AllowDelete="False" />
                     </px:PXGrid>
-                    <px:PXGrid ID="gridPaymentDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 380px;" Width="100%" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="PaymentDetail_RowDataBound">
+                    <px:PXGrid ID="gridPaymentDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px;" Width="100%" Height="250px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="PaymentDetail_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="TOGGLE OUT">
@@ -126,13 +126,13 @@
                             </px:PXGridLevel>
                         </Levels>
                         <Mode AllowAddNew="False" AllowDelete="False" InitNewRow="False" />
-                        <AutoSize Enabled="true" />
+                        <AutoSize Enabled="true" MinHeight="250" />
                     </px:PXGrid>
                 </Template>
             </px:PXTabItem>
             <px:PXTabItem Text="RESERVATION">
                 <Template>
-                    <px:PXGrid ID="gridReservationCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 300px;" Width="100%" Height="300px" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true" OnRowDataBound="ReservationTrans_RowDataBound">
+                    <px:PXGrid ID="gridReservationCheck" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px;" Width="100%" Height="150px" SkinID="Details" BorderWidth="0px" SyncPosition="True" AllowPaging="true" OnRowDataBound="ReservationTrans_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="OUT OF SCOPE">
@@ -180,7 +180,7 @@
                             <px:PXCheckBox ID="edFilterShowPost" runat="server" DataField="ShowPost" CommitChanges="True"></px:PXCheckBox>
                         </Template>
                     </px:PXFormView>
-                    <px:PXGrid ID="gridReservationDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="400px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="ReservationDetail_RowDataBound">
+                    <px:PXGrid ID="gridReservationDetails" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px;" Width="100%" Height="250px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="ReservationDetail_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="TOGGLE OUT">
@@ -238,7 +238,7 @@
                             </px:PXGridLevel>
                         </Levels>
                         <Mode AllowAddNew="False" AllowDelete="False" InitNewRow="False" />
-                        <AutoSize Enabled="true" />
+                        <AutoSize Enabled="true" MinHeight="250" />
                     </px:PXGrid>
                 </Template>
             </px:PXTabItem>
@@ -250,7 +250,7 @@
                             <px:PXCheckBox ID="edFolioFilterShowPost" runat="server" DataField="ShowPost" CommitChanges="True"></px:PXCheckBox>
                         </Template>
                     </px:PXFormView>
-                    <px:PXGrid ID="gridFolio" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px; height: 400px;" Width="100%" Height="300px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="FolioTrans_RowDataBound">
+                    <px:PXGrid ID="gridFolio" runat="server" DataSourceID="ds" RepaintColumns="True" AutoRepaint="True" MatrixMode="True" Style="z-index: 100; left: 0px; top: 0px;" Width="100%" Height="400px" SkinID="Details" BorderWidth="0px" SyncPosition="True" OnRowDataBound="FolioTrans_RowDataBound">
                         <ActionBar Position="TopAndBottom">
                             <CustomItems>
                                 <px:PXToolBarButton Text="TOGGLE OUT">
@@ -311,7 +311,7 @@
                             </px:PXGridLevel>
                         </Levels>
                         <Mode AllowAddNew="False" InitNewRow="False" AllowDelete="False" />
-                        <AutoSize Enabled="true" MinHeight="300" />
+                        <AutoSize Enabled="true" MinHeight="400" />
                     </px:PXGrid>
                 </Template>
             </px:PXTabItem>
@@ -341,7 +341,7 @@
             <px:PXTabItem Text="APPROVALS" BindingContext="form" RepaintOnDemand="false">
                 <Template>
                     <px:PXGrid ID="gridApproval" runat="server" DataSourceID="ds" Width="100%" SkinID="DetailsInTab" NoteIndicator="True" Style="left: 0px; top: 0px;">
-                        <AutoSize Enabled="True" />
+                        <%--<AutoSize Enabled="True" />--%>
                         <Mode AllowAddNew="False" AllowDelete="False" AllowUpdate="False" />
                         <Levels>
                             <px:PXGridLevel DataMember="Approval">

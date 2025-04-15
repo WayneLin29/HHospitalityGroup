@@ -30,8 +30,9 @@ namespace HH_APICustomization.Graph
                .InnerJoin<APInvoice>.On<APInvoice.docType.IsEqual<APTran.tranType>
                      .And<APInvoice.refNbr.IsEqual<APTran.refNbr>>>
                .Where<APInvoice.docDate.IsBetween<ORMaintFilter.apStartDate.FromCurrent, ORMaintFilter.apEndDate.FromCurrent>
-                 .And<APTranExtension.usrORBranch2.IsEqual<ORMaintFilter.orBranch.FromCurrent>>
-                 .And<APInvoice.branchID.IsEqual<ORMaintFilter.apHBranch.FromCurrent>.Or<ORMaintFilter.apHBranch.FromCurrent.IsNull>>>.ProcessingView.FilteredBy<ORMaintFilter> Transactions;
+                 .And<Brackets<APTranExtension.usrORBranch2.IsEqual<ORMaintFilter.orBranch.FromCurrent>.Or<ORMaintFilter.orBranch.FromCurrent.IsNull>>>
+                 .And<Brackets<APInvoice.branchID.IsEqual<ORMaintFilter.apHBranch.FromCurrent>.Or<ORMaintFilter.apHBranch.FromCurrent.IsNull>>>>
+               .ProcessingView.FilteredBy<ORMaintFilter> Transactions;
 
         public IEnumerable transactions()
         {

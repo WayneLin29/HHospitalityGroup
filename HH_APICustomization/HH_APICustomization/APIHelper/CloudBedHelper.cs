@@ -295,22 +295,27 @@ namespace HH_APICustomization.APIHelper
             var conditions = new Func<LUMCloudBedAccountMapping, bool>[]
             {
                 // 1.Trans Category + Desc + House Account
-                x => x.TransCategory == selectedData.Category &&
-                     x.Description == selectedData.Description &&
-                     x.HouseAccount == selectedData.HouseAccountID?.ToString(),
+                x => EqualsIgnoreCase(x.TransCategory, selectedData.Category) &&
+                     EqualsIgnoreCase(x.Description, selectedData.Description) &&
+                     EqualsIgnoreCase(x.CloudBedPropertyID, selectedData.PropertyID) &&
+                     EqualsIgnoreCase(x.HouseAccount, selectedData.HouseAccountID?.ToString() ?? ""),
                 // 2.Trans Category +Desc
-                x => x.TransCategory == selectedData.Category &&
-                     x.Description == selectedData.Description,
+                x => EqualsIgnoreCase(x.TransCategory, selectedData.Category) &&
+                     EqualsIgnoreCase(x.CloudBedPropertyID, selectedData.PropertyID) &&
+                     EqualsIgnoreCase(x.Description, selectedData.Description),
                 // 3.Trans Category + Transation Code + House Account
-                x => x.TransCategory == selectedData.Category &&
-                     x.TransactionCode == selectedData.TransactionCode &&
-                     x.HouseAccount == selectedData.HouseAccountID?.ToString(),
+                x => EqualsIgnoreCase(x.TransCategory, selectedData.Category) &&
+                     EqualsIgnoreCase(x.CloudBedPropertyID, selectedData.PropertyID) &&
+                     EqualsIgnoreCase(x.TransactionCode, selectedData.TransactionCode) &&
+                     EqualsIgnoreCase(x.HouseAccount, selectedData.HouseAccountID?.ToString() ?? ""),
                 // 4.Trans Category + Transation Code
-                x => x.TransCategory == selectedData.Category &&
-                     x.TransactionCode == selectedData.TransactionCode,
+                x => EqualsIgnoreCase(x.TransCategory, selectedData.Category) &&
+                     EqualsIgnoreCase(x.CloudBedPropertyID, selectedData.PropertyID) &&
+                     EqualsIgnoreCase(x.TransactionCode, selectedData.TransactionCode),
                 // 5.Trans Category + Source
-                 x => x.TransCategory == selectedData.Category &&
-                      x.Source == mapReservation?.Source
+                x => EqualsIgnoreCase(x.TransCategory, selectedData.Category) &&
+                     EqualsIgnoreCase(x.CloudBedPropertyID, selectedData.PropertyID) &&
+                     EqualsIgnoreCase(x.Source, mapReservation?.Source ?? "")
             };
 
             foreach (var condition in conditions)
@@ -330,6 +335,11 @@ namespace HH_APICustomization.APIHelper
                     throw ex;
             }
             return winnerAcctMapInfo;
+        }
+
+        public static bool EqualsIgnoreCase(string a, string b)
+        {
+            return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
         }
 
         public static int CompareProps(LUMCloudBedAccountMapping target, LUMCloudBedAccountMapping source)

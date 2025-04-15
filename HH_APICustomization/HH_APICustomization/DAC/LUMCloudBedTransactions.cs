@@ -365,7 +365,7 @@ namespace HH_APICustomization.DAC
         #endregion
 
         #region BranchID
-        [Branch(PersistingCheck = PXPersistingCheck.Nothing)]
+        [Branch(useDefaulting: false, PersistingCheck = PXPersistingCheck.Nothing)]
         //[PXDefault(PersistingCheck = PXPersistingCheck.Nothing)]
         [PXUIField(DisplayName = "Branch", FieldClass = "COMPANYBRANCH")]
         public virtual int? BranchID { get; set; }

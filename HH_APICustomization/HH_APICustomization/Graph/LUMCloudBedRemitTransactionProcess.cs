@@ -390,7 +390,7 @@ namespace HH_APICustomization.Graph
                 foreach (var pendingItem in pendingTransactions)
                 {
                     // 沒有Account/SubAccount 才重新執行
-                    if (!pendingItem.AccountID.HasValue || !pendingItem.SubAccountID.HasValue)
+                    if (!pendingItem.AccountID.HasValue || !pendingItem.SubAccountID.HasValue || !pendingItem.BranchID.HasValue)
                     {
                         var mapAccountInfo = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, pendingItem, false);
                         if (mapAccountInfo != null)
@@ -938,7 +938,7 @@ namespace HH_APICustomization.Graph
                 RemittanceHelper helper = new RemittanceHelper();
                 var selectedTrans = this.FolioTransactioins.Cache.Updated.RowCast<LUMCloudBedTransactions3>().Where(x => x.Selected ?? false);
                 // For current remit transactions whose account or sub is empty
-                foreach (var item in selectedTrans.Where(x => !x.AccountID.HasValue || !x.SubAccountID.HasValue))
+                foreach (var item in selectedTrans.Where(x => !x.AccountID.HasValue || !x.SubAccountID.HasValue || !x.BranchID.HasValue))
                 {
                     var winnerAcctObj = CloudBedHelper.GetCloudbedAccountMappingWithScore(this, item, true);
                     if (winnerAcctObj != null)
