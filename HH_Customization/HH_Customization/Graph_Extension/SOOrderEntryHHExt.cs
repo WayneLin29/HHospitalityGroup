@@ -330,6 +330,13 @@ namespace PX.Objects.SO
                     entry.Document.Cache.SetValueExt(doc, UD_BILLTYPE, "ENL");
                     doc = entry.Document.Update(doc);
                     #endregion
+
+                    #region User-Defiend
+                    // UserDefined - PPMTYPE
+                    entry.Document.Cache.SetValueExt(doc, PX.Objects.CS.Messages.Attribute + "PPMTYPE", "PY");
+                    doc = entry.Document.Update(doc);
+                    #endregion
+
                     entry.Save.Press();
                     foreach (T data in groupList)
                     {

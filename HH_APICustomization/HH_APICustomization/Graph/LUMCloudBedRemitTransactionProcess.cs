@@ -38,7 +38,7 @@ namespace HH_APICustomization.Graph
         public SelectFrom<LUMCloudBedTransactions>
               .Where<LUMCloudBedTransactions.propertyID.IsEqual<LUMCloudBedTransactions.propertyID.AsOptional>
                 .And<Brackets<
-                        Brackets<LUMCloudBedTransactions.remitRefNbr.IsNull>.And<LUMCloudBedTransactions.transactionDateTime.IsLessEqual<LUMRemittance.date.AsOptional>>>
+                        Brackets<LUMCloudBedTransactions.remitRefNbr.IsNull>.And<LUMCloudBedTransactions.transactionDateTime.IsLess<LUMRemittance.date.AsOptional>>>
                           .Or<LUMCloudBedTransactions.remitRefNbr.IsEqual<LUMCloudBedTransactions.remitRefNbr.AsOptional>>>
                 .And<Brackets<LUMCloudBedTransactions.isImported.IsNull>.Or<LUMCloudBedTransactions.isImported.IsEqual<False>>>
                 .And<Brackets<LUMCloudBedTransactions.isDeleted.IsNull>.Or<LUMCloudBedTransactions.isDeleted.IsEqual<False>>>
@@ -334,7 +334,7 @@ namespace HH_APICustomization.Graph
                 var _refNbr = this.Document.Current?.RefNbr;
                 // ReloadCloudBedData();
                 var _propertyID = this.ClodBedPreference.Select().TopFirst?.CloudBedPropertyID;
-                var _remitDate = this.Document.Current.Date.Value.AddDays(1);
+                var _remitDate = this.Document.Current.Date.Value.AddDays(2);
                 // 符合條件且未被處理的Transactions(Old: allowTransByProperty)
                 var pendingTransactions = helper.GetBqlCommand<LUMCloudBedTransactions>(this, this.PendingTransactions.View.BqlSelect, _propertyID, _remitDate, _refNbr);
                 // 被Toggle out 的Transactions
