@@ -338,11 +338,14 @@ namespace HH_APICustomization.Graph
                     trans.TransactionCode = row.transactionCode;
                     trans.TransactionNotes = row.notes.Length > 1024 ? row?.notes?.Substring(0, 1024) : row?.notes;
                     trans.Quantity = int.Parse(row.quantity);
-                    trans.Amount = (decimal?)row.amount;
+                    trans.TransactionCategory = row.transactionCategory;
+                    if (trans.TransactionCategory.Trim().ToUpper() == "REFUND" && row.amount > 0)
+                        trans.Amount = (decimal?)row.amount * -1;
+                    else
+                        trans.Amount = (decimal?)row.amount;
                     trans.Currency = row.currency;
                     trans.UserName = row.userName;
                     trans.TransactionType = row.transactionType;
-                    trans.TransactionCategory = row.transactionCategory;
                     trans.ItemCategoryName = row.itemCategoryName;
                     trans.TransactionID = row.accountingID;
                     trans.ParentTransactionID = row.parentTransactionID;
