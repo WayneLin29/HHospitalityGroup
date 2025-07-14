@@ -139,7 +139,7 @@ namespace HH_APICustomization.Graph
                 item.Voids = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.Voids)));
                 item.MenuItemQty = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.MenuItemQuantity)));
                 item.GrossSales = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.GrossSales)));
-                item.Discounts = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.Disconunts)));
+                //item.Discounts = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.Disconunts)));
                 item.NetSales = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.NetSales)));
                 item.Tax1 = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.Tax1)));
                 item.Tax2 = GetDec(reader.GetValue(column.Get(SalesByMenuItemColumn.Tax2)));
