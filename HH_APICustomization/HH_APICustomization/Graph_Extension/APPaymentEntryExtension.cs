@@ -1,17 +1,12 @@
-﻿using PX.Data;
-using PX.Data.BQL.Fluent;
-using PX.Data.EP;
-using PX.Data.Licensing;
-using PX.Objects.CS;
+﻿using HH_APICustomization.DAC;
+using PX.Data;
+using PX.Objects.CR;
 using PX.Objects.EP;
 using PX.SM;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static PX.Objects.FA.FABookSettings.midMonthType;
 
 namespace PX.Objects.AP
 {
@@ -23,61 +18,80 @@ namespace PX.Objects.AP
         public IEnumerable Release(PXAdapter adapter, ReleaseDelegate baseMethod)
         {
             baseMethod(adapter);
-            var payment = Base.Document.Current;
-            SendEmail();
+            if(Base.Document.Current?.DocType == APDocType.Check || Base.Document.Current?.DocType == APDocType.VoidCheck)
+                SendEmail();
             return adapter.Get();
         }
         #endregion
 
         private void SendEmail()
         {
+            APNotification apNotification = PXSelect<APNotification,
+                                Where<APNotification.notificationCD, Equal<Required<APNotification.notificationCD>>>>
+                                .Select(Base, "PYRelease");
+
             // Get Template
             Notification notification = PXSelect<Notification,
-                             Where<Notification.name, Equal<Required<Notification.name>>>>
-                             .Select(Base, "Payment Released");
+                             Where<Notification.notificationID, Equal<Required<Notification.notificationID>>>>
+                             .Select(Base, apNotification?.NotificationID);
 
-            TemplateNotificationGenerator sender = TemplateNotificationGenerator.Create(Base, Base.Document.Current,
-                        notification.NotificationID.Value);
-
-            // Find All AP Creater
+            // Find All AP
             var allPostNbr = Base.Adjustments.Select().RowCast<APAdjust>().Select(p => p.AdjdRefNbr).ToList();
 
-            HashSet<Guid?> allCreatedByIDs = new HashSet<Guid?>();
+            HashSet<string> allMailAddress = new HashSet<string>();
+
             foreach (var refNbr in allPostNbr)
             {
                 APInvoice aPInvoice = PXSelect<APInvoice,
                                         Where<APInvoice.refNbr, Equal<Required<APInvoice.refNbr>>>>
                                         .Select(Base, refNbr);
+
                 if (aPInvoice != null && aPInvoice.CreatedByID != null)
                 {
-                    allCreatedByIDs.Add(aPInvoice.CreatedByID);
+                    Contact contact = PXSelect<Contact,
+                                    Where<Contact.userID, Equal<Required<Contact.userID>>>>
+                                    .Select(Base, aPInvoice.CreatedByID)
+                                    .FirstOrDefault();
+
+                    if (contact?.EMail == null)
+                    {
+                        Users user = PXSelect<Users,
+                                    Where<Users.pKID, Equal<Required<Users.pKID>>>>
+                                    .Select(Base, aPInvoice.CreatedByID)
+                                    .FirstOrDefault();
+                        allMailAddress.Add(user?.Email);
+                    }
+                    else
+                        allMailAddress.Add(contact?.EMail);
+                }
+
+                // Find UDF Mail
+                if (aPInvoice?.NoteID != null)
+                {
+                    APRegisterKvExt attributeMail = PXSelect<APRegisterKvExt,
+                                        Where<APRegisterKvExt.recordID, Equal<Required<APRegisterKvExt.recordID>>,
+                                        And<APRegisterKvExt.fieldName, Contains<Required<APRegisterKvExt.fieldName>>>>>
+                                        .Select(Base, aPInvoice?.NoteID, "AttributeEMAILALSO");
+                    allMailAddress.Add(attributeMail?.ValueString);
                 }
             }
 
-            foreach (var item in allCreatedByIDs)
+            // Get PY Attachment
+            UploadFileMaintenance fileGraph = PXGraph.CreateInstance<UploadFileMaintenance>();
+            Guid[] fileIDs = PXNoteAttribute.GetFileNotes(Base.Document.Cache, Base.Document.Current);
+            var attachments = fileIDs.Select(id => fileGraph.GetFile(id)).Where(f => f != null).ToList();
+
+            foreach (var item in allMailAddress)
             {
-                string Mail = string.Empty;
-                Contact contact = PXSelect<Contact,
-                                Where<Contact.userID, Equal<Required<Contact.userID>>>>
-                                .Select(Base, item)
-                                .FirstOrDefault();
+                TemplateNotificationGenerator sender = TemplateNotificationGenerator.Create(Base, Base.Document.Current,
+                      notification.NotificationID.Value);
 
-                if (contact?.EMail == null)
+                sender.To = item;
+                foreach (FileInfo file in attachments)
                 {
-                    Users user = PXSelect<Users,
-                                Where<Users.pKID, Equal<Required<Users.pKID>>>>
-                                .Select(Base, item)
-                                .FirstOrDefault();
-                    Mail = user?.Email;
+                    sender.AddAttachment(file.FullName, file.BinData);
                 }
-                else
-                    Mail = contact?.EMail;
-
-                if (!string.IsNullOrEmpty(Mail))
-                {
-                    sender.To = Mail;
-                    sender.Send().Any();
-                }
+                sender.Send().Any();
             }
         }
     }

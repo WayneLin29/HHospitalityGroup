@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="APIHelper\CloudBedHelper.cs" />
+    <Compile Include="DAC\APRegisterKvExt.cs" />
     <Compile Include="DAC\LUMAllowCombination.cs" />
     <Compile Include="DAC\LUMCloudBedRoomBlock.cs" />
     <Compile Include="DAC\LUMCloudBedRoomBlockDetails.cs" />
