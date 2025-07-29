@@ -39,7 +39,7 @@ namespace PX.Objects.AP
                 APPayment invoice = Base.Document.Current;
                 if (invoice != null && Base.Document.Cache.GetStatus(invoice) != PXEntryStatus.Deleted)
                 {
-                    LinkFileByAdjdAP();
+                    //LinkFileByAdjdAP();
                     LinkBranch();
                 }
                 baseMethod();
