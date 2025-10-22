@@ -1,0 +1,19 @@
+﻿<Page path="~/pages/gl/gl404000.aspx" pageSource="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">
+    <PXGridLevel DataMember="GLTranEnq" ParentId="phG_grid_Levels#0" TypeFullName="PX.Web.UI.PXGridLevel">
+        <Children Key="Columns">
+            <AddItem>
+                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
+                    <Prop Key="DataField" Value="UsrNetAmount" />
+                    <Prop Key="Width" Value="100" />
+                </PXGridColumn>
+            </AddItem>
+            <AddItem>
+                <PXGridColumn TypeFullName="PX.Web.UI.PXGridColumn">
+                    <Prop Key="DataField" Value="UsrAbsAmount" />
+                    <Prop Key="Width" Value="100" />
+                </PXGridColumn>
+            </AddItem>
+            <PXGridColumn DataField="SignEndBalance" OriginalIndex="15" />
+        </Children>
+    </PXGridLevel>
+</Page>
