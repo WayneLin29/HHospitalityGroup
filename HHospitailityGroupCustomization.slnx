@@ -1,0 +1,27 @@
+<Solution>
+  <Project Path="../../" Type="Website" DisplayName="HHospitaility">
+    <BuildType Project="Debug" />
+    <Build Solution="Debug|*" Project="false" />
+    <Properties Name="WebsiteProperties">
+      <Property Name="Debug.AspNetCompiler.Debug" Value="&quot;True&quot;" />
+      <Property Name="Debug.AspNetCompiler.FixedNames" Value="&quot;false&quot;" />
+      <Property Name="Debug.AspNetCompiler.ForceOverwrite" Value="&quot;true&quot;" />
+      <Property Name="Debug.AspNetCompiler.PhysicalPath" Value="&quot;..\..\..\HHospitaility\&quot;" />
+      <Property Name="Debug.AspNetCompiler.TargetPath" Value="&quot;PrecompiledWeb\localhost_53496\&quot;" />
+      <Property Name="Debug.AspNetCompiler.Updateable" Value="&quot;true&quot;" />
+      <Property Name="Debug.AspNetCompiler.VirtualPath" Value="&quot;/localhost_53496&quot;" />
+      <Property Name="Release.AspNetCompiler.Debug" Value="&quot;False&quot;" />
+      <Property Name="Release.AspNetCompiler.FixedNames" Value="&quot;false&quot;" />
+      <Property Name="Release.AspNetCompiler.ForceOverwrite" Value="&quot;true&quot;" />
+      <Property Name="Release.AspNetCompiler.PhysicalPath" Value="&quot;..\..\..\HHospitaility\&quot;" />
+      <Property Name="Release.AspNetCompiler.TargetPath" Value="&quot;PrecompiledWeb\localhost_53496\&quot;" />
+      <Property Name="Release.AspNetCompiler.Updateable" Value="&quot;true&quot;" />
+      <Property Name="Release.AspNetCompiler.VirtualPath" Value="&quot;/localhost_53496&quot;" />
+      <Property Name="TargetFrameworkMoniker" Value="&quot;.NETFramework,Version%3Dv4.8&quot;" />
+      <Property Name="VWDPort" Value="&quot;53496&quot;" />
+    </Properties>
+  </Project>
+  <Project Path="HH_APICustomization/HH_APICustomization/HH_APICustomization.csproj" Id="9bc6d61a-5d4b-4d57-bc6b-5e3f9d04377e" />
+  <Project Path="HH_Customization/HH_Customization/HH_Customization.csproj" Id="474b82f2-122e-47e1-b0f6-b237729f7552" />
+  <Project Path="LeaveandOvertimeCustomization24R1/LeaveandOvertimeCustomization24R1/LeaveandOvertimeCustomization24R1.csproj" Id="a1deab5e-2735-40c0-9e24-a9aed847be91" />
+</Solution>
