@@ -1,5 +1,6 @@
 using HH_APICustomization.APIHelper;
 using HH_APICustomization.DAC;
+using Newtonsoft.Json.Linq;
 using PX.Data;
 using PX.Data.BQL.Fluent;
 using System;
@@ -590,7 +591,7 @@ namespace HH_APICustomization.Graph
         /// <summary> Import room assignments and detailed rates </summary>
         private static void ImportRoomAssignmentsAndRates(
             LUMCloudBedTransactionProcess baseGraph,
-            ReservationRateDetail rateDetail)
+            HH_APICustomization.Entity.ReservationRateDetail rateDetail)
         {
             foreach (var room in rateDetail.rooms)
             {
@@ -613,7 +614,7 @@ namespace HH_APICustomization.Graph
         }
 
         /// <summary> Map room assignment fields </summary>
-        private static void MapRoomAssignmentFields(LUMCloudBedRoomAssignment assignment, Room room, ReservationRateDetail rateDetail)
+        private static void MapRoomAssignmentFields(LUMCloudBedRoomAssignment assignment, HH_APICustomization.Entity.Room room, HH_APICustomization.Entity.ReservationRateDetail rateDetail)
         {
             assignment.ReservationID = rateDetail.reservationID;
             assignment.Roomid = room?.roomID;
@@ -627,7 +628,7 @@ namespace HH_APICustomization.Graph
         }
 
         /// <summary> Map room rate fields </summary>
-        private static void MapRoomRateFields(LUMCloudBedRoomRateDetails roomRate, string reservationID, string roomID, KeyValuePair<string, object> rate)
+        private static void MapRoomRateFields(LUMCloudBedRoomRateDetails roomRate, string reservationID, string roomID, KeyValuePair<string, JToken> rate)
         {
             roomRate.ReservationID = reservationID;
             roomRate.Roomid = roomID;

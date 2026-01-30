@@ -170,12 +170,21 @@ namespace PX.Objects.AP
                     PXTrace.WriteVerbose($"[PYEMAIL]     [Source: Vendor] (No vendor emails)");
                 }
 
-                // 3. Add Email Also attribute (from Invoice)
+                // 3. Add Email Also attribute (from Invoice) - supports multiple emails separated by ";"
                 string emailAlso = GetEmailAlsoAttribute(aPInvoice.NoteID);
                 if (!string.IsNullOrWhiteSpace(emailAlso))
                 {
-                    bool isNew = recipients.Add(emailAlso.Trim());
-                    PXTrace.WriteVerbose($"[PYEMAIL]     [Source: Email Also Attribute] {emailAlso} {(isNew ? "" : "(duplicate, ignored)")}");
+                    // Split by ";" to support multiple recipients
+                    string[] emailAlsoList = emailAlso.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string email in emailAlsoList)
+                    {
+                        string trimmedEmail = email.Trim();
+                        if (!string.IsNullOrWhiteSpace(trimmedEmail))
+                        {
+                            bool isNew = recipients.Add(trimmedEmail);
+                            PXTrace.WriteVerbose($"[PYEMAIL]     [Source: Email Also Attribute] {trimmedEmail} {(isNew ? "" : "(duplicate, ignored)")}");
+                        }
+                    }
                 }
                 else
                 {
