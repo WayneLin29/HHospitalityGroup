@@ -37,7 +37,8 @@ namespace HH_APICustomization.Descriptor
         /// <summary> 過濾被排除的 Transactions </summary>
         public IEnumerable<LUMCloudBedTransactions> FilterExcludedTransactions(IEnumerable<LUMCloudBedTransactions> pendingTransactions, IEnumerable<LUMRemitExcludeTransactions> excludedTransactions)
         {
-            return pendingTransactions.Where(x => !excludedTransactions.Any(y => y.TransactionID == x.TransactionID));
+            var excludeSet = new HashSet<string>(excludedTransactions.Select(y => y.TransactionID));
+            return pendingTransactions.Where(x => !excludeSet.Contains(x.TransactionID));
         }
 
         /// <summary> 取得 符合 ReservationCheck的 Transactions </summary>

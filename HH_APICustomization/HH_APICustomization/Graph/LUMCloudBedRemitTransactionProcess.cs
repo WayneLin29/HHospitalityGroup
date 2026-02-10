@@ -156,6 +156,10 @@ namespace HH_APICustomization.Graph
 
         IEnumerable<LUMCloudBedTransactions> transWithFilter = new List<LUMCloudBedTransactions>();
 
+        private static readonly HashSet<string> RevenueCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ROOM REVENUE", "TAXES", "FEES" };
+        private static readonly HashSet<string> TaxFeeCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "TAXES", "FEES" };
+        private static readonly HashSet<string> RefundVoidCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "REFUND", "VOID" };
+
         private Dictionary<string, LUMRemitExcludeTransactions> _excludeTransCache;
         private string _excludeTransCacheRefNbr;
         private string _cachedPropertyID;
@@ -305,10 +309,11 @@ namespace HH_APICustomization.Graph
             //var newResult = result.Union(toggleOutTrans);
 
             var isShowPost = this.TransactionFilter.Current?.ShowPost;
+            var toggleOutTransIDs = new HashSet<string>(toggleOutTrans.Select(x => x.TransactionID));
 
             foreach (LUMCloudBedTransactions3 item in newResult)
             {
-                item.SortNumber = CalculateSortNumber(item, _remitRefNbr, toggleOutTrans);
+                item.SortNumber = CalculateSortNumber(item, _remitRefNbr, toggleOutTransIDs);
                 if (item.PropertyID != _propertyID)
                     continue;
                 // Show All
@@ -366,7 +371,13 @@ namespace HH_APICustomization.Graph
         {
             PXLongOperation.StartOperation(this, () =>
             {
+                var swTotal = Stopwatch.StartNew();
+                var sw = Stopwatch.StartNew();
+
                 this.Save.Press();
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Save.Press (initial): {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
+
                 RemittanceHelper helper = new RemittanceHelper();
 
                 var _refNbr = this.Document.Current?.RefNbr;
@@ -376,19 +387,21 @@ namespace HH_APICustomization.Graph
                 // 符合條件且未被處理的Transactions(Old: allowTransByProperty)
                 var pendingTransactions = helper.GetBqlCommand<LUMCloudBedTransactions>(this, this.PendingTransactions.View.BqlSelect, _propertyID, _remitDate, _refNbr);
                 // 被Toggle out 的Transactions
-                var excludedTransactions = helper.GetBqlCommand<LUMRemitExcludeTransactions>(this, this.ExculdeTransactions.View.BqlSelect);
+                var excludedTransactions = helper.GetBqlCommand<LUMRemitExcludeTransactions>(this, this.ExculdeTransactions.View.BqlSelect).ToList();
                 // expected ExcludeTransaction
-                pendingTransactions = helper.FilterExcludedTransactions(pendingTransactions, excludedTransactions);
+                pendingTransactions = helper.FilterExcludedTransactions(pendingTransactions, excludedTransactions).ToList();
 
-                // Reservation Check Data
-                var reservationChecks = helper.GetBqlCommand<vHHRemitReservationCheck>(this, this.PropertyRemitReservationCheck.View.BqlSelect, _propertyID);
+                // Reservation Check Data (materialize to avoid SQLinq re-evaluation)
+                var reservationChecks = helper.GetBqlCommand<vHHRemitReservationCheck>(this, this.PropertyRemitReservationCheck.View.BqlSelect, _propertyID).ToList();
                 var groupReservationChecks = reservationChecks.OrderBy(x => x.SortBy).GroupBy(x => new { x.PropertyID, x.ReservationID }).Select(y => y.FirstOrDefault());
                 // All cloudbed transaction filter by property
-                var propertyTransactions = helper.GetBqlCommand<LUMCloudBedTransactions>(this, this.PropertyCloudbedTransactions.View.BqlSelect, _propertyID);
+                var propertyTransactions = helper.GetBqlCommand<LUMCloudBedTransactions>(this, this.PropertyCloudbedTransactions.View.BqlSelect, _propertyID).ToList();
                 // 現有已存在的Remit Reservation
-                var currentRemitReservations = helper.GetBqlCommand<LUMRemitReservation>(this, this.ReservationSummary.View.BqlSelect);
+                var currentRemitReservations = helper.GetBqlCommand<LUMRemitReservation>(this, this.ReservationSummary.View.BqlSelect).ToList();
                 // 有符合條件下的cloudbed transactions
                 var matchReservationCheckTransactions = helper.GetMatchReservationCheckTransactions(propertyTransactions, groupReservationChecks, currentRemitReservations);
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Data Loading (pending={pendingTransactions.Count()}, excluded={excludedTransactions.Count()}, reservationChecks={reservationChecks.Count()}, matchTrans={matchReservationCheckTransactions.Count()}): {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
 
                 #region Insert/Update LUMRemitPayment (according to pendingTransactions) (Payment Summary)
 
@@ -423,6 +436,8 @@ namespace HH_APICustomization.Graph
                 }
 
                 #endregion
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Insert/Update LUMRemitPayment: {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
 
                 #region Update Cloudbed Transaction Remit Refnbr / AccountID / Sub-AccountID (according to pending transactions)
 
@@ -446,6 +461,8 @@ namespace HH_APICustomization.Graph
                 InvokeCachePersist<LUMCloudBedTransactions>(PXDBOperation.Update);
 
                 #endregion
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Update Transaction RefNbr/Account + CachePersist (count={pendingTransactions.Count()}): {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
 
                 #region Delete Current Remit Reservation and Clean Transaction
                 /// 待刪除的Reservation(According to SQL View 中不存在的)
@@ -462,6 +479,8 @@ namespace HH_APICustomization.Graph
                 }
 
                 #endregion
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Delete Stale Reservations: {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
 
                 #region Insert/Update/Remove LUMRemitReservation (Reservation Summary)
 
@@ -469,17 +488,72 @@ namespace HH_APICustomization.Graph
                 /// 1.根據Check SQL View 找到尚未處理的TransactionID
                 /// 2.並將沒有Reservaion ID的Trans 改成 SqlView 的Reservation ID (House Account + House Account Name)
                 /// 3.處理既有的Remit Reservation
-                /// 4.Inser/Update Data        
+                /// 4.Inser/Update Data
                 // Insert/Update/Delete LUMRemitReservation
-                // Group by PropertyID + ReservationID (ReservationID/House Acct + House Name)
-                foreach (var grpAvailableTran in matchReservationCheckTransactions.GroupBy(x => new { x.PropertyID, x.ReservationID }))
+
+                // Batch query PendingCount by ReservationID (exclude transactions joined with cloudbed transactions)
+                var pendingCountByReservation = new Dictionary<string, int>();
+                foreach (PXResult<LUMRemitExcludeTransactions, LUMCloudBedTransactions> row in
+                    SelectFrom<LUMRemitExcludeTransactions>
+                        .InnerJoin<LUMCloudBedTransactions>.On<LUMRemitExcludeTransactions.transactionID.IsEqual<LUMCloudBedTransactions.transactionID>>
+                        .Where<LUMRemitExcludeTransactions.refNbr.IsEqual<P.AsString>>
+                        .View.Select(this, _refNbr))
                 {
+                    var trans = (LUMCloudBedTransactions)row;
+                    var key = trans.ReservationID ?? $"{trans.HouseAccountID}-";
+                    if (pendingCountByReservation.ContainsKey(key))
+                        pendingCountByReservation[key]++;
+                    else
+                        pendingCountByReservation[key] = 1;
+                }
+
+                // Batch query ToRemitCount by ReservationID
+                var toRemitCountByReservation = new Dictionary<string, int>();
+                foreach (var trans in SelectFrom<LUMCloudBedTransactions>
+                    .Where<LUMCloudBedTransactions.remitRefNbr.IsEqual<P.AsString>>
+                    .View.Select(this, _refNbr).RowCast<LUMCloudBedTransactions>())
+                {
+                    var key = trans.ReservationID ?? $"{trans.HouseAccountID}-";
+                    if (toRemitCountByReservation.ContainsKey(key))
+                        toRemitCountByReservation[key]++;
+                    else
+                        toRemitCountByReservation[key] = 1;
+                }
+
+                // Build reservationChecks lookup Dictionary (filter null keys)
+                var reservationCheckDict = reservationChecks
+                    .Where(x => x.ReservationID != null)
+                    .GroupBy(x => x.ReservationID)
+                    .ToDictionary(g => g.Key, g => g.First());
+
+                // Build currentRemitReservations lookup Dictionary (filter null keys)
+                var currentRemitReservationDict = currentRemitReservations
+                    .Where(x => x.RefNbr == _refNbr && x.ReservationID != null)
+                    .GroupBy(x => x.ReservationID)
+                    .ToDictionary(g => g.Key, g => g.First());
+
+                // Pre-load all CloudBed Reservations to avoid N+1 PK.Find queries
+                var matchGroups = matchReservationCheckTransactions.GroupBy(x => new { x.PropertyID, x.ReservationID }).ToList();
+                var reservationLookup = new Dictionary<string, LUMCloudBedReservations>();
+                foreach (var g in matchGroups.Where(g => !string.IsNullOrEmpty(g.Key.ReservationID)))
+                {
+                    var lookupKey = $"{g.Key.PropertyID}_{g.Key.ReservationID}";
+                    if (!reservationLookup.ContainsKey(lookupKey))
+                        reservationLookup[lookupKey] = LUMCloudBedReservations.PK.Find(this, g.Key.PropertyID, g.Key.ReservationID);
+                }
+
+                // Group by PropertyID + ReservationID (ReservationID/House Acct + House Name)
+                foreach (var grpAvailableTran in matchGroups)
+                {
+                    var grpReservationID = grpAvailableTran.Key.ReservationID ?? string.Empty;
                     // 已經將Trans的ReservationID 改為跟Check SQL View相同
-                    var checkObject = reservationChecks.FirstOrDefault(x => x.ReservationID == grpAvailableTran.Key.ReservationID);
+                    reservationCheckDict.TryGetValue(grpReservationID, out var checkObject);
                     var resLine = new LUMRemitReservation();
-                    var mapReservation = LUMCloudBedReservations.PK.Find(this, grpAvailableTran.Key.PropertyID, grpAvailableTran.Key.ReservationID);
-                    var isExists = currentRemitReservations.FirstOrDefault(x => x.RefNbr == _refNbr && (x.ReservationID == grpAvailableTran.Key.ReservationID || x.ReservationID == GetHouseAccountByReservationID(grpAvailableTran.Key.ReservationID))) != null;
-                    resLine = currentRemitReservations.FirstOrDefault(x => x.RefNbr == _refNbr && x.ReservationID == grpAvailableTran.Key.ReservationID) ?? resLine;
+                    reservationLookup.TryGetValue($"{grpAvailableTran.Key.PropertyID}_{grpReservationID}", out var mapReservation);
+                    var houseAccountKey = GetHouseAccountByReservationID(grpReservationID);
+                    var isExists = currentRemitReservationDict.ContainsKey(grpReservationID) || currentRemitReservationDict.ContainsKey(houseAccountKey);
+                    currentRemitReservationDict.TryGetValue(grpReservationID, out var existingResLine);
+                    resLine = existingResLine ?? resLine;
                     resLine.RefNbr = _refNbr;
                     resLine.ReservationID = grpAvailableTran.Key.ReservationID;
                     if (resLine?.IsOutOfScope ?? false)
@@ -507,10 +581,12 @@ namespace HH_APICustomization.Graph
                     resLine.Payment = 0;
                     resLine.PendingCount = 0;
                     resLine.ToRemitCount = 0;
-                    CalculateReservationAmount(_refNbr, checkObject, resLine);
+                    CalculateReservationAmount(_refNbr, checkObject, resLine, pendingCountByReservation, toRemitCountByReservation);
                     resLine = isExists ? this.ReservationSummary.Update(resLine) : this.ReservationSummary.Insert(resLine);
                 }
                 #endregion
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Insert/Update LUMRemitReservation: {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
 
                 #region Insert/Update LUMRemitBlock
                 var exisBlocks = this.RemitBlock.View.SelectMulti().RowCast<LUMRemitBlock>();
@@ -526,12 +602,19 @@ namespace HH_APICustomization.Graph
                     blockLine = isExists ? this.RemitBlock.Update(blockLine) : this.RemitBlock.Insert(blockLine);
                 }
                 #endregion
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Insert/Update LUMRemitBlock: {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
 
                 // Calculate Document Amount
                 CleanUpDocumentAmount();
                 CalculateDocumentAmount(this.RemitTransactions.View.SelectMulti().RowCast<LUMCloudBedTransactions>());
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Calculate Document Amount: {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
 
                 this.Save.Press();
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] Save.Press (final): {sw.ElapsedMilliseconds}ms");
+                swTotal.Stop();
+                PXTrace.WriteInformation($"[REMIT-PERF][PREPARE] ===== TOTAL: {swTotal.ElapsedMilliseconds}ms =====");
             });
             return adapter.Get();
         }
@@ -893,6 +976,7 @@ namespace HH_APICustomization.Graph
                 throw new PXException("Please specify void reason");
             PXLongOperation.StartOperation(this, () =>
             {
+                var swVoid = Stopwatch.StartNew();
                 using (PXTransactionScope sc = new PXTransactionScope())
                 {
                     var doc = this.Document.Current;
@@ -906,6 +990,8 @@ namespace HH_APICustomization.Graph
                         glGraph.releaseFromHold.Press();
                         glGraph.release.Press();
                     }
+                    PXTrace.WriteInformation($"[REMIT-PERF][VOID] GL Reverse + Release: {swVoid.ElapsedMilliseconds}ms");
+                    swVoid.Restart();
 
                     // Update RemitRefNumber
                     PXUpdate<Set<LUMCloudBedTransactions.remitRefNbr, Required<LUMCloudBedTransactions.remitRefNbr>,
@@ -920,6 +1006,7 @@ namespace HH_APICustomization.Graph
                     doc.Status = LUMRemitStatus.Voided;
                     this.Document.UpdateCurrent();
                     this.Save.Press();
+                    PXTrace.WriteInformation($"[REMIT-PERF][VOID] Update RefNbr + Save: {swVoid.ElapsedMilliseconds}ms");
                     sc.Complete();
                 }
             });
@@ -1124,8 +1211,8 @@ namespace HH_APICustomization.Graph
                     row.GetExtension<LUMCloudBedTransactionsExt>().ToggleByID = null;
                     row.GetExtension<LUMCloudBedTransactionsExt>().ToggleDateTime = null;
                 }
-                row.GetExtension<LUMCloudBedTransactionsExt>().CreditAmount = row?.TransactionType?.ToUpper() == "CREDIT" ? row?.Amount : 0;
-                row.GetExtension<LUMCloudBedTransactionsExt>().DebitAmount = row?.TransactionType?.ToUpper() == "DEBIT" ? row?.Amount : 0;
+                row.GetExtension<LUMCloudBedTransactionsExt>().CreditAmount = string.Equals(row?.TransactionType, "CREDIT", StringComparison.OrdinalIgnoreCase) ? row?.Amount : 0;
+                row.GetExtension<LUMCloudBedTransactionsExt>().DebitAmount = string.Equals(row?.TransactionType, "DEBIT", StringComparison.OrdinalIgnoreCase) ? row?.Amount : 0;
             }
         }
 
@@ -1138,8 +1225,8 @@ namespace HH_APICustomization.Graph
                     PXUIFieldAttribute.SetEnabled<LUMCloudBedTransactions2.selected>(e.Cache, row, false);
 
                 row.GetExtension<LUMCloudBedTransactionsExt>().CurrentRefNbr = this.Document.Current?.RefNbr;
-                row.GetExtension<LUMCloudBedTransactionsExt>().CreditAmount = row?.TransactionType?.ToUpper() == "CREDIT" ? row?.Amount : 0;
-                row.GetExtension<LUMCloudBedTransactionsExt>().DebitAmount = row?.TransactionType?.ToUpper() == "DEBIT" ? row?.Amount : 0;
+                row.GetExtension<LUMCloudBedTransactionsExt>().CreditAmount = string.Equals(row?.TransactionType, "CREDIT", StringComparison.OrdinalIgnoreCase) ? row?.Amount : 0;
+                row.GetExtension<LUMCloudBedTransactionsExt>().DebitAmount = string.Equals(row?.TransactionType, "DEBIT", StringComparison.OrdinalIgnoreCase) ? row?.Amount : 0;
             }
         }
 
@@ -1278,15 +1365,24 @@ namespace HH_APICustomization.Graph
         /// <param name="_isScopeOut">是否OutOfScope</param>
         public virtual void ToggleOutTransactions(IEnumerable<LUMCloudBedTransactions> selectedTransItems, bool? _isScopeOut = null)
         {
-            if (selectedTransItems.Count() == 0)
+            var selectedTransList = selectedTransItems.ToList();
+            if (selectedTransList.Count == 0)
                 return;
+            var swToggle = Stopwatch.StartNew();
             _excludeTransCache = null;
-            InitialToggleData(selectedTransItems);
+            InitialToggleData(selectedTransList);
+            PXTrace.WriteInformation($"[REMIT-PERF][TOGGLE-OUT] InitialToggleData: {swToggle.ElapsedMilliseconds}ms");
+            swToggle.Restart();
+
+            // Pre-load PaymentSummary once
+            var paymentByDescription = this.PaymentSummary.View.SelectMulti().RowCast<LUMRemitPayment>()
+                .GroupBy(x => x.Description ?? string.Empty)
+                .ToDictionary(g => g.Key, g => g.First());
 
             using (PXTransactionScope sc = new PXTransactionScope())
             {
                 /// 只執行RemitRefNbr = Current的交易
-                foreach (var item in selectedTransItems)
+                foreach (var item in selectedTransList)
                 {
                     if (item?.RemitRefNbr != this.Document.Current?.RefNbr)
                         continue;
@@ -1302,7 +1398,7 @@ namespace HH_APICustomization.Graph
                     excludeData = this.ExculdeTransactions.Insert(excludeData);
                     this.ExculdeTransactions.Cache.PersistInserted(excludeData);
                     // Remove Remit RefNbr(Payment Amount).
-                    UpdateTransactionRefNbr(item?.TransactionID, null);
+                    UpdateTransactionRefNbr(item?.TransactionID, null, paymentByDescription);
                     // Recalcuate Remit Reservation
                     /// Houst Account的Resvsertion ID會是NULL,須往回找
                     ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationSummary.Current?.ReservationID, _isScopeOut, "OUT");
@@ -1319,9 +1415,12 @@ namespace HH_APICustomization.Graph
                 //}
                 //FinalCheckScope(selectedTransItems.Select(x => x.ReservationID).Distinct().ToList(), true);
 
+                PXTrace.WriteInformation($"[REMIT-PERF][TOGGLE-OUT] Process loop (count={selectedTransList.Count}): {swToggle.ElapsedMilliseconds}ms");
+                swToggle.Restart();
                 InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemittance>(PXDBOperation.Update);
+                PXTrace.WriteInformation($"[REMIT-PERF][TOGGLE-OUT] CachePersist: {swToggle.ElapsedMilliseconds}ms");
                 sc.Complete();
             }
         }
@@ -1329,15 +1428,25 @@ namespace HH_APICustomization.Graph
         /// <summary> TOGGLE IN Cloudbed Transactions Data </summary>
         public virtual void ToggleInTransactions(IEnumerable<LUMCloudBedTransactions> selectedTransItems, bool? _isScopeOut = null)
         {
-            if (selectedTransItems.Count() == 0)
+            var selectedTransList = selectedTransItems.ToList();
+            if (selectedTransList.Count == 0)
                 return;
+            var swToggle = Stopwatch.StartNew();
             _excludeTransCache = null;
-            InitialToggleData(selectedTransItems);
+            InitialToggleData(selectedTransList);
+            PXTrace.WriteInformation($"[REMIT-PERF][TOGGLE-IN] InitialToggleData: {swToggle.ElapsedMilliseconds}ms");
+            swToggle.Restart();
+
+            // Pre-load PaymentSummary once
+            var paymentByDescription = this.PaymentSummary.View.SelectMulti().RowCast<LUMRemitPayment>()
+                .GroupBy(x => x.Description ?? string.Empty)
+                .ToDictionary(g => g.Key, g => g.First());
+
             var tempTrans = new List<LUMCloudBedTransactions>();
             using (PXTransactionScope sc = new PXTransactionScope())
             {
                 /// 只執行 RemitRefNbr = null的交易
-                foreach (var item in selectedTransItems)
+                foreach (var item in selectedTransList)
                 {
                     if (!string.IsNullOrEmpty(item.RemitRefNbr))
                         continue;
@@ -1351,7 +1460,7 @@ namespace HH_APICustomization.Graph
                         this.ExculdeTransactions.Cache.PersistDeleted(excludeData);
                     }
                     // Add Remit RefNbr.
-                    UpdateTransactionRefNbr(item?.TransactionID, this.Document.Current?.RefNbr);
+                    UpdateTransactionRefNbr(item?.TransactionID, this.Document.Current?.RefNbr, paymentByDescription);
                     // Recalcuate Remit Reservation
                     /// Houst Account的Resvsertion ID會是NULL,須往回找
                     ReCalculateRemitReservation(item, this.Document.Current?.RefNbr, item?.ReservationID ?? this.ReservationSummary.Current?.ReservationID, _isScopeOut, "IN");
@@ -1360,15 +1469,18 @@ namespace HH_APICustomization.Graph
                 }
 
                 //FinalCheckScope(tempTrans.Select(x => x.ReservationID).Distinct().ToList(), false);
+                PXTrace.WriteInformation($"[REMIT-PERF][TOGGLE-IN] Process loop (count={selectedTransList.Count}): {swToggle.ElapsedMilliseconds}ms");
+                swToggle.Restart();
                 InvokeCachePersist<LUMRemitReservation>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
                 InvokeCachePersist<LUMRemittance>(PXDBOperation.Update);
+                PXTrace.WriteInformation($"[REMIT-PERF][TOGGLE-IN] CachePersist: {swToggle.ElapsedMilliseconds}ms");
                 sc.Complete();
             }
         }
 
         /// <summary> Add/Remote Cloudbed Transaction Remit RefNbr. & Recorded Amount </summary>
-        private void UpdateTransactionRefNbr(string _transactionID, string _refNbr)
+        private void UpdateTransactionRefNbr(string _transactionID, string _refNbr, Dictionary<string, LUMRemitPayment> paymentByDescription)
         {
             // Update/Remova Remit RefNbr.
             var trans = this.transWithFilter.FirstOrDefault(x => x.TransactionID == _transactionID);
@@ -1378,15 +1490,11 @@ namespace HH_APICustomization.Graph
             trans = this.PropertyCloudbedTransactions.Update(trans);
             this.PropertyCloudbedTransactions.Cache.PersistUpdated(trans);
 
-            // Update Payment-Check Recorded Amount
-            var paymentTrans = this.PaymentSummary.View.SelectMulti().RowCast<LUMRemitPayment>();
-            var currentPayment = paymentTrans.Where(x => x.Description == trans?.Description).FirstOrDefault();
-            if (currentPayment != null)
+            // Update Payment-Check Recorded Amount (use pre-loaded dictionary)
+            if (trans?.Description != null && paymentByDescription.TryGetValue(trans.Description, out var currentPayment))
             {
                 currentPayment.RecordedAmt += string.IsNullOrEmpty(_refNbr) ? ((trans?.Amount ?? 0) * -1) : (trans?.Amount ?? 0);
                 currentPayment = this.PaymentSummary.Update(currentPayment);
-                //InvokeCachePersist<LUMRemitPayment>(PXDBOperation.Update);
-                //this.PaymentTransactions.Cache.PersistUpdated(currentPayment);
             }
         }
 
@@ -1420,7 +1528,28 @@ namespace HH_APICustomization.Graph
             CalculateDocumentAmount(new List<LUMCloudBedTransactions>() { selectedTrans }, prefix);
         }
 
-        /// <summary> Calculate Reservation Amount </summary>
+        /// <summary> Calculate Reservation Amount (batch version — uses pre-queried pending/toRemit counts) </summary>
+        private void CalculateReservationAmount(string _refNbr, vHHRemitReservationCheck checkObj, LUMRemitReservation reservationobj,
+            Dictionary<string, int> pendingCountByReservation, Dictionary<string, int> toRemitCountByReservation)
+        {
+            if (checkObj == null)
+                return;
+
+            IEnumerable<LUMCloudBedTransactions> transByReservation = new List<LUMCloudBedTransactions>();
+            transByReservation = GetTransacitonBelongToReservation(checkObj?.ReservationID);
+            transByReservation = transByReservation.Where(x => ((x?.IsImported ?? false) || x?.RemitRefNbr == this.Document.Current?.RefNbr) && !(x.IsDeleted ?? false));
+
+            var lookupKey = checkObj?.ReservationID ?? string.Empty;
+            pendingCountByReservation.TryGetValue(lookupKey, out var pendingCount);
+            toRemitCountByReservation.TryGetValue(lookupKey, out var toRemitCount);
+            reservationobj.PendingCount = pendingCount;
+            reservationobj.ToRemitCount = toRemitCount;
+
+            foreach (var trans in transByReservation)
+                CalculateReservationAmount(trans, reservationobj);
+        }
+
+        /// <summary> Calculate Reservation Amount (original per-reservation query version — used by Toggle) </summary>
         private void CalculateReservationAmount(string _refNbr, vHHRemitReservationCheck checkObj, LUMRemitReservation reservationobj)
         {
             if (checkObj == null)
@@ -1434,7 +1563,6 @@ namespace HH_APICustomization.Graph
                 // Reservation
                 case "R":
                 case "RS":
-                    // Pending Post Count of LUMRemitExcludeTransactions where (RefNbr = Current Remit AND Reservation = Current Reservation)
                     reservationobj.PendingCount = SelectFrom<LUMRemitExcludeTransactions>
                                                  .InnerJoin<LUMCloudBedTransactions>.On<LUMRemitExcludeTransactions.transactionID.IsEqual<LUMCloudBedTransactions.transactionID>
                                                        .And<LUMCloudBedTransactions.reservationID.IsEqual<P.AsString>>>
@@ -1448,7 +1576,6 @@ namespace HH_APICustomization.Graph
                 // House Account
                 case "H":
                     var _houstAccountID = checkObj?.ReservationID.Substring(0, checkObj.ReservationID.IndexOf('-'));
-                    // Pending Post Count of LUMRemitExcludeTransactions where (RefNbr = Current Remit AND Reservation = Current Reservation)
                     reservationobj.PendingCount = SelectFrom<LUMRemitExcludeTransactions>
                                                  .InnerJoin<LUMCloudBedTransactions>.On<LUMRemitExcludeTransactions.transactionID.IsEqual<LUMCloudBedTransactions.transactionID>
                                                        .And<LUMCloudBedTransactions.houseAccountID.IsEqual<P.AsInt>>>
@@ -1467,21 +1594,26 @@ namespace HH_APICustomization.Graph
         /// <summary> Calcaulete Reservation Amount according to Formular </summary>
         public virtual void CalculateReservationAmount(LUMCloudBedTransactions trans, LUMRemitReservation reservationobj, int prefix = 1)
         {
+            var isDebit = string.Equals(trans?.TransactionType, "DEBIT", StringComparison.OrdinalIgnoreCase);
+            var isCredit = string.Equals(trans?.TransactionType, "CREDIT", StringComparison.OrdinalIgnoreCase);
+            var category = trans?.Category;
+            var amount = trans?.Amount ?? 0;
+
             // Room Revenue - TransactionType = 'Debit' AND Category = 'Room Revenue'
-            if (trans?.TransactionType?.ToUpper() == "DEBIT" && trans?.Category?.ToUpper() == "ROOM REVENUE")
-                reservationobj.RoomRevenue = (reservationobj.RoomRevenue ?? 0) + prefix * (trans?.Amount ?? 0);
+            if (isDebit && string.Equals(category, "ROOM REVENUE", StringComparison.OrdinalIgnoreCase))
+                reservationobj.RoomRevenue = (reservationobj.RoomRevenue ?? 0) + prefix * amount;
             // Taxes - TransactionType = 'Debit' AND Category = 'Taxes'
-            if (trans?.TransactionType?.ToUpper() == "DEBIT" && trans?.Category?.ToUpper() == "TAXES")
-                reservationobj.Taxes = (reservationobj.Taxes ?? 0) + prefix * (trans?.Amount ?? 0);
+            if (isDebit && string.Equals(category, "TAXES", StringComparison.OrdinalIgnoreCase))
+                reservationobj.Taxes = (reservationobj.Taxes ?? 0) + prefix * amount;
             // Fees - TransactionType = 'Debit' AND Category = 'Fees'
-            if (trans?.TransactionType?.ToUpper() == "DEBIT" && trans?.Category?.ToUpper() == "FEES")
-                reservationobj.Fees = (reservationobj.Fees ?? 0) + prefix * (trans?.Amount ?? 0);
+            if (isDebit && string.Equals(category, "FEES", StringComparison.OrdinalIgnoreCase))
+                reservationobj.Fees = (reservationobj.Fees ?? 0) + prefix * amount;
             // Others - TransactionType = 'Debit' AND Category NOT IN ('Room Revenue', 'Taxes', 'Fees')
-            if (trans?.TransactionType?.ToUpper() == "DEBIT" && !new string[] { "ROOM REVENUE", "TAXES", "FEES" }.Contains(trans.Category))
-                reservationobj.Others = (reservationobj.Others ?? 0) + prefix * (trans?.Amount ?? 0);
-            // Payment - TransactionType = 'Credit'　
-            if (trans?.TransactionType?.ToUpper() == "CREDIT")
-                reservationobj.Payment = (reservationobj.Payment ?? 0) + prefix * (trans?.Amount ?? 0);
+            if (isDebit && !RevenueCategories.Contains(category))
+                reservationobj.Others = (reservationobj.Others ?? 0) + prefix * amount;
+            // Payment - TransactionType = 'Credit'
+            if (isCredit)
+                reservationobj.Payment = (reservationobj.Payment ?? 0) + prefix * amount;
         }
 
         /// <summary> Calculate Document Amount (RoomRevenue..) </summary>
@@ -1492,33 +1624,36 @@ namespace HH_APICustomization.Graph
             {
                 foreach (var tran in transactions)
                 {
-                    var _type = tran?.TransactionType?.ToUpper();
-                    var _category = tran?.Category?.ToUpper();
-                    var _tranCategory = tran?.TransactionCategory?.ToUpper();
+                    var isDebit = string.Equals(tran?.TransactionType, "DEBIT", StringComparison.OrdinalIgnoreCase);
+                    var isCredit = string.Equals(tran?.TransactionType, "CREDIT", StringComparison.OrdinalIgnoreCase);
+                    var _category = tran?.Category;
+                    var _tranCategory = tran?.TransactionCategory;
                     var _amount = tran?.Amount ?? 0;
+                    var isRoomRevenue = string.Equals(_category, "ROOM REVENUE", StringComparison.OrdinalIgnoreCase);
+                    var isTaxFee = TaxFeeCategories.Contains(_category);
                     //  TransactionType = 'Debit' AND Category = 'Room Revenue' AND Amount >= 0
-                    if (_type == "DEBIT" && _category == "ROOM REVENUE" && _amount >= 0)
+                    if (isDebit && isRoomRevenue && _amount >= 0)
                         doc.RoomRevenue = (doc.RoomRevenue ?? 0) + prefix * _amount;
                     // TransactionType = 'Debit' AND Category = 'Room Revenue' AND Amount < 0
-                    else if (_type == "DEBIT" && _category == "ROOM REVENUE" && _amount < 0)
+                    else if (isDebit && isRoomRevenue && _amount < 0)
                         doc.AdjRoomRevenue = (doc.AdjRoomRevenue ?? 0) + prefix * -1 * Math.Abs(_amount);
                     //  TransactionType = 'Debit' AND (Category = 'Taxes' OR Category = 'Fees') AND Amount > 0
-                    else if (_type == "DEBIT" && (_category == "TAXES" || _category == "FEES") && _amount >= 0)
+                    else if (isDebit && isTaxFee && _amount >= 0)
                         doc.Taxes = (doc.Taxes ?? 0) + prefix * _amount;
                     //  TransactionType = 'Debit' AND (Category = 'Taxes' OR Category = 'Fees') AND Amount < 0
-                    else if (_type == "DEBIT" && (_category == "TAXES" || _category == "FEES") && _amount < 0)
+                    else if (isDebit && isTaxFee && _amount < 0)
                         doc.AdjTaxes = (doc.AdjTaxes ?? 0) + prefix * -1 * Math.Abs(_amount);
-                    //  TransactionType = 'Debit' AND Category NOT IN ('Room Revenue', 'Taxes', 'Fees')  AND Amount > 0
-                    else if (_type == "DEBIT" && !new string[] { "TAXES", "FEES" }.Contains(_category) && _amount >= 0)
+                    //  TransactionType = 'Debit' AND Category NOT IN ('Taxes', 'Fees')  AND Amount > 0
+                    else if (isDebit && !isTaxFee && _amount >= 0)
                         doc.Other = (doc.Other ?? 0) + prefix * _amount;
-                    //  TransactionType = 'Debit' AND Category NOT IN ('Room Revenue', 'Taxes', 'Fees')  AND Amount < 0
-                    else if (_type == "DEBIT" && !new string[] { "TAXES", "FEES" }.Contains(_category) && _amount < 0)
+                    //  TransactionType = 'Debit' AND Category NOT IN ('Taxes', 'Fees')  AND Amount < 0
+                    else if (isDebit && !isTaxFee && _amount < 0)
                         doc.AdjOther = (doc.AdjOther ?? 0) + prefix * -1 * Math.Abs(_amount);
-                    //  TransactionType = 'Credit'　AND TransactionCategory NOT IN ( 'refund', 'void') 
-                    else if (_type == "CREDIT" && !(new string[] { "REFUND", "VOID" }.Contains(_tranCategory)))
+                    //  TransactionType = 'Credit'　AND TransactionCategory NOT IN ( 'refund', 'void')
+                    else if (isCredit && !RefundVoidCategories.Contains(_tranCategory))
                         doc.Payment = (doc.Payment ?? 0) + prefix * _amount;
                     //  TransactionType = 'Credit' AND TransactionCategory IN('refund', 'void')
-                    else if (_type == "CREDIT" && new string[] { "REFUND", "VOID" }.Contains(_tranCategory))
+                    else if (isCredit && RefundVoidCategories.Contains(_tranCategory))
                         doc.Refund = (doc.Refund ?? 0) + prefix * Math.Abs(_amount);
 
                     doc.CalcRoomRevenue = CalculateDifference(doc.RoomRevenue, Math.Abs(doc.AdjRoomRevenue ?? 0));
@@ -1533,7 +1668,7 @@ namespace HH_APICustomization.Graph
         public IEnumerable<LUMCloudBedTransactions> GetTransacitonBelongToReservation(string _reservationID)
         {
             IEnumerable<LUMCloudBedTransactions> transByReservation = new List<LUMCloudBedTransactions>();
-            var propertyID = this.ClodBedPreference.Select().TopFirst.CloudBedPropertyID;
+            var propertyID = GetPropertyID();
             var resType = _reservationID.Contains("-") ? "H" : "R";
             switch (resType)
             {
@@ -1582,10 +1717,15 @@ namespace HH_APICustomization.Graph
         /// <summary> Create Journal Transaction </summary>
         public virtual void CreateJournalTransaction(LUMCloudBedRemitTransactionProcess baseGraph, List<LUMCloudBedTransactions> selectedData)
         {
+            var swJournal = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
+
             HHHelper helper = new HHHelper();
             var groupData = selectedData.Where(x => !(x.IsImported ?? false)).GroupBy(x => new { x.RemitRefNbr, x.Currency });
             var cloudbedProperty = SelectFrom<LUMCloudBedPreference>.View.Select(baseGraph).RowCast<LUMCloudBedPreference>();
             var ledgerInfo = helper.GetActualLedgerInfo();
+            PXTrace.WriteInformation($"[REMIT-PERF][RELEASE] Init (selectedData={selectedData.Count}, groups={groupData.Count()}): {sw.ElapsedMilliseconds}ms");
+            sw.Restart();
             // 如果沒有任何Transaction 可以產生傳票
             if (groupData.Count() == 0)
             {
@@ -1631,6 +1771,8 @@ namespace HH_APICustomization.Graph
                                 r => $"{r.PropertyID}_{r.ReservationID}",
                                 r => LUMCloudBedReservations.PK.Find(baseGraph, r.PropertyID, r.ReservationID));
                         var mapCloudbedProerty = baseGraph.ClodBedPreference.View.SelectMulti().FirstOrDefault() as LUMCloudBedPreference;
+                        PXTrace.WriteInformation($"[REMIT-PERF][RELEASE] Pre-load Reservations (count={reservationLookup.Count}) + GL Header: {sw.ElapsedMilliseconds}ms");
+                        sw.Restart();
 
                         foreach (var row in cloudBedGroupRow)
                         {
@@ -1653,8 +1795,8 @@ namespace HH_APICustomization.Graph
                                 line.TranDesc = $"C/O {mapReservation?.EndDate?.ToString("yyyy-MM-dd")} - {mapReservation?.ThirdPartyIdentifier} - {row.HouseAccountID} - {row.ReservationID} - {row.Description} - {row.TransactionDateTime?.ToString("HH:mm:ss")}";
                                 if (line.TranDesc.Length > 512)
                                     line.TranDesc = line?.TranDesc?.Substring(0, 512);
-                                line.CuryDebitAmt = row.TransactionType?.ToUpper() == "CREDIT" ? row.Amount : 0;
-                                line.CuryCreditAmt = row.TransactionType?.ToUpper() == "DEBIT" ? row.Amount : 0;
+                                line.CuryDebitAmt = string.Equals(row.TransactionType, "CREDIT", StringComparison.OrdinalIgnoreCase) ? row.Amount : 0;
+                                line.CuryCreditAmt = string.Equals(row.TransactionType, "DEBIT", StringComparison.OrdinalIgnoreCase) ? row.Amount : 0;
                                 line = glGraph.GLTranModuleBatNbr.Cache.Insert(line) as GLTran;
                                 lineNbrDic.Add(row.TransactionID, line.LineNbr);
                                 #endregion
@@ -1671,8 +1813,8 @@ namespace HH_APICustomization.Graph
                                 line.TranDesc = $"C/O {mapReservation?.EndDate?.ToString("yyyy-MM-dd")} - {mapReservation?.ThirdPartyIdentifier} - {row.HouseAccountID} - {row.ReservationID} - {row.Description} - {row.TransactionDateTime?.ToString("HH:mm:ss")}";
                                 if (line.TranDesc.Length > 512)
                                     line.TranDesc = line?.TranDesc?.Substring(0, 512);
-                                line.CuryDebitAmt = row.TransactionType?.ToUpper() == "DEBIT" ? row.Amount : 0;
-                                line.CuryCreditAmt = row.TransactionType?.ToUpper() == "CREDIT" ? row.Amount : 0;
+                                line.CuryDebitAmt = string.Equals(row.TransactionType, "DEBIT", StringComparison.OrdinalIgnoreCase) ? row.Amount : 0;
+                                line.CuryCreditAmt = string.Equals(row.TransactionType, "CREDIT", StringComparison.OrdinalIgnoreCase) ? row.Amount : 0;
                                 glGraph.GLTranModuleBatNbr.Cache.Insert(line);
                                 #endregion
                             }
@@ -1694,12 +1836,16 @@ namespace HH_APICustomization.Graph
                             }
                         }
                         #endregion
+                        PXTrace.WriteInformation($"[REMIT-PERF][RELEASE] GL Lines creation loop: {sw.ElapsedMilliseconds}ms");
+                        sw.Restart();
 
                         errorMsg = string.Empty;
                         glGraph.releaseFromHold.Press();
                         glGraph.Save.Press();
                         glGraph.release.Press();
                         glBatchNbr = doc.BatchNbr;
+                        PXTrace.WriteInformation($"[REMIT-PERF][RELEASE] GL ReleaseFromHold + Save + Release: {sw.ElapsedMilliseconds}ms");
+                        sw.Restart();
 
                         // 回寫Cloudbed Transaciton BatchNbr.
                         cloudBedGroupRow.ToList().ForEach(x =>
@@ -1715,6 +1861,8 @@ namespace HH_APICustomization.Graph
                         baseGraph.Document.UpdateCurrent();
                         // Save Process Result
                         baseGraph.Actions.PressSave();
+                        PXTrace.WriteInformation($"[REMIT-PERF][RELEASE] Write-back BatchNbr + PressSave: {sw.ElapsedMilliseconds}ms");
+                        sw.Restart();
                         sc.Complete();
                     }
                     catch (PXOuterException ex)
@@ -1729,7 +1877,8 @@ namespace HH_APICustomization.Graph
                     }
                 }// end of transaction scrope
             }
-
+            swJournal.Stop();
+            PXTrace.WriteInformation($"[REMIT-PERF][RELEASE] ===== TOTAL: {swJournal.ElapsedMilliseconds}ms =====");
         }
 
         /// <summary> 檢查是不是審核人 </summary>
@@ -2041,13 +2190,13 @@ namespace HH_APICustomization.Graph
         }
 
         /// <summary> 計算Folio的排序 </summary>
-        private int CalculateSortNumber(LUMCloudBedTransactions3 item, string currentRemit, IEnumerable<LUMCloudBedTransactions3> toggleOutTrans)
+        private int CalculateSortNumber(LUMCloudBedTransactions3 item, string currentRemit, HashSet<string> toggleOutTransIDs)
         {
             // Transaction RemitRefnbr = Current Remit
             if (item?.RemitRefNbr == currentRemit)
                 return 1;
             // Transaction toggle out, and current Remit empty
-            else if (string.IsNullOrEmpty(item?.RemitRefNbr) && toggleOutTrans.Contains(item))
+            else if (string.IsNullOrEmpty(item?.RemitRefNbr) && toggleOutTransIDs.Contains(item?.TransactionID))
                 return 2;
             // Transaction where remit refnbr is null and isimported <> true
             else if (string.IsNullOrEmpty(item?.RemitRefNbr) && !(item?.IsImported ?? false))
